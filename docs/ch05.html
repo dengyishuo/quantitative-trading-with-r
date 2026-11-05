@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>第5章 统计和概率中级 · 量化金融与R语言</title>
+<meta name="description" content="Quantitative Trading with R 中文翻译稿" />
+<style>
+:root {
+  --bg: #ffffff;
+  --fg: #1f2328;
+  --muted: #6b7280;
+  --line: #e5e7eb;
+  --soft: #f7f8fa;
+  --accent: #0f5c8c;
+  --code-bg: #f6f8fa;
+  --sidebar-w: 288px;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  color: var(--fg);
+  background: var(--bg);
+  font-family: -apple-system, "PingFang SC", "Hiragino Sans GB",
+               "Microsoft YaHei", "Source Han Sans SC", sans-serif;
+  font-size: 16px;
+  line-height: 1.85;
+  -webkit-font-smoothing: antialiased;
+}
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* 侧边栏 */
+.sidebar {
+  position: fixed; inset: 0 auto 0 0; width: var(--sidebar-w);
+  border-right: 1px solid var(--line);
+  background: var(--soft);
+  display: flex; flex-direction: column;
+  overflow: hidden;
+}
+.brand {
+  padding: 22px 20px 14px;
+  border-bottom: 1px solid var(--line);
+}
+.brand .t { font-size: 17px; font-weight: 700; line-height: 1.4; }
+.brand .s { font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.5; }
+.search { padding: 12px 16px; border-bottom: 1px solid var(--line); }
+.search input {
+  width: 100%; padding: 8px 10px; font-size: 13px;
+  border: 1px solid var(--line); border-radius: 6px;
+  background: #fff; color: var(--fg); outline: none;
+}
+.search input:focus { border-color: var(--accent); }
+.nav { flex: 1; overflow-y: auto; padding: 10px 0 40px; }
+.nav .group { padding: 12px 20px 6px; font-size: 11px; font-weight: 700;
+  color: var(--muted); letter-spacing: .08em; }
+.nav a.item {
+  display: block; padding: 7px 20px 7px 20px;
+  font-size: 14px; color: var(--fg); border-left: 3px solid transparent;
+}
+.nav a.item:hover { background: #eef1f5; text-decoration: none; }
+.nav a.item.active {
+  border-left-color: var(--accent); background: #e8eff5;
+  font-weight: 600; color: var(--accent);
+}
+.nav details summary {
+  padding: 7px 20px; font-size: 14px; cursor: pointer; list-style: none;
+}
+.nav details summary::-webkit-details-marker { display: none; }
+.nav details summary:hover { background: #eef1f5; }
+.nav details a.sub {
+  display: block; padding: 4px 20px 4px 34px;
+  font-size: 12.5px; color: var(--muted); line-height: 1.5;
+}
+.nav details a.sub:hover { color: var(--accent); }
+
+/* 正文 */
+.main { margin-left: var(--sidebar-w); }
+.wrap { max-width: 860px; margin: 0 auto; padding: 40px 40px 96px; }
+.crumb { font-size: 12px; color: var(--muted); margin-bottom: 10px; }
+h1 { font-size: 30px; line-height: 1.35; margin: 0 0 26px;
+     font-weight: 700; letter-spacing: .01em; }
+h2 { font-size: 21px; margin: 40px 0 14px; padding-bottom: 8px;
+     border-bottom: 1px solid var(--line); font-weight: 700; }
+h3 { font-size: 17px; margin: 28px 0 10px; font-weight: 700; }
+h4 { font-size: 15px; margin: 22px 0 8px; font-weight: 700; }
+p { margin: 0 0 16px; text-align: justify; }
+p.signature { text-align: right; }
+ul, ol { margin: 0 0 16px; padding-left: 26px; }
+li { margin: 4px 0; }
+img { max-width: 100%; height: auto; display: block; margin: 22px auto;
+      border-radius: 4px; }
+figure { margin: 24px 0; text-align: center; }
+figcaption { font-size: 13px; color: var(--muted); margin-top: 8px; }
+
+code {
+  font-family: "SF Mono", Menlo, Consolas, "Courier New", monospace;
+  font-size: 0.88em; background: var(--code-bg);
+  padding: 2px 5px; border-radius: 4px;
+  border: 1px solid #eaecef;
+}
+pre {
+  background: var(--code-bg); border: 1px solid var(--line);
+  border-radius: 6px; padding: 14px 16px; overflow-x: auto;
+  line-height: 1.6; margin: 0 0 18px;
+}
+pre code { background: none; border: 0; padding: 0; font-size: 12.5px; }
+
+table { border-collapse: collapse; width: 100%; margin: 20px 0;
+        font-size: 14px; }
+th, td { border: 1px solid var(--line); padding: 7px 11px; }
+th { background: var(--soft); font-weight: 700; }
+tr:nth-child(even) td { background: #fcfcfd; }
+
+blockquote { margin: 0 0 18px; padding: 10px 18px;
+  border-left: 3px solid var(--line); color: var(--muted); background: var(--soft); }
+
+/* 插图目录 / 表格目录 */
+.cap-list { list-style: none; padding: 0; margin: 4px 0 0; }
+.cap-list li { border-bottom: 1px solid var(--line); }
+.cap-list a { display: flex; align-items: baseline; gap: 12px;
+  padding: 9px 2px; font-size: 14px; color: var(--fg); }
+.cap-list a:hover { background: var(--soft); text-decoration: none;
+  color: var(--accent); }
+.cap-num { min-width: 68px; color: var(--muted); font-size: 12.5px;
+  font-variant-numeric: tabular-nums; }
+.cap-title { flex: 1; }
+.cap-where { color: var(--muted); font-size: 11.5px; white-space: nowrap; }
+.cap-empty { color: var(--muted); font-size: 14px; }
+
+/* MathML 居中与缩放 */
+math[display="block"] { display: block; margin: 20px auto; font-size: 1.05em; }
+
+/* 页脚翻页 */
+.pager { display: flex; justify-content: space-between; gap: 16px;
+         margin-top: 56px; padding-top: 22px; border-top: 1px solid var(--line); }
+.pager a { flex: 1; padding: 12px 16px; border: 1px solid var(--line);
+           border-radius: 8px; font-size: 13px; }
+.pager a:hover { border-color: var(--accent); text-decoration: none;
+                 background: var(--soft); }
+.pager .dir { display: block; font-size: 11px; color: var(--muted);
+              margin-bottom: 3px; }
+.pager .next { text-align: right; }
+
+/* 首页 */
+.cover { padding: 56px 0 8px; }
+.cover h1 { font-size: 38px; margin-bottom: 8px; }
+.cover .sub { font-size: 15px; color: var(--muted); margin-bottom: 34px; }
+.toc-list { border-top: 1px solid var(--line); }
+.toc-list > li { list-style: none; margin: 0; border-bottom: 1px solid var(--line); }
+.toc-list { padding-left: 0; }
+.toc-row { display: flex; align-items: baseline; gap: 10px;
+           padding: 13px 2px; font-size: 15px; }
+.toc-row .no { color: var(--muted); font-size: 12px; min-width: 26px; }
+.toc-subs { padding: 0 0 12px 36px; margin: 0; }
+.toc-subs li { list-style: none; font-size: 13px; color: var(--muted);
+               padding: 3px 0; }
+
+/* 搜索结果 */
+#hits { display: none; position: absolute; left: 16px; right: 16px; top: 96px;
+        background: #fff; border: 1px solid var(--line); border-radius: 8px;
+        box-shadow: 0 8px 24px rgba(0,0,0,.12); max-height: 60vh;
+        overflow-y: auto; z-index: 50; }
+#hits.on { display: block; }
+#hits a { display: block; padding: 10px 14px; border-bottom: 1px solid var(--line); }
+#hits a:last-child { border-bottom: 0; }
+#hits a:hover { background: var(--soft); text-decoration: none; }
+#hits .h { font-size: 13px; font-weight: 600; color: var(--fg); }
+#hits .p { font-size: 11px; color: var(--accent); margin-bottom: 2px; }
+#hits .s { font-size: 12px; color: var(--muted); line-height: 1.5; }
+#hits .none { padding: 14px; font-size: 13px; color: var(--muted); }
+
+@media (max-width: 900px) {
+  .sidebar { display: none; }
+  .main { margin-left: 0; }
+  .wrap { padding: 24px 20px 72px; }
+  .cover h1 { font-size: 28px; }
+}
+@media print {
+  .sidebar, .pager, .search { display: none; }
+  .main { margin-left: 0; }
+  .wrap { max-width: none; padding: 0; }
+}
+</style>
+</head>
+<body>
+<aside class="sidebar">
+  <div class="brand">
+    <div class="t">量化金融与R语言</div>
+    <div class="s">Quantitative Trading with R 中文翻译稿</div>
+  </div>
+  <div class="search">
+    <input id="q" type="search" placeholder="搜索全书…" autocomplete="off" />
+  </div>
+  <nav class="nav"><div class="group">前言</div><a class="item" href="figures.html">插图目录</a><a class="item" href="tables.html">表格目录</a><a class="item" href="preface.html">译者序</a><a class="item" href="translators.html">译者简介</a><a class="item" href="acknowledgements.html">致谢</a><div class="group">正文</div><a class="item" href="ch01.html">第1章 总览</a><a class="item" href="ch02.html">第2章 交易工具</a><a class="item" href="ch03.html">第3章 与数据打交道</a><a class="item" href="ch04.html">第4章 统计和概率基础</a><details open><summary><a class="item active" style="display:inline;padding:0;border:0" href="ch05.html">第5章 统计和概率中级</a></summary><a class="sub" href="ch05.html#随机过程">随机过程</a><a class="sub" href="ch05.html#股票价格分布">股票价格分布</a><a class="sub" href="ch05.html#平稳性">平稳性</a><a class="sub" href="ch05.html#用urca判断平稳">用urca判断平稳</a><a class="sub" href="ch05.html#正态性假设">正态性假设</a><a class="sub" href="ch05.html#相关性">相关性</a><a class="sub" href="ch05.html#过滤数据">过滤数据</a><a class="sub" href="ch05.html#r-公式">R 公式</a><a class="sub" href="ch05.html#线性回归中的线性">线性回归中的线性</a><a class="sub" href="ch05.html#波动性">波动性</a><a class="sub" href="ch05.html#总结">总结</a></details><a class="item" href="ch06.html">第6章 价格差，贝塔系数和风险</a><a class="item" href="ch07.html">第7章 基于Quantstrat包的回溯测试</a><a class="item" href="ch08.html">第8章 高频数据分析</a><a class="item" href="ch09.html">第9章 期权</a><a class="item" href="ch10.html">第10章 最优化</a><a class="item" href="ch11.html">第11章 速度，测试与报告</a><div class="group">附录</div><a class="item" href="appendix.html">补充</a><a class="item" href="references.html">参考文献</a><a class="item" href="terms.html">索引</a></nav>
+  <div id="hits"></div>
+</aside>
+<main class="main">
+  <div class="wrap">
+    <div class="crumb">正文</div>
+    <h1>第5章 统计和概率中级</h1>
+<p>本章将探索股票价格的统计特性，以及收益率的平稳性、正态和自相关等话题。了解这些概念有助于我们进行统计推断，并为后面构建交易策略做铺垫。</p>
+<h2 id="随机过程">随机过程</h2>
+<p>要拟合模型，首先得有模型。首先，假设股票价格是由某种随机过程引起的。随机过程是一组以时间为索引的随机变量。包括以下例子：</p>
+<ul>
+<li>每日流星撞击上层大气的数量</li>
+<li>每分钟抵达交易所对盘系统（matching engine）的平均买方订单量</li>
+<li>每次买卖盘记录最优价改变时，标普500指数电子迷你合约的买方出价更新</li>
+<li>IWM大盘指标的每日收盘价</li>
+<li>每小时GOOG收益的百分比</li>
+</ul>
+<p>可以把随机过程想象成一个黑箱，观察者看不到它的内部构造和工作流程，唯一可见的是给定时间点的数值输出。 这组以时间顺序排列的X1，X2，X3...XN，称为一个随机过程。值得注意的是伴随这一组数值的时间并不一定是事先定好的离散区间，只要顺序排列即可。</p>
+<p><img src="media/fig-05-01.png" style="width:3.19333in;height:0.94667in" alt="图5.1" /></p>
+<p id="fig-5-1"><strong>图5.1</strong> 随机过程</p>
+<p>交易员的一个最终目标是，根据观察值X1，X2，X3...XN，探索黑箱机制（随机过程）。这个问题并不简单。理论上，只要知道黑箱用来产生今天股票价格的参数，就能依据这些信息预测明天的值。现实中，并没有单一决定性的机制可以产生股票价格或其他类似价格（汇率、期权报价、债券价格等等）。这种机制即使真的存在，也会极其复杂，而且随时间变化无常。</p>
+<p>然而，我们仍然可以用数学和编程工具回答关于市场的一部分具体问题。作者相信，即使模型简单，经过经常调整，也能很好地近似一个更复杂的过程。与其依赖复杂模型描述市场上的事件，不如常常回顾简单的模型和技术。这需要使用者透彻地理解简单模型的局限和故障点。</p>
+<p>为了将复杂的市场机制拟合到统计框架，我们需要做一些简化性的假设：</p>
+<ol type="1">
+<li>存在一个可以建模的随机过程。可以记录和分析随机过程产生的随机变量（价格、收益率、交易量）。</li>
+<li>大部分随机过程的参数不随时间变化。</li>
+</ol>
+<h2 id="股票价格分布">股票价格分布</h2>
+<p>经验告诉我们，股票价格非负，而且理论上可以无限大。所以理论概率分布的下限为零，右边的尾部靠近但永远不重合x轴。我们之所以关心股票价格，是为了问这样的问题：明天SPY ETF收盘价高于210美元的概率是多少？</p>
+<p>下图展示了内存中的全部历史价格的直方图。均值和标准差也计算并标注在图中。</p>
+<pre><code># 提取价格并计算相关统计量值
+prices &lt;- SPY$SPY.Adjusted
+mean_prices &lt;- round(mean(prices), 2)
+sd_prices &lt;- round(sd(prices), 2)
+
+# 绘制包含图例的直方图
+hist(prices, breaks = 100, prob=T, cex.main = 0.9)
+abline(v = mean_prices, lwd = 2)
+legend(&quot;topright&quot;, cex = 0.8, border = NULL, bty = &quot;n&quot;,
+  paste(&quot;mean=&quot;, mean_prices, &quot;; sd=&quot;, sd_prices))</code></pre>
+<p><img src="media/fig-05-02.png" style="width:3.31333in;height:2.68000in" alt="图5.2" /></p>
+<p id="fig-5-2"><strong>图5.2</strong> 价格分布</p>
+<p>类似地，我们可以看到另一段时间跨度下的价格分布。进行下一步之前，为了让生活更简单，我们把上面代码封装为一个函数，在不同时间段运行。函数定义如下：</p>
+<pre><code>plot_4_ranges &lt;- function(data, start_date, end_date, title) {
+
+  # 设定绘图窗口为两行两列
+  par(mfrow = c(2, 2))
+  for(i in 1:4) {
+    # 创建一个合适时间范围的字符串
+    range &lt;- paste(start_date[i], &quot;::&quot;, end_date[i], sep = &quot;&quot;)
+
+    # 创建价格向量以及需要的统计量
+    time_series &lt;- data[range]
+
+    mean_data &lt;- round(mean(time_series, na.rm = TRUE), 3)
+    sd_data &lt;- round(sd(time_series, na.rm = TRUE), 3)
+
+    # 绘制包含图例的直方图
+    hist_title &lt;- paste(title, range)
+    hist(time_series, breaks = 100, prob=TRUE,
+     xlab = &quot;&quot;, main = hist_title, cex.main = 0.8)
+    legend(&quot;topright&quot;, cex = 0.7, bty = &#39;n&#39;,
+     paste(&quot;mean=&quot;, mean_data, &quot;; sd=&quot;, sd_data))
+  }
+
+  # 重置绘图窗口  
+  par(mfrow = c(1, 1))
+}</code></pre>
+<p><img src="media/fig-05-03.png" style="width:4.21667in;height:2.86333in" alt="图5.3" /></p>
+<p id="fig-5-3"><strong>图5.3</strong> 四个价格分布</p>
+<p>定义好函数，我们就可以放心使用了：</p>
+<pre><code># 定义好我们感兴趣的时间起点和结点
+begin_dates &lt;- c(&quot;2007-01-01&quot;, &quot;2008-06-06&quot;,
+  &quot;2009-10-10&quot;, &quot;2011-03-03&quot;)
+end_dates &lt;- c(&quot;2008-06-05&quot;, &quot;2009-09-09&quot;,
+  &quot;2010-12-30&quot;, &quot;2013-01-06&quot;)
+
+# 绘图
+plot_4_ranges(prices, begin_dates,
+  end_dates, &quot;SPY prices for:&quot;)</code></pre>
+<p>从图中可以很清楚地看到，我们关心的统计量（均值和标准差）随时间改变。不同时间段产生迥异的结果。随着时间推移，SPY的价格分布大致是非平稳的。</p>
+<h2 id="平稳性">平稳性</h2>
+<p>当一个随机过程的概率分布不随时间改变形状和位置时，其被称为<code>严格平稳</code> <code>的</code>。考虑一个随机过程<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>X</mi><mi>t</mi></msub><annotation encoding="application/x-tex">X_{t}</annotation></semantics></math>。这个过程的实现是一个形如<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>X</mi><msub><mi>t</mi><mn>1</mn></msub></msub><annotation encoding="application/x-tex">X_{t_{1}}</annotation></semantics></math>, <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>X</mi><msub><mi>t</mi><mn>2</mn></msub></msub><annotation encoding="application/x-tex">X_{t_{2}}</annotation></semantics></math>, ... , <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>X</mi><msub><mi>t</mi><mi>N</mi></msub></msub><annotation encoding="application/x-tex">X_{t_{N}}</annotation></semantics></math>的时间序列。下面方程的等号意味着，分布是一致的。对严格平稳，有</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>X</mi><msub><mi>t</mi><mn>1</mn></msub></msub><mo>,</mo><mspace width="0.222em"></mspace><msub><mi>X</mi><msub><mi>t</mi><mn>2</mn></msub></msub><mo>,</mo><mspace width="0.222em"></mspace><mi>…</mi><mo>,</mo><mspace width="0.222em"></mspace><msub><mi>X</mi><msub><mi>t</mi><mi>N</mi></msub></msub><mo>=</mo><msub><mi>X</mi><mrow><msub><mi>t</mi><mn>1</mn></msub><mo>+</mo><mi>τ</mi></mrow></msub><mo>,</mo><mspace width="0.222em"></mspace><msub><mi>X</mi><mrow><msub><mi>t</mi><mn>2</mn></msub><mo>+</mo><mi>τ</mi></mrow></msub><mo>,</mo><mi>…</mi><mo>,</mo><msub><mi>X</mi><mrow><msub><mi>t</mi><mi>N</mi></msub><mo>+</mo><mi>τ</mi></mrow></msub><mspace width="0.222em"></mspace></mrow><annotation encoding="application/x-tex">
+X_{t_{1}},\ X_{t_{2}},\ \ldots,\ X_{t_{N}} = X_{t_{1} + \tau},\ X_{t_{2} + \tau},\ldots,X_{t_{N} + \tau}\ 
+</annotation></semantics></math></p>
+<p>（5.1）</p>
+<p>现实生活中，严格的平稳很难发生。更实际地，大多数情况下我们关心分布的前几个矩是否平稳。均值和方差就是这样两个矩<sup>2</sup>。平稳的弱形式叫做<strong>方差平稳</strong>，<strong>弱平稳</strong>，或<strong>二阶平稳</strong>。</p>
+<p>下面式子如果成立，该过程称为协方方差平稳：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>E</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>X</mi><mi>t</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mi>E</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>X</mi><mrow><mi>t</mi><mo>+</mo><mi>τ</mi></mrow></msub><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mi>μ</mi></mrow><annotation encoding="application/x-tex">
+E\left( X_{t} \right) = E\left( X_{t + \tau} \right) = \mu
+</annotation></semantics></math></p>
+<p>（5.2） 以及</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>c</mi><mi>o</mi><mi>v</mi><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>X</mi><mi>t</mi></msub><mo>,</mo><mspace width="0.222em"></mspace><msub><mi>X</mi><mrow><mi>t</mi><mo>+</mo><mi>τ</mi></mrow></msub><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mi>f</mi><mo stretchy="false" form="prefix">(</mo><mi>τ</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">
+cov\left( X_{t},\ X_{t + \tau} \right) = f(\tau)
+</annotation></semantics></math></p>
+<p>（5.3）</p>
+<p>第二个方程描述的是，协方方差可以表达为单一参数的函数，也就是τ。</p>
+<p>我们为什么关心平稳？为了预测未来，我们做一简化假设，未来会与过去相似。想象一个黑箱，纳入历史收盘价，预测下一日收盘价。如果黑箱从未见过最近的价格（比如，校准阶段），它怎么可能对未来价格作出结论？但是，如果在训练阶段，新输入与旧的输入相似，于是黑盒子会维持下去，对未来的价值产生有根据的猜测。作为首要原则，我们希望任何预测算法的输入是平稳的。</p>
+<p>金融价格数据大多数时候是<strong>不平稳的</strong>。要使之为我所用，须转化为平稳时间序列。一种实现的方法是关注收益率而非价格本身，另一种是使用协整模型<sup>3</sup>，此时单个序列非平稳但组合序列平稳。</p>
+<p><img src="media/fig-05-04.png" style="width:2.19333in;height:1.02000in" alt="图5.4" /></p>
+<p id="fig-5-4"><strong>图5.4</strong> 黑箱的平稳输入</p>
+<p>下面选取与之前同期的SPY股票数据展开分析。我们将探讨连续价格变动的自然对数，而非价格。此度量称为对数收益率。对于比较小的百分比收益率，对数收益率提供更适当的近似。数学推理如下：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>R</mi><mi>t</mi></msub><mo>=</mo><mfrac><mrow><msub><mi>P</mi><mrow><mi>t</mi><mspace width="0.222em"></mspace></mrow></msub><mo>−</mo><msub><mi>P</mi><mrow><mi>t</mi><mo>−</mo><mn>1</mn><mspace width="0.222em"></mspace></mrow></msub></mrow><msub><mi>P</mi><mrow><mi>t</mi><mo>−</mo><mn>1</mn><mspace width="0.222em"></mspace></mrow></msub></mfrac><mo>=</mo><mfrac><msub><mi>P</mi><mrow><mi>t</mi><mspace width="0.222em"></mspace></mrow></msub><msub><mi>P</mi><mrow><mi>t</mi><mo>−</mo><mn>1</mn><mspace width="0.222em"></mspace></mrow></msub></mfrac><mo>−</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">
+R_{t} = \frac{P_{t\ } - P_{t - 1\ }}{P_{t - 1\ }} = \frac{P_{t\ }}{P_{t - 1\ }} - 1
+</annotation></semantics></math></p>
+<p>（5.4）</p>
+<p><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>l</mi><mi>o</mi><mi>g</mi><mo stretchy="false" form="prefix">(</mo><mn>1</mn><mo>+</mo><mi>x</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">log(1 + x)</annotation></semantics></math>泰勒展开式为</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mrow><mi>log</mi><mo>&#8289;</mo></mrow><mo stretchy="false" form="prefix">(</mo><mn>1</mn><mo>+</mo><mi>x</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mi>x</mi><mo>−</mo><mfrac><msup><mi>x</mi><mn>2</mn></msup><mn>2</mn></mfrac><mo>+</mo><mfrac><msup><mi>x</mi><mn>3</mn></msup><mn>3</mn></mfrac><mo>+</mo><mi>O</mi><mo stretchy="false" form="prefix">(</mo><msup><mi>x</mi><mn>4</mn></msup><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">
+\log(1 + x) = x - \frac{x^{2}}{2} + \frac{x^{3}}{3} + O(x^{4})
+</annotation></semantics></math></p>
+<p>（5.5）</p>
+<p>考虑上式中x取值很小的情形：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mrow><mi>log</mi><mo>&#8289;</mo></mrow><mo stretchy="false" form="prefix">(</mo><mn>1</mn><mo>+</mo><mi>x</mi><mo stretchy="false" form="postfix">)</mo><mo>≈</mo><mi>x</mi></mrow><annotation encoding="application/x-tex">
+\log(1 + x) \approx x
+</annotation></semantics></math></p>
+<p>（5.6）</p>
+<p>用Rt代替x，即<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mrow><mi>log</mi><mo>&#8289;</mo></mrow><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo>+</mo><msub><mi>R</mi><mi>t</mi></msub><mo stretchy="true" form="postfix">)</mo></mrow><mo>≈</mo><msub><mi>R</mi><mi>t</mi></msub></mrow><annotation encoding="application/x-tex">\log\left( 1 + R_{t} \right) \approx R_{t}</annotation></semantics></math></p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>=</mo><mrow><mi>log</mi><mo>&#8289;</mo></mrow><mrow><mo stretchy="true" form="prefix">(</mo><mn>1</mn><mo>+</mo><mfrac><msub><mi>P</mi><mrow><mi>t</mi><mspace width="0.222em"></mspace></mrow></msub><msub><mi>P</mi><mrow><mi>t</mi><mo>−</mo><mn>1</mn><mspace width="0.222em"></mspace></mrow></msub></mfrac><mo>−</mo><mn>1</mn><mo stretchy="true" form="postfix">)</mo></mrow><mo>≈</mo><msub><mi>R</mi><mi>t</mi></msub></mrow><annotation encoding="application/x-tex">
+= \log\left( 1 + \frac{P_{t\ }}{P_{t - 1\ }} - 1 \right) \approx R_{t}
+</annotation></semantics></math></p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>=</mo><mrow><mi>log</mi><mo>&#8289;</mo></mrow><mrow><mo stretchy="true" form="prefix">(</mo><mfrac><msub><mi>P</mi><mrow><mi>t</mi><mspace width="0.222em"></mspace></mrow></msub><msub><mi>P</mi><mrow><mi>t</mi><mo>−</mo><mn>1</mn><mspace width="0.222em"></mspace></mrow></msub></mfrac><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mrow><mi>log</mi><mo>&#8289;</mo></mrow><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>P</mi><mrow><mi>t</mi><mspace width="0.222em"></mspace></mrow></msub><mo stretchy="true" form="postfix">)</mo></mrow><mo>−</mo><mrow><mi>log</mi><mo>&#8289;</mo></mrow><mrow><mo stretchy="true" form="prefix">(</mo><msub><mi>P</mi><mrow><mi>t</mi><mo>−</mo><mn>1</mn></mrow></msub><mo stretchy="true" form="postfix">)</mo></mrow><mo>≈</mo><msub><mi>R</mi><mi>t</mi></msub></mrow><annotation encoding="application/x-tex">
+= \log\left( \frac{P_{t\ }}{P_{t - 1\ }} \right) = \log\left( P_{t\ } \right) - \log\left( P_{t - 1} \right) \approx R_{t}
+</annotation></semantics></math></p>
+<p>（5.7）</p>
+<p>我们为何关心价格的对数变动，而弃用一般常见的收益率呢？主要是为了对数价格的良好的数学特性。由于价格符合对数正态分布，那么自然有百分比收益率在模型中呈正态分布。</p>
+<p><img src="media/fig-05-05.png" style="width:3.59333in;height:3.14000in" alt="图5.5" /></p>
+<p id="fig-5-5"><strong>图5.5</strong> 平稳收益率的分布</p>
+<pre><code># 计算对数收益率
+returns &lt;- diff(log(prices))
+
+# 使用跟之前相同的函数绘制收益率而不是价格
+plot_4_ranges(returns, begin_dates, end_dates, &quot;SPY log prices for:&quot;)</code></pre>
+<p>图中均值近乎为0，标准差相差不大。初步视察的结果显示，收益率的分布，至少分布的前几个矩，是平稳的。对平稳特性的分析并没有复杂的统计方法。各种统计检验试图回答这样的问题：某一个特定的分布是否平稳？例如，KPSS单位根检验，Elliot-Rothenberg Stock检验，Augmented Dickey-Fuller (ADF)检验，Phillips Peron检验，Schmidt Phillips检验, 以及Zivot Andrews检验。如果你想看到更多解释和R代码示例，推荐Pfaff关于用R进行协整时间序列分析的书<a href="http://quant.stackexchange.com/questions/2372/how-to-check-if-a-timeseries-is-stationary" class="uri">http://quant.stackexchange.com/questions/2372/how-to-check-if-a-timeseries-is-stationary</a>。</p>
+<p><img src="media/fig-05-06.png" style="width:3.64667in;height:2.27667in" alt="图5.6" /></p>
+<p id="fig-5-6"><strong>图5.6</strong> 股票价格和收益率</p>
+<h2 id="用urca判断平稳">用urca判断平稳</h2>
+<p>我们可以借助urca包来判断一个假设的时间序列是否平稳。另外，ucca包还能判断时间序列之间的协整关系。</p>
+<p>接下来，我们将对SPY的原始价格和指数收益率进行平稳性检验。</p>
+<p>基于前面针对价格和收益率的讨论，我们预期价格分布非平稳而收益率则是平稳的。</p>
+<p>文献中的检验方法不胜枚举，urca包只实现了其中一部分。比如Kwiatkowski检验、单位根检验、KPSS等等。KPSS的思想是的原假设假定序列是包含确定性趋势平稳的。检验结果的统计量和临界值对比，从而判断是否接受或拒绝原假设。</p>
+<pre><code># 获取SPY数据并且确认其为非平稳
+require(quantmod)
+getSymbols(&quot;SPY&quot;)
+spy &lt;- SPY$SPY.Adjusted
+
+# 使用默认设置
+require(urca)
+test &lt;- ur.kpss(as.numeric(spy))
+
+# 输出结果是一个S4对象
+class(test)
+## [1] &quot;ur.kpss&quot;
+## attr(,&quot;package&quot;)
+## [1] &quot;urca&quot;
+
+# 提取检验统计量值test@teststat
+test@teststat
+## [1] 11.63543
+# 看一下临界值
+test@cval
+##                              10pct  5pct    2.5pct 1pct
+## critical values  0.347  0.463  0.574  0.739</code></pre>
+<p>临界值大到足以拒绝时间序列平稳的原假设。那么收益率也是如此吗？</p>
+<pre><code>spy_returns &lt;- diff(log(spy))
+
+# 检验收益率的平稳性
+test_returns &lt;- ur.kpss(as.numeric(spy_returns))
+test_returns@teststat
+## [1] 0.336143
+test_returns@cval</code></pre>
+<p>本例中，在10%的显著性水平下我们也不能拒绝原假设。截取2013年1月后的一段时间，此时价格似乎更加冷静。</p>
+<pre><code>test_post_2013 &lt;- ur.kpss(as.numeric(spy_returns[&#39;2013::&#39;]))
+test_post_2013@teststat
+## [1] 0.06936672</code></pre>
+<p>此时不能拒绝代表时间序列平稳的原假设。</p>
+<h2 id="正态性假设">正态性假设</h2>
+<p>现在，我们要做出关于价格和收益率分布的简化假设。忽略某些时段明显的异常值和集群点，假设收益率符合正态（高斯）分布。为什么？这样会让数学更简单。</p>
+<p>给定均值<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>μ</mi><annotation encoding="application/x-tex">\mu</annotation></semantics></math>，标准差<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>σ</mi><annotation encoding="application/x-tex">\sigma</annotation></semantics></math>，高斯分布的公式是：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>f</mi><mo stretchy="false" form="prefix">(</mo><mi>x</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mfrac><mn>1</mn><msqrt><mrow><mn>2</mn><mi>π</mi><msup><mi>σ</mi><mn>2</mn></msup><mspace width="0.222em"></mspace></mrow></msqrt></mfrac><msup><mi>e</mi><mfrac><msup><mrow><mo stretchy="false" form="prefix">(</mo><mi>x</mi><mo>−</mo><mi>μ</mi><mo stretchy="false" form="postfix">)</mo></mrow><mn>2</mn></msup><mrow><mn>2</mn><mi>σ</mi></mrow></mfrac></msup></mrow><annotation encoding="application/x-tex">
+f(x) = \frac{1}{\sqrt{2\pi\sigma^{2}\ }}e^{\frac{{(x - \mu)}^{2}}{2\sigma}}
+</annotation></semantics></math></p>
+<p>（5.8）</p>
+<p>看看正态分布叠加在每日收益率数据上会是什么样子。首先，生成一组随机数，具有和股票收益率一致的均值和标准差。下面的R代码实现了这一叠加：</p>
+<pre><code># 绘制直方图和密度曲线
+mu &lt;- mean(returns, na.rm = TRUE)
+sigma &lt;- sd(returns, na.rm = TRUE)
+x &lt;- seq(-5 * sigma, 5 * sigma, length = nrow(returns))
+
+hist(returns, breaks = 100,
+  main = &quot;Histogram of returns for SPY&quot;,
+  cex.main = 0.8, prob=TRUE)
+lines(x, dnorm(x, mu, sigma), col = &quot;red&quot;, lwd = 2)</code></pre>
+<p>函数<code>dnorm()</code>，基于给定x的范围、均值和方差的生成一组正态分布数据。函数<code>lines()</code>构造出直方图基础上的曲线图。</p>
+<p><img src="media/fig-05-07.png" style="width:2.54333in;height:2.03333in" alt="图5.7" /></p>
+<p id="fig-5-7"><strong>图5.7</strong> 正态分布的直方图与密度曲线</p>
+<p>如图，数据显然不符合正态分布。零值附近的观察值较为密集，而正态分布假设这个区段具有更少的数据。而且分布的尾部有更多异常值。我们把这个经验分布叫做尖峰（leptokyrtic）分布。单词lepto来自“薄”的希腊语单词。lepto的希腊语反义词是是platy，意为“厚”。</p>
+<p><img src="media/fig-05-08.png" style="width:2.54333in;height:1.92333in" alt="图5.8" /></p>
+<p id="fig-5-8"><strong>图5.8</strong> 尖峰与低峰</p>
+<p>另一种展示实际的经验分布和理论上正态分布二者区别的方式是通过函数<code>qqnorm</code>和<code>qqline</code>。还是用刚刚的数据</p>
+<pre><code># 设定绘图窗口为一行两列
+par(mfrow = c(1, 2))
+
+# SPY数据
+qqnorm(as.numeric(returns),
+  main = &quot;SPY empirical returns qqplot()&quot;,
+  cex.main = 0.8)
+qqline(as.numeric(returns),  lwd = 2)
+grid()
+
+# 正态分布随机数据
+normal_data &lt;- rnorm(nrow(returns), mean = mu, sd = sigma)
+
+qqnorm(normal_data, main = &quot;Normal returns&quot;, cex.main = 0.8)
+qqline(normal_data, lwd = 2)
+grid()</code></pre>
+<p>点与直线的偏差表示数据分布与正态分布的背离程度。有很多判定正态分布和与给定经验分布之间偏离的统计检验。其中大部分（比如Kolmogorov-Smirnov, Shapiro-Wilks, Cramer-von Mises, Anderson-Darling等检验）已经在R里实现。</p>
+<p><img src="media/fig-05-09.png" style="width:3.37000in;height:1.98333in" alt="图5.9" /></p>
+<p id="fig-5-9"><strong>图5.9</strong> 分位数（QQ）图</p>
+<p>比如，夏普检验（Shapiro test）只需要把原始收益率作为参数喂给函数<code>shapiro.test()</code>。结论的P值可以看作数据来自一个正态分布的似然性。</p>
+<pre><code>answer &lt;- shapiro.test(as.numeric(returns))
+
+answer[[2]]
+## [1] 5.118396e-34</code></pre>
+<p>根据以上结论，我们的数据来自一个高斯分布的可能性很小。</p>
+<p>对上述分析，作者持将信将疑的态度。在盲目相信统计检验以前，你需要理解数据的本质结构。过多或过少的数据会使统计检验非常敏感，导致产生更多假阳性预测，从而极大地扭曲结论。异常值也会歪曲事实。在进行严格的统计分析之前，你最好尽可能以可视化的方式检查数据。这样会节约大量时间，免去麻烦。下面的例子给出了异常值扭曲结论。构造一个由正态分布的数值组成的向量，然后用函数shapiro.test()查看与正态分布的偏离。</p>
+<pre><code>set.seed(129)
+normal_numbers &lt;- rnorm(5000, 0, 1)
+ans &lt;- shapiro.test(normal_numbers)
+
+ans[[2]]
+## [1] 0.9963835</code></pre>
+<p><img src="media/fig-05-10.png" style="width:3.21000in;height:1.82667in" alt="图5.10" /></p>
+<p id="fig-5-10"><strong>图5.10</strong> 错误值</p>
+<p>P值很大，意味着我们的样本确实来源于正态分布。如果样本中存在一个异常值呢？比如一个输入错误导致某个值特别大？</p>
+<pre><code># 人为破坏一个数据点
+normal_numbers[50] &lt;- 1000
+ans &lt;- shapiro.test(normal_numbers)
+
+ans[[2]]
+## [1] 1.775666e-95</code></pre>
+<p>本例中P值实际为零，Shapiro-Wilks检验没有过滤掉异常值的影响，因而不够稳健。进行检验之前，绘制出简单的数据图就可以发现这一错误值。</p>
+<p>绘制数据图不一定实用。我们可以将探测和处理异常数据的过程自动化，或者运用稳健的异常值诊断统计方法。</p>
+<h2 id="相关性">相关性</h2>
+<p>异常值处理通常不只是科学，更是一门艺术。让我们再次考虑SPY和VXX的对数收益率。这次，我们想要了解每日收益率数据有怎样的相关关系。</p>
+<p>相关性（Correlation）是两个随机变量之间线性依赖关系的一个统计测量。业界最常用的是皮尔逊相关系数（Pearson Correlation）。另一个受欢迎的是秩相关（Rank Correlation，译者注：有的书中翻译为等级相关）。皮尔逊相关系数形式如下：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>ρ</mi><mrow><mi>X</mi><mo>,</mo><mi>Y</mi></mrow></msub><mo>=</mo><mfrac><mrow><mi>E</mi><mo stretchy="false" form="prefix">[</mo><mo stretchy="false" form="prefix">(</mo><mi>X</mi><mo>−</mo><msub><mi>μ</mi><mi>X</mi></msub><mo stretchy="false" form="postfix">)</mo><mo stretchy="false" form="prefix">(</mo><mi>Y</mi><mo>−</mo><msub><mi>μ</mi><mi>Y</mi></msub><mo stretchy="false" form="postfix">)</mo><mo stretchy="false" form="postfix">]</mo></mrow><mrow><msub><mi>σ</mi><mi>X</mi></msub><msub><mi>σ</mi><mi>Y</mi></msub></mrow></mfrac></mrow><annotation encoding="application/x-tex">
+\rho_{X,Y} = \frac{E\lbrack(X - \mu_{X})(Y - \mu_{Y})\rbrack}{\sigma_{X}\sigma_{Y}}
+</annotation></semantics></math></p>
+<p>(5.9)</p>
+<p><img src="media/fig-05-11.png" style="width:3.26667in;height:1.98667in" alt="图5.11" /></p>
+<p id="fig-5-11"><strong>图5.11</strong> 常见的收益率散点图</p>
+<p>分子项<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>E</mi><mo stretchy="false" form="prefix">[</mo><mo stretchy="false" form="prefix">(</mo><mi>X</mi><mo>−</mo><msub><mi>μ</mi><mi>X</mi></msub><mo stretchy="false" form="postfix">)</mo><mo stretchy="false" form="prefix">(</mo><mi>Y</mi><mo>−</mo><msub><mi>μ</mi><mi>Y</mi></msub><mo stretchy="false" form="postfix">)</mo><mo stretchy="false" form="postfix">]</mo></mrow><annotation encoding="application/x-tex">E\lbrack(X - \mu_{X})(Y - \mu_{Y})\rbrack</annotation></semantics></math>是一个重要的数学构造，广泛应用在金融领域。它叫做随机变量X和Y的协方差（covariance）。出现两个以上变量时，这个构造也可以表达成矩阵形式，叫做协方差矩阵，是现代金融学的基石。公式中的相关系数和协方差揭示差不多一致的信息。尺度是唯一的不同。<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>ρ</mi><mrow><mi>X</mi><mo>,</mo><mi>Y</mi></mrow></msub><annotation encoding="application/x-tex">\rho_{X,Y}</annotation></semantics></math>取正值表示随机变量X和Y可能以线性的形式相互关联。上面给出的相关系数公式是总体统计量。不同的样本统计量试图产生无偏和有效的<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>ρ</mi><mrow><mi>X</mi><mo>,</mo><mi>Y</mi></mrow></msub><annotation encoding="application/x-tex">\rho_{X,Y}</annotation></semantics></math> <sup>7</sup>估计量。</p>
+<pre><code>sv &lt;- as.xts(returns_matrix[, c(1, 6)])
+
+head(sv)
+##               SPY.Close    VXX.Close
+## 2009-02-02 -0.003022794 -0.003160468
+## 2009-02-03  0.013949240 -0.047941603
+## 2009-02-04 -0.004908132  0.003716543
+## 2009-02-05  0.014770965 -0.006134680</code></pre>
+<p>SPY和VXX时间序列数据的散点图如下：</p>
+<p>在R里，相关性通过函数<code>cor()</code>传入一个时间序列矩阵得到。</p>
+<pre><code>cor(sv)
+##            SPY.Close  VXX.Close
+## SPY.Close  1.0000000 -0.4603908
+## VXX.Close -0.4603908  1.0000000</code></pre>
+<p><img src="media/fig-05-12.png" style="width:3.15000in;height:1.98667in" alt="图5.12" /></p>
+<p id="fig-5-12"><strong>图5.12</strong> VXX中的异常值</p>
+<p>产生的矩阵列举了所有可能的两两相关关系。结果令人欣慰，SPY收益率和自己高度相关。SPY和VXX收益率呈现负相关。考虑到VXX是一支追踪波动性的股票，这也说得通。我们有多大把握相信SPY和VXX之间的相关系数是-0.46？以及，这个相关估计对异常值有多大敏感呢？VXX收益率图透露了2个异常值的存在。</p>
+<h2 id="过滤数据">过滤数据</h2>
+<p>如果移除异常值，相关估计将变化几何？我们面临三个选择。完全忽视异常值并继续统计分析，删除样本中的异常值，要么把异常值转化为有意义的值。三者中我们选择直接删除错误的记录。</p>
+<pre><code># 找出异常值
+outliers &lt;- which(sv[, 2] &gt; 1.0)
+
+# 如果异常值存在则删除之
+if(length(outliers) &gt; 0) {
+  sv &lt;- sv[-outliers, ]
+}
+
+cor(sv)
+##            SPY.Close  VXX.Close
+## SPY.Close  1.0000000 -0.8066466
+## VXX.Close -0.8066466  1.0000000</code></pre>
+<p>注意相关估计和散点图都均发生了戏剧性的改变：</p>
+<p><img src="media/fig-05-13.png" style="width:3.41000in;height:2.01667in" alt="图5.13" /></p>
+<p id="fig-5-13"><strong>图5.13</strong> 异常值的去除</p>
+<p>SPY和VXX的确存在强线性关系。一种量化关系的方式是考虑两个时间序列的线性回归的R2。相关与线性回归的概念紧密相连。事实证明，单变量线性回归R2的方根等于皮尔逊相关系数。R2是对因变量变化被自变量变化解释程度的一个测量。</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>ρ</mi><mo>=</mo><msqrt><msup><mi>R</mi><mn>2</mn></msup></msqrt></mrow><annotation encoding="application/x-tex">
+\rho = \sqrt{R^{2}}
+</annotation></semantics></math></p>
+<p>(5.10)</p>
+<p>回到研究中的时间序列，线性回归的结果可以视为穿过二维空间散点图的一条最优拟合直线。要建立这组线性关系，需要斜率和截距的估计。可以通过函数<code>lm()</code>返回得到。函数<code>lm()</code>也返回特定的统计量，描述参数的合理程度。当回归包含两个以上变量时（多元回归），估计的系数仍然组成一条直线，只不过在更高维空间。下面是线性回归试图拟合的数学模型：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>Y</mi><mo>=</mo><mi>α</mi><mo>+</mo><msub><mi>β</mi><mn>1</mn></msub><msub><mi>X</mi><mn>1</mn></msub><mo>+</mo><msub><mi>β</mi><mn>2</mn></msub><msub><mi>X</mi><mn>2</mn></msub><mo>+</mo><mi>.</mi><mi>.</mi><mi>.</mi><mo>+</mo><msub><mi>β</mi><mi>N</mi></msub><msub><mi>X</mi><mi>N</mi></msub><mo>+</mo><mi>ϵ</mi></mrow><annotation encoding="application/x-tex">
+Y = \alpha + \beta_{1}X_{1} + \beta_{2}X_{2} + ... + \beta_{N}X_{N} + \epsilon
+</annotation></semantics></math></p>
+<p>（5.11）</p>
+<p>我们想要研究系数<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>α</mi><annotation encoding="application/x-tex">\alpha</annotation></semantics></math>和<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>α</mi><annotation encoding="application/x-tex">\alpha</annotation></semantics></math>。<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>ϵ</mi><annotation encoding="application/x-tex">\epsilon</annotation></semantics></math>项是个杂物框，包含一切没有被线性模型解释的部分。理想情况下，此项具有正态分布，无自相关或其他可辨识的结构。</p>
+<h2 id="r-公式">R 公式</h2>
+<p>让我们先了解一些公式（formulas）的知识，再回到线性回归的例子。一些函数（<code>lm()</code>, <code>glm()</code>, <code>nls()</code>）接受符号表达式作为参数。R用~运算符来构造公式。给定两个变量x和y，我们可以创建下列符号表达式或公式：</p>
+<pre><code># 创建一个公式
+my_formula &lt;- as.formula(&quot;y ~ x&quot;)
+
+# 输出是什么？ 
+my_formula
+## y ~ x
+
+# my_formula的类是什么？ 
+class(my_formula)
+## [1] &quot;formula&quot;</code></pre>
+<p>这种方式有效地告诉R，我们想要建立因变量y和自变量x之间的线性关系。另外，R也知道我们希望取得线性关系的斜率和截距。将公式右边改成<code>y ~ x - 1</code>，可以忽略截距。如果超过一个自变量，我们可以指定公式为：<code>y ~ x + z + W + z*W -1</code>来捕捉变量yxz和w之间的线性关系，以及z和w的交互关系。函数<code>I()</code>用来执行公式内部的数学运算。比如，<code>y~x+z+I(w*x)</code>会造一个等同于w和x乘积的新变量。在R控制台输入<code>?formula</code>，打开内置的帮助页面，查看更多关于构建公式的例子。</p>
+<pre><code># 创建一个线性回归的对象
+reg &lt;- lm(VXX.Close ~ SPY.Close, data = sv)
+
+# 下面是输出结果
+summary(reg)
+
+## Call:
+## lm(formula = VXX.Close ~ SPY.Close, data = sv)
+
+## Residuals:
+##    Min        1Q    Median        3Q       Max
+## -0.085607 -0.012830 -0.000865  0.012188  0.116349
+
+## Coefficients:
+##            Estimate Std. Error t value Pr(&gt;|t|)
+## (Intercept) -0.0024365  0.0006641  -3.669 0.000254 ***
+## SPY.Close   -2.5848492  0.0552193 -46.811  &lt; 2e-16 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1
+
+## Residual standard error: 0.02287 on 1187 degrees of freedom
+## Multiple R-squared:  0.6486,Adjusted R-squared:  0.6483
+## F-statistic:  2191 on 1 and 1187 DF,  p-value: &lt; 2.2e-16</code></pre>
+<p><img src="media/fig-05-14.png" style="width:3.44000in;height:2.01667in" alt="图5.14" /></p>
+<p id="fig-5-14"><strong>图5.14</strong> 回归结果展示</p>
+<p>斜率和截距在summary输出的系数部分列出。本例中，截距是-0.0024365，斜率是-2.5848492。<code>Pr(&gt;|t|)</code>下方的数字是估计参数的p值。p值是假设原假设为真时，观察到估计参数的概率。原假设是一个陈述——参数（斜率和截距）为零。p值很小，则拒绝原假设。翻译一下这种精致的表达，也就是说，我们相信我们的估计非零。</p>
+<pre><code>b &lt;- reg$coefficients[1]
+a &lt;- reg$coefficients[2]</code></pre>
+<p>线性模型告诉我们VXX收益率和SPY收益率在t时刻的关系为：<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>V</mi><mi>X</mi><msub><mi>X</mi><mi>t</mi></msub><mo>=</mo><mi>a</mi><mi>S</mi><mi>P</mi><msub><mi>Y</mi><mi>t</mi></msub><mo>+</mo><mi>b</mi><mo>+</mo><msub><mi>ϵ</mi><mi>t</mi></msub></mrow><annotation encoding="application/x-tex">VXX_{t} = aSPY_{t} + b + \epsilon_{t}</annotation></semantics></math>。噪音项<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>ϵ</mi><mi>t</mi></msub><annotation encoding="application/x-tex">\epsilon_{t}</annotation></semantics></math>也叫做回归的残差。实际操作中，我们常常用函数<code>abline()</code>把线性回归的结果叠加到散点图上。</p>
+<p>拟合曲线在一对收益率上看着很不错。残差效果如下：</p>
+<pre><code>par(mfrow = c(2, 2))
+plot(reg$residuals,
+     main = &quot;Residuals through time&quot;,
+     xlab = &quot;Days&quot;, ylab = &quot;Residuals&quot;)
+hist(reg$residuals, breaks = 100,
+     main = &quot;Distribution of residuals&quot;,
+     xlab = &quot;Residuals&quot;)
+qqnorm(reg$residuals)
+qqline(reg$residuals)
+acf(reg$residuals, main = &quot;Autocorrelation&quot;)</code></pre>
+<p><img src="media/fig-05-15.png" style="width:4.09000in;height:2.16333in" alt="图5.15" /></p>
+<p id="fig-5-15"><strong>图5.15</strong> 诊断图</p>
+<p>四幅图展现了残差的四个方面。首先，时间和直方图似乎表明残差是服从正态分布的。然而，它们有比正态分布更厚的尾部。同样的结论可以由函数<code>qqplot()</code>画出的分位图得到。函数<code>acf()</code>计算时间序列的自相关性。当前观察值和任何历史观察值有无关联？笼统而言，能否用过去的值推断预测下一期的值？实现的方式是把时间序列向前移动一步，重计算和原始序列的相关性。滞后零期，相关性为1。任何其他滞后期会产生一个不同的数。上面的自相关图表示在我们的简单线性回归模型中没有显著的自相关结构。如果有自相关，我们就必须重新讨论用线性回归描述两变量关系的假设。在理想世界，我们希望残差越“嘈杂”越好，希望它呈正态分布，没有内部结构（线性或非线性的依赖关系）。</p>
+<p>查看同期收益率是一种分析不同证券关系的方法。一个更有趣的问题是，昨天和今天的收益率之间是否存在线性关系？如果答案是“是”，线性回归模型将是预测因变量回归因子情况的好的尝试。</p>
+<pre><code>vxx_lag_1 &lt;- lag(VXX$VXX.Close, k = 1)
+
+head(vxx_lag_1)
+##               VXX.Close
+## 2009-01-30    NA
+## 2009-02-02    104.58
+## 2009-02-03    104.25
+## 2009-02-04    99.37
+## 2009-02-05    99.74
+## 2009-02-06    99.13
+
+head(VXX$VXX.Close)
+##               VXX.Close
+## 2009-01-30    104.58
+## 2009-02-02    104.25
+## 2009-02-03    99.37
+## 2009-02-04    99.74
+## 2009-02-05    99.13
+## 2009-02-06    97.70</code></pre>
+<p>函数<code>lag()</code>计算一步价格漂移，也就是，时间滞后一天。现在，我们回到过滤的VXX收益率矩阵，看一看滞后SPY和VXX之间的线性回归。下例中，隐含假设为SPY收益率先于VXX收益率。</p>
+<pre><code># 将收益率序列和收益率的滞后序列合并
+sv &lt;- merge(sv, lag(sv))
+
+# SPY时候序列和VXX序列的散点图
+plot(as.numeric(sv[, 3]), as.numeric(sv[, 2]),
+  main = &quot;Scatter plot SPY lagged vs. VXX.&quot;,
+  xlab = &quot;SPY lagged&quot;,
+  ylab = &quot;VXX&quot;,
+  cex.main = 0.8,
+  cex.axis = 0.8,
+  cex.lab = 0.8)
+grid()</code></pre>
+<p><img src="media/fig-05-16.png" style="width:3.72333in;height:2.46333in" alt="图5.16" /></p>
+<p id="fig-5-16"><strong>图5.16</strong> 含滞后的散点图</p>
+<p>没有一点点意外。散点图暗示我们，滞后SPY收益率和VXX收益率没有可分辨的线性关系。线性回归的结果会证实这一猜想：</p>
+<pre><code>reg2 &lt;- lm(VXX.Close ~ SPY.Close.1, data = sv)
+
+summary(reg2)
+## Coefficients:
+##           Estimate Std. Error t value Pr(&gt;|t|)
+## (Intercept) -0.004140   0.001121  -3.694 0.000231 ***
+## SPY.Close.1  0.104119   0.093154   1.118 0.263918
+
+## Residual standard error: 0.03857 on 1186 degrees of freedom
+## (1 observation deleted due to missingness)
+## Multiple R-squared:  0.001052,Adjusted R-squared:  0.00021
+## F-statistic: 1.249 on 1 and 1186 DF,  p-value: 0.2639</code></pre>
+<p>那么，如果假设VXX收益率领先于SPY收益率呢？</p>
+<p>我们可以很容易地通过滞后VXX，并使用SPY作为独立的回归因子再次进行回归。结果是一样的。</p>
+<p>函数<code>ccf()</code>（交叉相关函数cross correlation function）进行相似的分析，它独立地滞后时间序列并计算两两相关系数。和<code>acf()</code>函数类似，但它取两列时间序列，而不是一列。</p>
+<pre><code>ccf(as.numeric(sv[, 1]), as.numeric(sv[, 2]),
+    main = &quot;Cross correlation between SPY and VXX&quot;,
+    ylab = &quot;Cross correlation&quot;, xlab = &quot;Lag&quot;, cex.main = 0.8,
+    cex.lab = 0.8, cex.axis = 0.8)</code></pre>
+<p><img src="media/fig-05-17.png" style="width:3.68000in;height:2.24667in" alt="图5.17" /></p>
+<p id="fig-5-17"><strong>图5.17</strong> 收益率的交叉相关性</p>
+<h2 id="线性回归中的线性">线性回归中的线性</h2>
+<p>如上所述，线性回归是一种试图识别回归因子中线性关系的数学模型。牢记限定修饰词“线性”。一种可能的情形是，两个变量相关性非常高，但线性回归却完全不能识别。</p>
+<p>抛物线常作为经典例子来佐证这一观点。函数<code>f(x)=x2</code>是完全确定的，它清晰地勾勒了x和f(x)依的赖关系。在这组数据上建立线性回归，输出结果如下：</p>
+<pre><code>x &lt;- seq(1:100)
+y &lt;- x ^ 2
+
+# 生成散点图
+plot(x, y)
+
+# 拟合回归
+reg_parabola &lt;- lm(y ~ x)
+
+# 在散点图上添加最优拟合直线
+abline(reg_parabola, lwd = 2)
+
+# 检视回归结果
+summary(reg_parabola)</code></pre>
+<p><img src="media/fig-05-18.png" style="width:3.76667in;height:2.40667in" alt="图5.18" /></p>
+<p id="fig-5-18"><strong>图5.18</strong> 直线和抛物线</p>
+<p>显然，线性回归并不是识别非线性关系的理想选择。只要稍微调整一个变量，我们又能使用函数<code>lm()</code>了。</p>
+<pre><code>plot(x, sqrt(y))
+reg_transformed &lt;- lm(sqrt(y) ~ x)
+abline(reg_transformed)
+
+summary(reg_transformed)</code></pre>
+<p><img src="media/fig-05-19.png" style="width:3.66333in;height:2.18000in" alt="图5.19" /></p>
+<p id="fig-5-19"><strong>图5.19</strong> 平方根转换</p>
+<p>变量的数学变换，会大大拓展你的线性回归模型适用场合。找到恰当的变换形式肯定不是一个简单的任务。</p>
+<h2 id="波动性">波动性</h2>
+<p>波动性是一组数据与他们均值的离差。给定任意数据，我们可以得到上述离差的一个估计。随机过程波动性一个常用度量是以前见过的标准差（standard deviation）统计量。</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>σ</mi><mo>=</mo><msqrt><mfrac><mrow><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>N</mi></munderover><mo stretchy="false" form="prefix">(</mo><msub><mi>X</mi><mi>i</mi></msub><mo>−</mo><mi>μ</mi><msup><mo stretchy="false" form="postfix">)</mo><mn>2</mn></msup></mrow><mi>N</mi></mfrac></msqrt></mrow><annotation encoding="application/x-tex">
+\sigma = \sqrt{\frac{\sum_{i = 1}^{N}(X_{i} - \mu)^{2}}{N}}
+</annotation></semantics></math></p>
+<p>(5.12)</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>D</mi><mo>=</mo><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>N</mi></munderover><mo stretchy="false" form="prefix">|</mo><msub><mi>X</mi><mi>i</mi></msub><mo>−</mo><mi>μ</mi><mo stretchy="false" form="prefix">|</mo></mrow><annotation encoding="application/x-tex">
+D = \sum_{i = 1}^{N}|X_{i} - \mu|
+</annotation></semantics></math></p>
+<p>(5.13)</p>
+<p>收益率的波动性是交易员和宽客深入研究的一个指标。</p>
+<p>开发某些交易策略时，我们真正关心的是金融工具的收益率围绕他们平均值的摆动有多大和多频繁。我们并不关心移动的方向。相反，我们关注此类移动的相对大小。我们为什么不关心方向？答案是，方向很难预测。对大小数量说道一二却容易得多。</p>
+<p>注意，波动率的公式包含收益率的平方这一重要组成基石。当处理每日或盘中收益分布时，我们发现均值趋近零。方差的公式因此可以近似为：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>σ</mi><mo>=</mo><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>N</mi></munderover><msubsup><mi>r</mi><mi>i</mi><mn>2</mn></msubsup></mrow><annotation encoding="application/x-tex">
+\sigma = \sum_{i = 1}^{N}r_{i}^{2}
+</annotation></semantics></math></p>
+<p>(5.14)</p>
+<p>我们发现，至少每日收益率之间没有显著的自相关性。那么收益率分布的更高阶矩呢？考虑下面的模拟：</p>
+<pre><code># 生成1000个正态分布的IID随机数
+z &lt;- rnorm(1000, 0, 1)
+
+# 收益率和收益率平方序列的自相关图
+par(mfrow = c(2, 1))
+acf(z, main = &quot;returns&quot;, cex.main = 0.8,
+    cex.lab = 0.8, cex.axis = 0.8)
+
+grid()
+acf(z ^ 2, main = &quot;returns squared&quot;,
+    cex.lab = 0.8, cex.axis = 0.8)
+grid()</code></pre>
+<p>上面人工构建的收益率应该展示出自回归特性。事实上，这也是图中展现出来的。收益率的平方呢？</p>
+<p>这应该不足为奇。由于原始向量z是iid（独立和同分布），我们期待向量的平方也是iid。</p>
+<p>这里是真实收益率的平方的自相关特性。需要记住，收益率的平方加起来时，就成了离差或方差的代理。</p>
+<pre><code>par(mfrow = c(1, 1))
+acf(sv[, 1] ^ 2, main = &quot;Actual returns squared&quot;,
+    cex.main = 0.8, cex.lab = 0.8, cex.axis = 0.8)
+grid()</code></pre>
+<p><img src="media/fig-05-20.png" style="width:3.53333in;height:3.01000in" alt="图5.20" /></p>
+<p id="fig-5-20"><strong>图5.20</strong> 收益率自相关性</p>
+<p><img src="media/fig-05-21.png" style="width:4.06333in;height:6.47333in" alt="图5.21" /></p>
+<p id="fig-5-21"><strong>图5.21</strong> 理论收益率平方的自相关</p>
+<p><img src="media/fig-05-22.png" style="width:3.60333in;height:2.24000in" alt="图5.22" /></p>
+<p id="fig-5-22"><strong>图5.22</strong> 真实收益率平方的自相关</p>
+<p>自相关性统计显著地存在于每日收益率平方的各个滞后项。实证分布的高阶矩为也显示出自相关效应，收益率的绝对值也是如此。</p>
+<pre><code>par(mfrow = c(1, 2))
+acf(sv[, 1]^3)
+acf(abs(sv[, 1]))</code></pre>
+<p>各种层次的计量经济模型被提出以解释这种高阶自相关结构[50]。这些模型主要可以分为三类：</p>
+<ul>
+<li>ARIMA</li>
+<li>GARCH</li>
+<li>Stochastic Volatility（随机波动率模型）</li>
+</ul>
+<p>波动性的这类行为通常被称为异方差性。观察收益率随时间变化的曲线时，异方差性尤为明显。看起来没有自相关的正常序列应该不存在聚集效应。真正的金融数据存在这种效应，意味着时间序列的高阶矩有记忆效应。</p>
+<h2 id="总结">总结</h2>
+<p>本章延续前面的初级概率统计知识，定义了什么是随机过程，以及金融时间序列和随机过程之间的关联。介绍了平稳性，以及多种在R里进行平稳性和正态性统计检验的方法。探索了时间序列之间相关性的概念，异常值检测，过滤技术。另外，我们讨论了线性回归和自相关在R里的实现，最后展示了收益率平方的自相关性。为了解释波动性的异方差性，我们又考虑了复杂的计量经济学建模技术。</p>
+<p>翻译：杨环 审校：冯凌秉</p>
+
+    <div class="pager"><a class="prev" href="ch04.html"><span class="dir">上一页</span>第4章 统计和概率基础</a><a class="next" href="ch06.html"><span class="dir">下一页</span>第6章 价格差，贝塔系数和风险</a></div>
+  </div>
+</main>
+<script>
+(function () {
+  var box = document.getElementById('q');
+  var panel = document.getElementById('hits');
+  if (!box) return;
+  var idx = [];
+  fetch('search-index.json')
+    .then(function (r) { return r.json(); })
+    .then(function (d) { idx = d; })
+    .catch(function () {});
+
+  function esc(s) {
+    return s.replace(/[&<>"]/g, function (c) {
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];
+    });
+  }
+  function run() {
+    var q = box.value.trim().toLowerCase();
+    if (!q) { panel.classList.remove('on'); panel.innerHTML = ''; return; }
+    var terms = q.split(/\s+/);
+    var out = [];
+    for (var i = 0; i < idx.length && out.length < 24; i++) {
+      var e = idx[i];
+      var hay = (e.h + ' ' + e.p + ' ' + e.t).toLowerCase();
+      var ok = true;
+      for (var k = 0; k < terms.length; k++) {
+        if (hay.indexOf(terms[k]) < 0) { ok = false; break; }
+      }
+      if (!ok) continue;
+      var pos = e.t.toLowerCase().indexOf(terms[0]);
+      var snip = pos > 40 ? e.t.slice(pos - 30, pos + 90)
+                          : e.t.slice(0, 110);
+      out.push('<a href="' + e.u + '"><div class="p">' + esc(e.p) +
+               '</div><div class="h">' + esc(e.h) +
+               '</div><div class="s">' + esc(snip) + '</div></a>');
+    }
+    panel.innerHTML = out.length
+      ? out.join('')
+      : '<div class="none">没有匹配的内容</div>';
+    panel.classList.add('on');
+  }
+  box.addEventListener('input', run);
+  box.addEventListener('focus', run);
+  document.addEventListener('click', function (e) {
+    if (!panel.contains(e.target) && e.target !== box) {
+      panel.classList.remove('on');
+    }
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') { panel.classList.remove('on'); box.blur(); }
+  });
+})();
+</script>
+</body>
+</html>

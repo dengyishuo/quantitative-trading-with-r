@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>索引 · 量化金融与R语言</title>
+<meta name="description" content="Quantitative Trading with R 中文翻译稿" />
+<style>
+:root {
+  --bg: #ffffff;
+  --fg: #1f2328;
+  --muted: #6b7280;
+  --line: #e5e7eb;
+  --soft: #f7f8fa;
+  --accent: #0f5c8c;
+  --code-bg: #f6f8fa;
+  --sidebar-w: 288px;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  color: var(--fg);
+  background: var(--bg);
+  font-family: -apple-system, "PingFang SC", "Hiragino Sans GB",
+               "Microsoft YaHei", "Source Han Sans SC", sans-serif;
+  font-size: 16px;
+  line-height: 1.85;
+  -webkit-font-smoothing: antialiased;
+}
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* 侧边栏 */
+.sidebar {
+  position: fixed; inset: 0 auto 0 0; width: var(--sidebar-w);
+  border-right: 1px solid var(--line);
+  background: var(--soft);
+  display: flex; flex-direction: column;
+  overflow: hidden;
+}
+.brand {
+  padding: 22px 20px 14px;
+  border-bottom: 1px solid var(--line);
+}
+.brand .t { font-size: 17px; font-weight: 700; line-height: 1.4; }
+.brand .s { font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.5; }
+.search { padding: 12px 16px; border-bottom: 1px solid var(--line); }
+.search input {
+  width: 100%; padding: 8px 10px; font-size: 13px;
+  border: 1px solid var(--line); border-radius: 6px;
+  background: #fff; color: var(--fg); outline: none;
+}
+.search input:focus { border-color: var(--accent); }
+.nav { flex: 1; overflow-y: auto; padding: 10px 0 40px; }
+.nav .group { padding: 12px 20px 6px; font-size: 11px; font-weight: 700;
+  color: var(--muted); letter-spacing: .08em; }
+.nav a.item {
+  display: block; padding: 7px 20px 7px 20px;
+  font-size: 14px; color: var(--fg); border-left: 3px solid transparent;
+}
+.nav a.item:hover { background: #eef1f5; text-decoration: none; }
+.nav a.item.active {
+  border-left-color: var(--accent); background: #e8eff5;
+  font-weight: 600; color: var(--accent);
+}
+.nav details summary {
+  padding: 7px 20px; font-size: 14px; cursor: pointer; list-style: none;
+}
+.nav details summary::-webkit-details-marker { display: none; }
+.nav details summary:hover { background: #eef1f5; }
+.nav details a.sub {
+  display: block; padding: 4px 20px 4px 34px;
+  font-size: 12.5px; color: var(--muted); line-height: 1.5;
+}
+.nav details a.sub:hover { color: var(--accent); }
+
+/* 正文 */
+.main { margin-left: var(--sidebar-w); }
+.wrap { max-width: 860px; margin: 0 auto; padding: 40px 40px 96px; }
+.crumb { font-size: 12px; color: var(--muted); margin-bottom: 10px; }
+h1 { font-size: 30px; line-height: 1.35; margin: 0 0 26px;
+     font-weight: 700; letter-spacing: .01em; }
+h2 { font-size: 21px; margin: 40px 0 14px; padding-bottom: 8px;
+     border-bottom: 1px solid var(--line); font-weight: 700; }
+h3 { font-size: 17px; margin: 28px 0 10px; font-weight: 700; }
+h4 { font-size: 15px; margin: 22px 0 8px; font-weight: 700; }
+p { margin: 0 0 16px; text-align: justify; }
+p.signature { text-align: right; }
+ul, ol { margin: 0 0 16px; padding-left: 26px; }
+li { margin: 4px 0; }
+img { max-width: 100%; height: auto; display: block; margin: 22px auto;
+      border-radius: 4px; }
+figure { margin: 24px 0; text-align: center; }
+figcaption { font-size: 13px; color: var(--muted); margin-top: 8px; }
+
+code {
+  font-family: "SF Mono", Menlo, Consolas, "Courier New", monospace;
+  font-size: 0.88em; background: var(--code-bg);
+  padding: 2px 5px; border-radius: 4px;
+  border: 1px solid #eaecef;
+}
+pre {
+  background: var(--code-bg); border: 1px solid var(--line);
+  border-radius: 6px; padding: 14px 16px; overflow-x: auto;
+  line-height: 1.6; margin: 0 0 18px;
+}
+pre code { background: none; border: 0; padding: 0; font-size: 12.5px; }
+
+table { border-collapse: collapse; width: 100%; margin: 20px 0;
+        font-size: 14px; }
+th, td { border: 1px solid var(--line); padding: 7px 11px; }
+th { background: var(--soft); font-weight: 700; }
+tr:nth-child(even) td { background: #fcfcfd; }
+
+blockquote { margin: 0 0 18px; padding: 10px 18px;
+  border-left: 3px solid var(--line); color: var(--muted); background: var(--soft); }
+
+/* 插图目录 / 表格目录 */
+.cap-list { list-style: none; padding: 0; margin: 4px 0 0; }
+.cap-list li { border-bottom: 1px solid var(--line); }
+.cap-list a { display: flex; align-items: baseline; gap: 12px;
+  padding: 9px 2px; font-size: 14px; color: var(--fg); }
+.cap-list a:hover { background: var(--soft); text-decoration: none;
+  color: var(--accent); }
+.cap-num { min-width: 68px; color: var(--muted); font-size: 12.5px;
+  font-variant-numeric: tabular-nums; }
+.cap-title { flex: 1; }
+.cap-where { color: var(--muted); font-size: 11.5px; white-space: nowrap; }
+.cap-empty { color: var(--muted); font-size: 14px; }
+
+/* MathML 居中与缩放 */
+math[display="block"] { display: block; margin: 20px auto; font-size: 1.05em; }
+
+/* 页脚翻页 */
+.pager { display: flex; justify-content: space-between; gap: 16px;
+         margin-top: 56px; padding-top: 22px; border-top: 1px solid var(--line); }
+.pager a { flex: 1; padding: 12px 16px; border: 1px solid var(--line);
+           border-radius: 8px; font-size: 13px; }
+.pager a:hover { border-color: var(--accent); text-decoration: none;
+                 background: var(--soft); }
+.pager .dir { display: block; font-size: 11px; color: var(--muted);
+              margin-bottom: 3px; }
+.pager .next { text-align: right; }
+
+/* 首页 */
+.cover { padding: 56px 0 8px; }
+.cover h1 { font-size: 38px; margin-bottom: 8px; }
+.cover .sub { font-size: 15px; color: var(--muted); margin-bottom: 34px; }
+.toc-list { border-top: 1px solid var(--line); }
+.toc-list > li { list-style: none; margin: 0; border-bottom: 1px solid var(--line); }
+.toc-list { padding-left: 0; }
+.toc-row { display: flex; align-items: baseline; gap: 10px;
+           padding: 13px 2px; font-size: 15px; }
+.toc-row .no { color: var(--muted); font-size: 12px; min-width: 26px; }
+.toc-subs { padding: 0 0 12px 36px; margin: 0; }
+.toc-subs li { list-style: none; font-size: 13px; color: var(--muted);
+               padding: 3px 0; }
+
+/* 搜索结果 */
+#hits { display: none; position: absolute; left: 16px; right: 16px; top: 96px;
+        background: #fff; border: 1px solid var(--line); border-radius: 8px;
+        box-shadow: 0 8px 24px rgba(0,0,0,.12); max-height: 60vh;
+        overflow-y: auto; z-index: 50; }
+#hits.on { display: block; }
+#hits a { display: block; padding: 10px 14px; border-bottom: 1px solid var(--line); }
+#hits a:last-child { border-bottom: 0; }
+#hits a:hover { background: var(--soft); text-decoration: none; }
+#hits .h { font-size: 13px; font-weight: 600; color: var(--fg); }
+#hits .p { font-size: 11px; color: var(--accent); margin-bottom: 2px; }
+#hits .s { font-size: 12px; color: var(--muted); line-height: 1.5; }
+#hits .none { padding: 14px; font-size: 13px; color: var(--muted); }
+
+@media (max-width: 900px) {
+  .sidebar { display: none; }
+  .main { margin-left: 0; }
+  .wrap { padding: 24px 20px 72px; }
+  .cover h1 { font-size: 28px; }
+}
+@media print {
+  .sidebar, .pager, .search { display: none; }
+  .main { margin-left: 0; }
+  .wrap { max-width: none; padding: 0; }
+}
+</style>
+</head>
+<body>
+<aside class="sidebar">
+  <div class="brand">
+    <div class="t">量化金融与R语言</div>
+    <div class="s">Quantitative Trading with R 中文翻译稿</div>
+  </div>
+  <div class="search">
+    <input id="q" type="search" placeholder="搜索全书…" autocomplete="off" />
+  </div>
+  <nav class="nav"><div class="group">前言</div><a class="item" href="figures.html">插图目录</a><a class="item" href="tables.html">表格目录</a><a class="item" href="preface.html">译者序</a><a class="item" href="translators.html">译者简介</a><a class="item" href="acknowledgements.html">致谢</a><div class="group">正文</div><a class="item" href="ch01.html">第1章 总览</a><a class="item" href="ch02.html">第2章 交易工具</a><a class="item" href="ch03.html">第3章 与数据打交道</a><a class="item" href="ch04.html">第4章 统计和概率基础</a><a class="item" href="ch05.html">第5章 统计和概率中级</a><a class="item" href="ch06.html">第6章 价格差，贝塔系数和风险</a><a class="item" href="ch07.html">第7章 基于Quantstrat包的回溯测试</a><a class="item" href="ch08.html">第8章 高频数据分析</a><a class="item" href="ch09.html">第9章 期权</a><a class="item" href="ch10.html">第10章 最优化</a><a class="item" href="ch11.html">第11章 速度，测试与报告</a><div class="group">附录</div><a class="item" href="appendix.html">补充</a><a class="item" href="references.html">参考文献</a><a class="item active" href="terms.html">索引</a></nav>
+  <div id="hits"></div>
+</aside>
+<main class="main">
+  <div class="wrap">
+    <div class="crumb">附录</div>
+    <h1>索引</h1>
+<p>abline() 108</p>
+<p>addTA() 66</p>
+<p>addTo() 65, 66</p>
+<p>市集, 251, 265</p>
+<p>算法的, 8, 237<br />
+对齐参数, 128<br />
+alpha透明度参数, 250</p>
+<p>分析, 154, 169, 196<br />
+年化的, 173<br />
+无套利的, 225, 259<br />
+arca交易所, 179<br />
+自回归移动平均模型arima, 117<br />
+数组array, 17<br />
+绘制箭头函数arrows(), 196<br />
+美国标准信息交换代码ascii, 180<br />
+汇编, 12<br />
+自相关性, 91, 106, 115, 117, 188<br />
+自动机, 253<br />
+自回归, 258<br />
+坐标轴标签, 27</p>
+<p>回测, 140<br />
+回测, 129<br />
+回测, 147<br />
+巴塞尔, 137, 257, 265<br />
+贝叶斯, 87, 265<br />
+贝叶斯, 87<br />
+基于贝叶斯定理的, 87, 90, 263<br />
+熊市的, 6<br />
+基准, 144<br />
+最低卖出, 7<br />
+最高买入, 7<br />
+最佳拟合, 106, 120, 121<br />
+最低卖出, 7<br />
+beta系数, 120, 121, 125, 126<br />
+beta系数, 120<br />
+偏差, 76, 77, 81, 138<br />
+biased-coin, 90<br />
+偏差-方差, 81, 90<br />
+买-卖, 6, 183<br />
+大O符号, 253<br />
+Black Scholes模型, 200, 258</p>
+<p>blotter包, 149<br />
+布林线, 66, 67<br />
+布尔型, 15, 34<br />
+border参数, 93<br />
+Brainfuck语言, 13<br />
+分支, 31, 34<br />
+布朗（运动）, 255<br />
+暴力法或穷举法, 222, 223, 224<br />
+牛市, 6<br />
+买入并持有, 143, 144<br />
+收盘价买进？buy-on-close, 157<br />
+买-卖, 145<br />
+byrow参数, 19</p>
+<p>字节（计算机文件大小的基本计算单位）, 191</p>
+<p>微积分, 217, 251, 252<br />
+校准过的, 92<br />
+校准, 95<br />
+看涨期权, 51, 139, 142, 201<br />
+画布, 27, 29<br />
+Cassandra（开源分布式NoSQL数据库系统）, 254</p>
+<p>柯西, 87<br />
+cbind(), 130<br />
+Chicago Board of Trade, CBOT（芝加哥期货交易所）, 200</p>
+<p>chartSeries(), 65<br />
+卡方, 87<br />
+chron包, 255</p>
+<p>点击式交易, 6<br />
+封闭形式的closed-form, 200, 224<br />
+成群集中clustering, 99, 117, 194<br />
+芝加哥商品交易所（ChicagoMercantile Exchange, CME）, 3<br />
+芝加哥商品交易所集团cmegroup, 4, 9, 262<br />
+cmpfun(), 239</p>
+<p>coef(), 128<br />
+协整的, 95, 97, 120, 256, 261<br />
+协整, 120<br />
+投硬币, 87<br />
+矩？co-moment, 149<br />
+可计算的computable, 252<br />
+计算computation, 221, 265<br />
+共轭（梯度）conjugate, 225</p>
+<p>Connors RSI, 162, 263</p>
+<p><strong>Page 270</strong></p>
+<p>控制台, 14, 15<br />
+本期收益, 108, 110<br />
+合约, 5, 91, 199<br />
+收敛, 73, 75<br />
+凸的, 255<br />
+核心团队, 12, 264, 265<br />
+协方差, 95, 104, 138<br />
+cppFunction(), 240, 241<br />
+cummax(), 140, 232<br />
+cumprod(), 160, 235<br />
+cumsum(), 33<br />
+曲线拟合, 225, 236</p>
+<p>数据库, 37, 50<br />
+数据驱动的, 8<br />
+数据过滤的, 183<br />
+数据格式的, 197<br />
+数据处理的, 70, 251<br />
+dbConnect(), 52<br />
+dbDisconnect(), 53<br />
+dbGetQuery(), 53<br />
+dbListTables(), 52<br />
+dbSendQuery(), 53<br />
+delta值（亦，对冲值）, 51</p>
+<p>density密度, 86</p>
+<p>deoptim包, 224, 231, 261</p>
+<p>相关，依赖 dependence, 103, 256<br />
+背离deviance, 101, 102<br />
+偏差，（标准）差deviation, 101, 114<br />
+devtools包, 53</p>
+<p>迪基-福勒单位根检验Dickey-Fuller, 97<br />
+differential-calculus, 251<br />
+digits, 61<br />
+dimnames(), 19<br />
+dnorm(), 100, 188, 192<br />
+dollar-neutral, 120<br />
+包dplyr, 51, 53<br />
+drawdowns, 142, 172, 173</p>
+<p>计量econometric, 117, 147, 264<br />
+E-Mini, 3, 62<br />
+equity-curve-straightness-measures, 142,<br />
+264<br />
+含有变量测量误差的errors-in-variables, 256<br />
+估计量estimator, 76, 77, 78<br />
+Eurex, 4<br />
+欧洲美元eurodollar, 3, 5<br />
+Euronext, 4<br />
+函数EuropeanOption(), 201, 202, 203</p>
+<p>eval(), 220, 221<br />
+表达式, 37, 221<br />
+延展性, 13<br />
+因子，数据类型factors, 21<br />
+Fama-French, 256, 266<br />
+finite-difference, 213<br />
+fixed-income, 225<br />
+fortran, 13, 239<br />
+forward-looking, 137<br />
+框架, 11<br />
+频率学派, 87, 88<br />
+f统计量, 114<br />
+函数式编程, 30, 31, 252<br />
+基金, 7, 8, 143, 149, 178</p>
+<p>gamma, 81, 87, 204<br />
+garch, 117<br />
+Garman-Klass, 82<br />
+高斯gaussian, 72, 73, 86<br />
+几何（平均）-收益率geometric-return, 235<br />
+getOption(), 46<br />
+getPortfolio(), 158, 167<br />
+getSymbols(), 64, 65<br />
+？建议改为包ggplot2, ggplot, 26, 67, 70<br />
+ggvis包, 26</p>
+<p>github, 53, 54, 90, 196<br />
+全局的, 224, 231<br />
+GlobalEnv参数, 65</p>
+<p>Globex（芝加哥电子交易平台）, 3, 4</p>
+<p>grdevices, 11<br />
+？参数组合greeks, 201, 202, 215<br />
+grep(), 152, 210<br />
+g-得分, 143<br />
+gsub(), 168</p>
+<p>hadley, 36, 53, 54, 67, 70, 240, 243,<br />
+254, 262<br />
+head(), 33<br />
+头部信息, 38<br />
+异方差的, 117<br />
+十六进制的, 25<br />
+高频, 5, 6, 177, 188<br />
+highfrequency包, 196</p>
+<p>hist(), 63, 73, 74</p>
+<p>identical(), 48<br />
+ieee, 255</p>
+<p><strong>Page271</strong></p>
+<p>ifelse(), 34<br />
+integrand(), 15<br />
+integrate(), 15<br />
+itermax参数, 234</p>
+<p>javascript（脚本语言）, 47<br />
+詹森不等式, 81, 255, 266<br />
+乔纳森检验, 256<br />
+julia（编程语言）, 13, 14, 253<br />
+just-in-time（及时反应）, 253<br />
+可汗学院, 251<br />
+knitr包, 237, 245, 246</p>
+<p>Kolmogorov（柯尔莫哥洛夫，数学家）, 84, 263<br />
+Kolmogorov Smirnov检验, 101<br />
+KPSS, 97, 98, 99<br />
+lapply(), 202, 240<br />
+latex, 246, 247<br />
+尖峰的, 101<br />
+？是否应为扁峰的platykurtic而非leptokyrtic, 101<br />
+似然度, 83, 84, 88, 102<br />
+locf(), 164<br />
+loess(), 230, 231<br />
+lubridate(), 255</p>
+<p>mariadb数据库管理系统, 54, 254, 261</p>
+<p>markdown（用于文本编辑的标记语言）, 246, 249, 266</p>
+<p>做市商（策略）market-making, 6, 82</p>
+<p>？（策略） market-taking, 6</p>
+<p>马尔科夫链, 90<br />
+matlab软件, 14<br />
+矩阵matrix, 16, 19, 20<br />
+max-drawdown, 143<br />
+MCMC, 90<br />
+mean-reverting, 168<br />
+中位数, 33<br />
+元语言, 246<br />
+microbenchmark(), 238, 241<br />
+微观价格micro-price, 186, 187, 197<br />
+微观结构microstructure, 177, 196, 245, 257<br />
+？买卖均价mid-price, 186, 209<br />
+最小方差, 230<br />
+mmap包, 254</p>
+<p>建模, 90, 117, 200<br />
+模型, 81, 90, 117<br />
+矩, 95, 97, 115, 116, 117<br />
+MonetDB（数据库管理系统）, 54<br />
+MongoDB（一种非关系型数据库）, 254</p>
+<p>munging数据集, 70, 261</p>
+<p>MySQL一种关系型数据库管理系统, 51, 52, 54<br />
+NASDAQ, 4, 179<br />
+Nelder-Mead, 224<br />
+Newton’sMethod, 218, 219, 220<br />
+非凸, 261<br />
+非线性, 109, 113, 195, 197<br />
+非平稳, 98<br />
+NoSQL数据库, 50, 254<br />
+零假设, 256<br />
+NYSE, 4, 9, 179</p>
+<p>Oanda, 65<br />
+面向对象的, 30, 252, 255<br />
+ODBC, 51<br />
+odbcClose(), 52<br />
+odbcConnect(), 51<br />
+开源, 11, 41<br />
+optim(), 224, 230, 236<br />
+可选性, 199<br />
+交易委托账本orderbook, 6, 177, 252, 257<br />
+过拟合, 228, 259<br />
+抛物线, 112, 113, 217<br />
+Parkinson估计量, 82<br />
+被动的, 6, 7<br />
+pdfLatex, 246, 247, 248<br />
+Pearson（皮尔逊相关系数）, 39, 103, 106<br />
+Phillips Ouliaris测试, 256<br />
+platykurtic, 101<br />
+plot(), 26, 27, 28<br />
+plyr包, 53<br />
+pmax(), 142<br />
+多态, 255<br />
+总体, 71, 72, 73<br />
+一种数据库管理系统postgresql, 51, 54<br />
+prcomp(), 121, 123, 124<br />
+主成分, 121, 257, 266<br />
+P值, 102, 103, 256<br />
+python软件, 1, 13, 14, 251</p>
+<p>qqline(), 101<br />
+qqnorm(), 101<br />
+qqplot(), 101, 109<br />
+quadprog包, 231<br />
+二次的, 231<br />
+Quandl数据库, 8<br />
+宽客, 1, 8</p>
+<p><strong>Page272</strong></p>
+<p>四分位数, 45, 102<br />
+量化金融, 13<br />
+Quantlib（金融工程的编程库）, 200, 258</p>
+<p>quantmod包, 46, 56, 65</p>
+<p>quantstrat包, 137, 147, 148, 149, 257</p>
+<p>随机变量, 83, 84, 85, 91, 92<br />
+rbind(), 170, 171<br />
+R博客聚合平台r-bloggers, 50, 262<br />
+rCharts包, 26</p>
+<p>RDBMS（关系型数据库管理系统）, 254</p>
+<p>reChart(), 65<br />
+Redis数据库, 254</p>
+<p>regexpr(), 37<br />
+回归, 106, 107, 112<br />
+正则化, 259<br />
+残差, 108, 120, 225<br />
+RInside包, 237, 242</p>
+<p>RJSONIO包, 47</p>
+<p>rmarkdown包, 262</p>
+<p>RMySQL包, 51, 52</p>
+<p>rnorm(), 33, 73<br />
+稳健, 103, 149, 219, 256<br />
+RODBC包, 51, 52</p>
+<p>rollapply(), 128<br />
+RQuantLib包, 200, 201, 213</p>
+<p>RStan包, 90, 265</p>
+<p>RStudio, 237, 250<br />
+Rtools, 240, 259<br />
+Ruby, 200<br />
+RUnit包, 243</p>
+<p>样本, 72, 73, 255<br />
+sapply(), 210<br />
+saveRDS(), 48<br />
+SciDB（一个股票数据库）, 258<br />
+脚本, 11, 246, 251<br />
+Shapiro-Wilks（夏皮罗-维尔克斯）, 101, 103</p>
+<p>夏普（比率）sharpe, 139, 140</p>
+<p>缩水率shrinkage, 259</p>
+<p>偏度, 256</p>
+<p>滑点, 148<br />
+sort(), 33, 170<br />
+索提诺（比率）Sortino, 141<br />
+sourceCpp(), 240, 242<br />
+平滑曲线, 230</p>
+<p>S-Plus软件, 262</p>
+<p>价差beta, spread-beta, 120</p>
+<p>价差交易, spread-trading, 145</p>
+<p>SQLite数据库, 54</p>
+<p>稳态, 91, 95, 97, 98, 117<br />
+随机的, 91, 117, 231, 235<br />
+限价停损, 157<br />
+止损, 157<br />
+直线度, 142, 264<br />
+stringsAsFactors参数, 21</p>
+<p>strptime(), 61<br />
+substr(), 206<br />
+summary(), 33, 45<br />
+Swift开发语言, 13</p>
+<p>switch(), 34</p>
+<p>testtaht包, 237, 243, 250<br />
+theta参数, 201<br />
+分笔股票交易数据tick-data, 196, 197, 257<br />
+含分笔股票交易信息的数据库tick-databases, 258<br />
+整理, 53, 55, 262<br />
+Ulcer Index（溃疡指数）, 142, 267<br />
+无偏性, 76, 90<br />
+uniroot(), 219, 220<br />
+unlist(), 74, 76, 78, 79<br />
+包urca, 98, 99</p>
+<p>向量化, 18, 20<br />
+VPIN（同步交易量知情交易概率), 195, 262, 267<br />
+xlconnect包, 49, 262</p>
+<p>YAML（另一种标记语言）, 47, 48 </p>
+
+    <div class="pager"><a class="prev" href="references.html"><span class="dir">上一页</span>参考文献</a></div>
+  </div>
+</main>
+<script>
+(function () {
+  var box = document.getElementById('q');
+  var panel = document.getElementById('hits');
+  if (!box) return;
+  var idx = [];
+  fetch('search-index.json')
+    .then(function (r) { return r.json(); })
+    .then(function (d) { idx = d; })
+    .catch(function () {});
+
+  function esc(s) {
+    return s.replace(/[&<>"]/g, function (c) {
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];
+    });
+  }
+  function run() {
+    var q = box.value.trim().toLowerCase();
+    if (!q) { panel.classList.remove('on'); panel.innerHTML = ''; return; }
+    var terms = q.split(/\s+/);
+    var out = [];
+    for (var i = 0; i < idx.length && out.length < 24; i++) {
+      var e = idx[i];
+      var hay = (e.h + ' ' + e.p + ' ' + e.t).toLowerCase();
+      var ok = true;
+      for (var k = 0; k < terms.length; k++) {
+        if (hay.indexOf(terms[k]) < 0) { ok = false; break; }
+      }
+      if (!ok) continue;
+      var pos = e.t.toLowerCase().indexOf(terms[0]);
+      var snip = pos > 40 ? e.t.slice(pos - 30, pos + 90)
+                          : e.t.slice(0, 110);
+      out.push('<a href="' + e.u + '"><div class="p">' + esc(e.p) +
+               '</div><div class="h">' + esc(e.h) +
+               '</div><div class="s">' + esc(snip) + '</div></a>');
+    }
+    panel.innerHTML = out.length
+      ? out.join('')
+      : '<div class="none">没有匹配的内容</div>';
+    panel.classList.add('on');
+  }
+  box.addEventListener('input', run);
+  box.addEventListener('focus', run);
+  document.addEventListener('click', function (e) {
+    if (!panel.contains(e.target) && e.target !== box) {
+      panel.classList.remove('on');
+    }
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') { panel.classList.remove('on'); box.blur(); }
+  });
+})();
+</script>
+</body>
+</html>

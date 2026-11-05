@@ -1,0 +1,11 @@
+# 公开仓库采用白名单，只发布电子书、代码、示例数据和 README。
+*
+!.gitignore
+!README.md
+!docs/
+!docs/**
+!code/
+!code/**
+!data/
+!data/**
+

@@ -1,0 +1,1106 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>第3章 与数据打交道 · 量化金融与R语言</title>
+<meta name="description" content="Quantitative Trading with R 中文翻译稿" />
+<style>
+:root {
+  --bg: #ffffff;
+  --fg: #1f2328;
+  --muted: #6b7280;
+  --line: #e5e7eb;
+  --soft: #f7f8fa;
+  --accent: #0f5c8c;
+  --code-bg: #f6f8fa;
+  --sidebar-w: 288px;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  color: var(--fg);
+  background: var(--bg);
+  font-family: -apple-system, "PingFang SC", "Hiragino Sans GB",
+               "Microsoft YaHei", "Source Han Sans SC", sans-serif;
+  font-size: 16px;
+  line-height: 1.85;
+  -webkit-font-smoothing: antialiased;
+}
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* 侧边栏 */
+.sidebar {
+  position: fixed; inset: 0 auto 0 0; width: var(--sidebar-w);
+  border-right: 1px solid var(--line);
+  background: var(--soft);
+  display: flex; flex-direction: column;
+  overflow: hidden;
+}
+.brand {
+  padding: 22px 20px 14px;
+  border-bottom: 1px solid var(--line);
+}
+.brand .t { font-size: 17px; font-weight: 700; line-height: 1.4; }
+.brand .s { font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.5; }
+.search { padding: 12px 16px; border-bottom: 1px solid var(--line); }
+.search input {
+  width: 100%; padding: 8px 10px; font-size: 13px;
+  border: 1px solid var(--line); border-radius: 6px;
+  background: #fff; color: var(--fg); outline: none;
+}
+.search input:focus { border-color: var(--accent); }
+.nav { flex: 1; overflow-y: auto; padding: 10px 0 40px; }
+.nav .group { padding: 12px 20px 6px; font-size: 11px; font-weight: 700;
+  color: var(--muted); letter-spacing: .08em; }
+.nav a.item {
+  display: block; padding: 7px 20px 7px 20px;
+  font-size: 14px; color: var(--fg); border-left: 3px solid transparent;
+}
+.nav a.item:hover { background: #eef1f5; text-decoration: none; }
+.nav a.item.active {
+  border-left-color: var(--accent); background: #e8eff5;
+  font-weight: 600; color: var(--accent);
+}
+.nav details summary {
+  padding: 7px 20px; font-size: 14px; cursor: pointer; list-style: none;
+}
+.nav details summary::-webkit-details-marker { display: none; }
+.nav details summary:hover { background: #eef1f5; }
+.nav details a.sub {
+  display: block; padding: 4px 20px 4px 34px;
+  font-size: 12.5px; color: var(--muted); line-height: 1.5;
+}
+.nav details a.sub:hover { color: var(--accent); }
+
+/* 正文 */
+.main { margin-left: var(--sidebar-w); }
+.wrap { max-width: 860px; margin: 0 auto; padding: 40px 40px 96px; }
+.crumb { font-size: 12px; color: var(--muted); margin-bottom: 10px; }
+h1 { font-size: 30px; line-height: 1.35; margin: 0 0 26px;
+     font-weight: 700; letter-spacing: .01em; }
+h2 { font-size: 21px; margin: 40px 0 14px; padding-bottom: 8px;
+     border-bottom: 1px solid var(--line); font-weight: 700; }
+h3 { font-size: 17px; margin: 28px 0 10px; font-weight: 700; }
+h4 { font-size: 15px; margin: 22px 0 8px; font-weight: 700; }
+p { margin: 0 0 16px; text-align: justify; }
+p.signature { text-align: right; }
+ul, ol { margin: 0 0 16px; padding-left: 26px; }
+li { margin: 4px 0; }
+img { max-width: 100%; height: auto; display: block; margin: 22px auto;
+      border-radius: 4px; }
+figure { margin: 24px 0; text-align: center; }
+figcaption { font-size: 13px; color: var(--muted); margin-top: 8px; }
+
+code {
+  font-family: "SF Mono", Menlo, Consolas, "Courier New", monospace;
+  font-size: 0.88em; background: var(--code-bg);
+  padding: 2px 5px; border-radius: 4px;
+  border: 1px solid #eaecef;
+}
+pre {
+  background: var(--code-bg); border: 1px solid var(--line);
+  border-radius: 6px; padding: 14px 16px; overflow-x: auto;
+  line-height: 1.6; margin: 0 0 18px;
+}
+pre code { background: none; border: 0; padding: 0; font-size: 12.5px; }
+
+table { border-collapse: collapse; width: 100%; margin: 20px 0;
+        font-size: 14px; }
+th, td { border: 1px solid var(--line); padding: 7px 11px; }
+th { background: var(--soft); font-weight: 700; }
+tr:nth-child(even) td { background: #fcfcfd; }
+
+blockquote { margin: 0 0 18px; padding: 10px 18px;
+  border-left: 3px solid var(--line); color: var(--muted); background: var(--soft); }
+
+/* 插图目录 / 表格目录 */
+.cap-list { list-style: none; padding: 0; margin: 4px 0 0; }
+.cap-list li { border-bottom: 1px solid var(--line); }
+.cap-list a { display: flex; align-items: baseline; gap: 12px;
+  padding: 9px 2px; font-size: 14px; color: var(--fg); }
+.cap-list a:hover { background: var(--soft); text-decoration: none;
+  color: var(--accent); }
+.cap-num { min-width: 68px; color: var(--muted); font-size: 12.5px;
+  font-variant-numeric: tabular-nums; }
+.cap-title { flex: 1; }
+.cap-where { color: var(--muted); font-size: 11.5px; white-space: nowrap; }
+.cap-empty { color: var(--muted); font-size: 14px; }
+
+/* MathML 居中与缩放 */
+math[display="block"] { display: block; margin: 20px auto; font-size: 1.05em; }
+
+/* 页脚翻页 */
+.pager { display: flex; justify-content: space-between; gap: 16px;
+         margin-top: 56px; padding-top: 22px; border-top: 1px solid var(--line); }
+.pager a { flex: 1; padding: 12px 16px; border: 1px solid var(--line);
+           border-radius: 8px; font-size: 13px; }
+.pager a:hover { border-color: var(--accent); text-decoration: none;
+                 background: var(--soft); }
+.pager .dir { display: block; font-size: 11px; color: var(--muted);
+              margin-bottom: 3px; }
+.pager .next { text-align: right; }
+
+/* 首页 */
+.cover { padding: 56px 0 8px; }
+.cover h1 { font-size: 38px; margin-bottom: 8px; }
+.cover .sub { font-size: 15px; color: var(--muted); margin-bottom: 34px; }
+.toc-list { border-top: 1px solid var(--line); }
+.toc-list > li { list-style: none; margin: 0; border-bottom: 1px solid var(--line); }
+.toc-list { padding-left: 0; }
+.toc-row { display: flex; align-items: baseline; gap: 10px;
+           padding: 13px 2px; font-size: 15px; }
+.toc-row .no { color: var(--muted); font-size: 12px; min-width: 26px; }
+.toc-subs { padding: 0 0 12px 36px; margin: 0; }
+.toc-subs li { list-style: none; font-size: 13px; color: var(--muted);
+               padding: 3px 0; }
+
+/* 搜索结果 */
+#hits { display: none; position: absolute; left: 16px; right: 16px; top: 96px;
+        background: #fff; border: 1px solid var(--line); border-radius: 8px;
+        box-shadow: 0 8px 24px rgba(0,0,0,.12); max-height: 60vh;
+        overflow-y: auto; z-index: 50; }
+#hits.on { display: block; }
+#hits a { display: block; padding: 10px 14px; border-bottom: 1px solid var(--line); }
+#hits a:last-child { border-bottom: 0; }
+#hits a:hover { background: var(--soft); text-decoration: none; }
+#hits .h { font-size: 13px; font-weight: 600; color: var(--fg); }
+#hits .p { font-size: 11px; color: var(--accent); margin-bottom: 2px; }
+#hits .s { font-size: 12px; color: var(--muted); line-height: 1.5; }
+#hits .none { padding: 14px; font-size: 13px; color: var(--muted); }
+
+@media (max-width: 900px) {
+  .sidebar { display: none; }
+  .main { margin-left: 0; }
+  .wrap { padding: 24px 20px 72px; }
+  .cover h1 { font-size: 28px; }
+}
+@media print {
+  .sidebar, .pager, .search { display: none; }
+  .main { margin-left: 0; }
+  .wrap { max-width: none; padding: 0; }
+}
+</style>
+</head>
+<body>
+<aside class="sidebar">
+  <div class="brand">
+    <div class="t">量化金融与R语言</div>
+    <div class="s">Quantitative Trading with R 中文翻译稿</div>
+  </div>
+  <div class="search">
+    <input id="q" type="search" placeholder="搜索全书…" autocomplete="off" />
+  </div>
+  <nav class="nav"><div class="group">前言</div><a class="item" href="figures.html">插图目录</a><a class="item" href="tables.html">表格目录</a><a class="item" href="preface.html">译者序</a><a class="item" href="translators.html">译者简介</a><a class="item" href="acknowledgements.html">致谢</a><div class="group">正文</div><a class="item" href="ch01.html">第1章 总览</a><a class="item" href="ch02.html">第2章 交易工具</a><details open><summary><a class="item active" style="display:inline;padding:0;border:0" href="ch03.html">第3章 与数据打交道</a></summary><a class="sub" href="ch03.html#数据导入">数据导入</a><a class="sub" href="ch03.html#r包安装">R包安装</a><a class="sub" href="ch03.html#数据储藏和传输">数据储藏和传输</a><a class="sub" href="ch03.html#从表单提取数据">从表单提取数据</a><a class="sub" href="ch03.html#数据库登录">数据库登录</a><a class="sub" href="ch03.html#dplyr包">dplyr包</a><a class="sub" href="ch03.html#使用xts包">使用xts包</a><a class="sub" href="ch03.html#使用quantmod包">使用quantmod包</a><a class="sub" href="ch03.html#quantmod包与图表">quantmod包与图表</a><a class="sub" href="ch03.html#用ggplot2包绘图">用ggplot2包绘图</a><a class="sub" href="ch03.html#总结">总结</a></details><a class="item" href="ch04.html">第4章 统计和概率基础</a><a class="item" href="ch05.html">第5章 统计和概率中级</a><a class="item" href="ch06.html">第6章 价格差，贝塔系数和风险</a><a class="item" href="ch07.html">第7章 基于Quantstrat包的回溯测试</a><a class="item" href="ch08.html">第8章 高频数据分析</a><a class="item" href="ch09.html">第9章 期权</a><a class="item" href="ch10.html">第10章 最优化</a><a class="item" href="ch11.html">第11章 速度，测试与报告</a><div class="group">附录</div><a class="item" href="appendix.html">补充</a><a class="item" href="references.html">参考文献</a><a class="item" href="terms.html">索引</a></nav>
+  <div id="hits"></div>
+</aside>
+<main class="main">
+  <div class="wrap">
+    <div class="crumb">正文</div>
+    <h1>第3章 与数据打交道</h1>
+<p>金融数据以多种形式和大小规模存在。本书中，我们将主要关注特定类别的财务数据，即时间序列数据。时间序列数据包含一个时间成分，主要用作索引（键），来确定其他有意义的值。你也可以想象时间序列数据是一组键—值组合，其中键为时间，值为单一记录或一组记录。下表以苹果公司股票（AAPL）为例，展示了典型的日度时间序列数据长什么样子。.csv格式的原始数据下载于雅虎网站。</p>
+<p>第一列为日期，其他列包含价格和成交量信息。现在我们把刚刚下载好的数据导入到R里。</p>
+<h2 id="数据导入">数据导入</h2>
+<p>首先，我们扫一眼苹果公司股票日度收盘价数据。这里介绍一种简单的从表格获取数据到R环境的方法。打开.csv文件，复制收盘价一列，然后在R里输入下列命令：</p>
+<pre><code># 在windows电脑中
+aapl &lt;- read.table(&quot;clipboard&quot;)
+# 在Mac/Linux中
+aapl &lt;- read.table(pipe(&quot;pbpaste&quot;))</code></pre>
+<p>这样，剪贴板上的内容就被读入到一个名为aapl的变量。使用head()命令查看此变量的前几个记录。</p>
+<pre><code>head(aapl)</code></pre>
+<p><img src="media/fig-03-01.png" style="width:4.45000in;height:1.74333in" alt="图3.1" /></p>
+<p id="fig-3-1"><strong>图3.1</strong> 苹果股价的时间序列</p>
+<p><code>aapl</code>是哪种类型的对象呢？它是一个矩阵？列表？数据框？</p>
+<pre><code>class(aapl)</code></pre>
+<p>看来<code>aapl</code>对象实际上是一个数据框。我们也注意到，R还对提取的数据列提供了名称（V1）。进一步查看后，发现打印出的数据是倒序的。这可以通过将原始表格重新按顺序排列，或反转这个刚刚创建的<code>aapl</code>对象得到修复。这里给出实现后者的方法：</p>
+<pre><code>aapl &lt;- aapl[rev(rownames(aapl)), , drop = FALSE]</code></pre>
+<p><code>rev()</code>命令像我们预期的那样反转了记录。这一句的语法有点令人犯晕。它其实是告诉R，反转数据框aapl的每行记录，并保留原来对象的结构。参数<code>drop = FALSE</code>避免数据框降级为向量。</p>
+<p>为了提取和可视化价格的原始向量，我们进行下面操作：</p>
+<pre><code>prices &lt;- aapl$V1
+plot(prices, main = &quot;AAPL plot&quot;, type = &#39;l&#39;)</code></pre>
+<p>函数<code>read.table()</code>和<code>read.csv()</code>有很多可选参数，使得读入数据变得轻而易举。除了复制收盘价数据列搭配“clipboard”命令，我们还可以选择指明待分析的数据文件的存放路径进行读物。敲入<code>?read.csv</code>命令查看可供使用的所有参数。</p>
+<p><img src="media/fig-03-02.png" style="width:3.16667in;height:1.95333in" alt="图3.2" /></p>
+<p id="fig-3-2"><strong>图3.2</strong> 简单股票曲线图</p>
+<pre><code># 加载.csv 文件
+aapl_2 &lt;- read.csv(file = &quot;Chapter_03/aapl.csv&quot;, header = TRUE, stringsAsFactors = FALSE)
+
+# 倒转行元素
+aapl_2 &lt;- aapl_2[rev(rownames(aapl_2)), ]</code></pre>
+<p>这一次，通过指出输入文件中的第一行为表头，R会通过变量名提取出每一列，如果我们想要提取收盘价，，可以键入如下代码：</p>
+<pre><code>aapl_close &lt;- aapl_2[, &quot;Close&quot;]</code></pre>
+<p>我们用函数<code>summary()</code>快速得到表格形式的汇总统计量。</p>
+<pre><code>summary(aapl_close)</code></pre>
+<p>函数<code>summary()</code>生成均值、中位数、第一、第三分位数，以及缺失值（NA）信息。面对新的数据集，汇总和可视化总是分析前的一个步骤。很多时候，汇总统计量就能帮助发现数据的结构性问题。</p>
+<h2 id="r包安装">R包安装</h2>
+<p>大多数你关心的功能很可能已经被别人开发成了函数。在R社区里，利用他人的劳动成果会受到鼓励。如果某个功能函数已经存在而且运行良好，就没有必要重复造轮子。包或者库是指捆绑在一起的函数（通常为R，C++，C或Fortran代码）、数据和关于一个主题的支持文档。特定主题的列表详见<code>CRAN Task Views</code>网站：<code>cran.r-project.org/web/views/</code>。一些组织机构也会写供内部使用而不外传的R包。如果想了解如何编写自己的R包，下面这些参考信息提供了不错的入门资料。</p>
+<p>我们待会儿要用的包叫<strong>quantmod</strong>，作者为Jeffrey Ryan，它可以方便我们直观地操作金融时间序列数据。</p>
+<p>安装<strong>quantmod</strong>时，首先打开R控制台，输入下面命令：<code>install.packages("quantmod")</code>。注意包名字两侧的引号。函数<code>install.packages()</code> <code>的</code>全部参数如下：</p>
+<pre><code>install.packages(pkgs, lib, repos = getOption(&quot;repos&quot;),
+contriburl = contrib.url(repos, type),
+method, available = NULL, destdir = NULL,
+dependencies = NA, type = getOption(&quot;pkgType&quot;),
+configure.args = getOption(&quot;configure.args&quot;),
+configure.vars = getOption(&quot;configure.vars&quot;),
+clean = FALSE, Ncpus = getOption(&quot;Ncpus&quot;, 1L),
+verbose = getOption(&quot;verbose&quot;),
+libs_only = FALSE, INSTALL_opts, quiet = FALSE,
+keep_outputs = FALSE, ...)</code></pre>
+<p>安装过程中，<strong>quantmod</strong>自动载入它依赖的包。如果和互联网连接，R会把下载的包存放在某个默认文件夹中。该文件夹位置可以通过<code>lib</code>参数指定。</p>
+<p>安装是一回事，加载使用则是另一回事。安装只发生一次，但加载在每次调用脚本时就会发生。函数<code>library()</code>或<code>require()</code> <code>可以</code>将程序包载入R环境。大部分时候它们没什么差别。</p>
+<h2 id="数据储藏和传输">数据储藏和传输</h2>
+<p>着手分析前，我们必须明白怎样高效地储存和索取数据。有很多种方式完成两种目标。就存储而言，一些常用的媒介形式有：</p>
+<ul>
+<li>逗号分隔文件（.csv）</li>
+<li>Excel表格（.xls或.xlsx）</li>
+<li>关系型数据库</li>
+</ul>
+<p>剩下就不展开了。掌握上面几种格式的文件存取，对于90%我们感兴趣的任务已经绰绰有余。</p>
+<p>而说到在电脑间传输（也涉及储存）文件，.json数据格式非常流行。 JSON是Javascript Object Notation的字母缩写，它使用人类易读的键-值范式来储存信息。</p>
+<p>一个简单的.json文件可能长这样：</p>
+<pre><code>{
+&quot;CVX&quot;:
+{
+&quot;Currency&quot;: &quot;USD&quot;,
+&quot;Sector&quot;: &quot;Basic Materials&quot;,
+&quot;Industry&quot;: &quot;Major Integrated Oil &amp; Gas&quot;
+},
+&quot;GOOG&quot;:
+{
+&quot;Currency&quot;: &quot;USD&quot;,
+&quot;Sector&quot;: &quot;Technology&quot;,
+&quot;Industry&quot;: &quot;Internet Information Providers&quot;
+}
+}</code></pre>
+<p>该文件被存放在本地，然后通过RJSONIO包解析成list对象。</p>
+<pre><code># 安装和加载所需包
+install.packages(&quot;RJSONIO&quot;)
+library(RJSONIO)
+# 读取数据文件 
+out &lt;- fromJSON(content = &quot;path/sample_json_file.json&quot; )
+# 检视结果对象的结构str(out)
+## List of 2
+## $ CVX : Named chr [1:3] &quot;USD&quot; &quot;Basic Materials...
+## ..- attr(*, &quot;names&quot;)= chr [1:3] &quot;Currency&quot;...
+## $ GOOG: Named chr [1:3] &quot;USD&quot; &quot;Technology&quot;...
+## ..- attr(*, &quot;names&quot;)= chr [1:3] &quot;Currency&quot;...</code></pre>
+<p>另一种可以编码，以及在不同应用间传输的好用格式是XML（Extensible Markup Language）。YAML是第三种选择。YAML是YAML Ain’t Markup Language的递归缩写。这些格式的思路大体相似，都采取肉眼可读的数据编码形式。解析XML和YAML文件的R包分别叫XML和 yaml。</p>
+<p>将数据保存为.rdata或.rds可以获得压缩格式的文件。在R中，这可以通过save()和saveRDS()命令来完成。二者将底层数据对象转换为二进制（binary）格式。相应地，可以通过load()和readRDS()命令将压缩文件加载回到R环境中。实际上，用于文件名的后缀可以是任意的。使用.rdata和.rds的只是为了清晰显示和遵从惯例。</p>
+<p>为方便比较，我们将之前从雅虎（Yahoo）读取的苹果股票数据保存为.csv文件并查询其大小。</p>
+<pre><code>write.csv(aapl_2, file = &quot;path/aapl_2.csv&quot;)</code></pre>
+<p>该文件在磁盘上为455 KB。</p>
+<pre><code>save(aapl_2, file = &quot;path/aapl_2.rdata&quot;)</code></pre>
+<p>通过将原始数据框保存为二进制对象，该文件现在只有164KB大小。压缩前大概是压缩后的2.5倍。为了验证压缩不改变数据对象本身，我们可以将保存的版本加载回内存并与.csv版本进行比较。由于save()命令将所有内容都载入主环境，我们将不得不重新命名旧文件，以免覆盖它。saveRDS()可以达到同样效果。将旧对象赋予一个新的变量，并删除旧变量。</p>
+<pre><code>aapl_old &lt;- aapl_2
+rm(aapl_2)
+load(file = &quot;path/aapl_2.rdata&quot;)</code></pre>
+<p>identical()命令用于检查对象是否一致。</p>
+<pre><code>identical(aapl_old, aapl_2)
+## [1] TRUE</code></pre>
+<p>我们应当尽可能地使用这些二进制R对象。这里的妥协是不同语言框架之间数据的可移植性。许多应用程序已经使用.csv和.json格式。但是，只有R用户，使用R序列化文件。</p>
+<h2 id="从表单提取数据">从表单提取数据</h2>
+<p>表格在金融领域随处可见。交易员、会计师、宽客以及其他各类专业人员依靠表格来管理金融工具组合，跟踪会计指标并进行量化分析。</p>
+<p><img src="media/fig-03-03.png" style="width:2.93333in;height:0.95333in" alt="图3.3" /></p>
+<p id="fig-3-3"><strong>图3.3</strong> 表单signals示例</p>
+<p><img src="media/fig-03-04.png" style="width:3.75667in;height:2.86667in" alt="图3.4" /></p>
+<p id="fig-3-4"><strong>图3.4</strong> 表单strength示例</p>
+<p><code>XLConnect</code>包提供了不依赖平台的Excel的接口是我们能够将数据读入成熟悉的R数据框[33]。根据开发者网站的介绍<a href="http://www.mirai-solutions.com/，XLConnect包" class="uri">http://www.mirai-solutions.com/，XLConnect包</a>完全免费，无需任何注册或其他附加条件。你甚至不需要为了使用包里的函数而专门安装Microsoft Excel。只需要安装最新版本的Java运行环境（JRE）。为了描述该包的功能，我们使用一个.xlsx工作簿，内有2个工作表。第一张表名为signals，第二张为strength。工作簿命名为strategy.xlsx。</p>
+<pre><code>library(XLConnect)
+
+# 创建一个工作簿对象
+book &lt;- loadWorkbook(&quot;Chapter_03/strategy.xlsx&quot;)
+
+# 将其转换成数据框格式
+signals &lt;- readWorksheet(book, sheet = &quot;signals&quot;, header = TRUE)
+
+signals
+##     time signal1 signal2
+## 1 08:30:00  0.43   -0.20
+## 2 08:31:00  0.54    0.33
+## 3 08:32:00  0.32   -0.21
+
+strength &lt;- readWorksheet(book, sheet = &quot;strength&quot;, header = TRUE)
+
+strength
+## intensity score
+## 1 2 7.5
+## 2 3 8.4
+## 3 6 5.4</code></pre>
+<p>也可以创建一个工作簿，用R导入数据。</p>
+<pre><code># 创建一个新的工作表
+book &lt;- loadWorkbook(&quot;demo_sheet.xlsx&quot;, create = TRUE)
+
+# 创建一个名为stock1的工作表
+createSheet(book, name = &quot;stock1&quot;)
+
+# 创建一个名为stock2的工作表C 
+createSheet(book, name = &quot;stock2&quot;)
+
+# 将数据载入工作簿
+df &lt;- data.frame(a = c(1, 2, 3), b = c(4, 5, 6))
+writeWorksheet (book, data=df, sheet=&quot;stock1&quot;, header = TRUE)
+
+# 保存该工作簿
+saveWorkbook(book, file = &quot;Chapter_03/demo_sheet.xlsx&quot;)</code></pre>
+<p>如果想了解更多关于如何在R中操作Excel文件，可以详读Nicola Sturaro Sommacal的博客文章<a href="http://www.r-bloggers.com/read-excel-files-from-r/" class="uri">http://www.r-bloggers.com/read-excel-files-from-r/</a>。</p>
+<h2 id="数据库登录">数据库登录</h2>
+<p>交易员或宽客时不时需要与数据库打交道，不是提取就是存入数据。数据库，尤其与金融和交易相关的，大部分本质上为关系型。近年来崛起的数据库还有NoSQL系列。有一些R函数，可以登录关系型和NoSQL型的数据库。数据库是一种存储介质，为快速、可扩展的存储和检索数据提供额外的功能。许多数据库都有特定的查询语句。SQL是其中一例。SQL是结构化查询语言的简称。SQL形式的数据库形式多样。表3.1中列出了一些常用的。</p>
+<p id="tab-3-1">表3.1 主要关系型数据库</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">Oracle</th>
+<th style="text-align: center;">www.oracle.com/database</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">MySQL</td>
+<td style="text-align: center;">www.mysql.com</td>
+</tr>
+<tr>
+<td style="text-align: center;">Microsoft SQL Server</td>
+<td style="text-align: center;">www.microsoft.com/sql-server</td>
+</tr>
+<tr>
+<td style="text-align: center;">PostgreSQL</td>
+<td style="text-align: center;">www.postgresql.com</td>
+</tr>
+<tr>
+<td style="text-align: center;">Microsoft Access</td>
+<td style="text-align: center;">www.office.microsoft.com/en-us/access</td>
+</tr>
+<tr>
+<td style="text-align: center;">DB2</td>
+<td style="text-align: center;">www.ibm.com/software/data/db2</td>
+</tr>
+</tbody>
+</table>
+<p>下面一个例子中，我们从MySQL数据库中提取数据。构造和填充一个数据库不在本书讨论范围。注释8解释了怎样着手设置一个数据库。本例假设一个MySQL数据库已经存在，而且已经存有数据。</p>
+<p>我们会探讨三种在R里登录MySQL数据的方式。第一种方法使用RODBC包，第二种用RMySQL包，第三种探索使用dplyr包。</p>
+<p>RODBC包是开放式数据库连接（ODBC）编程界面的一个R接口。界面允许第三方应用通过SQL调用，与关系型数据库无缝连接和操纵数据。在Windows平台上，在ODBC数据源管理器菜单上设定注册数据源名字。一旦安装MySQL驱动，确定名字，我们可以使用命令odbcConnect()来建立MySQL数据库实例的一个连接。一个 MySQL实例可以由多个数据库组成，每个相应地有一个或以上表格。表中每行可视为单独的一个记录。这样的表中的每一列称为一个字段。我用作示范的数据库名为OptionsData，它包括一个叫做ATMVolatilities的表格。该表中包括几只股票的虚拟的隐含波动率估计。表中的字段是期权代号，期权到期日，离到期日的天数，期权的delta值（不区分看涨或看跌期权），以及每一个期权的隐含波动率值。</p>
+<pre><code># 加载RODBC 包
+require(RODBC)
+
+# 创建一个MySQL连接
+con &lt;- odbcConnect(&quot;rfortraders&quot;)
+
+# 选择数据库和数据表名称
+database_name &lt;- &quot;OptionsData&quot;
+table_name &lt;- &quot;ATMVolatilities&quot;
+symbol &lt;- &quot;SPY&quot;
+
+sql_command &lt;- paste0(&quot;SELECT Symbol, Date, Maturity,
+  Delta, CallPut, ImpliedVolatility
+  FROM &quot;, database_name, &quot;.&quot;, table_name,
+  &quot; WHERE Maturity = 91
+  AND Symbol IN (&#39;&quot;, symbol, &quot;&#39;);&quot;)
+
+iv &lt;- sqlQuery(con, sql_command)
+
+# 断开与数据库的连接
+odbcClose(con)</code></pre>
+<p>上面的SQL查询提取出了任意一段时间内，SPY和ETF的91天到期期权隐含波动率。输出结果大致如下：</p>
+<pre><code>head(iv)
+## Symbol Date Maturity Delta CallPut ImpliedVolatility
+## SPY 6/9/2014       91    55       C          0.115925
+## SPY 6/9/2014       91    60       C          0.119577
+## SPY 6/9/2014       91    65       C          0.123468
+## SPY 6/9/2014       91    70       C          0.127629
+## SPY 6/9/2014       91    75       C          0.132094
+## SPY 6/9/2014       91    80       C          0.136776</code></pre>
+<p>RMySQL包的功能与RODBC类似，却只服务MySQL数据库。比起RODBC，许多使用MySQL的从业者更青睐RMySQL。下面一段代码，建立本机实例的一个连接，将数据提取到数据框格式，然后关闭连接：</p>
+<pre><code># 载入必要的包 
+require(RMySQL)
+
+# 建立一个连接
+con &lt;- dbConnect(MySQL(), user=&quot;your_login&quot;,
+password=&quot;your_password&quot;,
+dbname=&quot;OptionsData&quot;,
+host=&quot;location_of_database&quot;)
+
+# 列出其中表和字段
+dbListTables(con)
+
+# 定义查询命令提取数据
+sql_command &lt;- paste0(&quot;SELECT Symbol, Date, Maturity,
+Delta, CallPut, ImpliedVolatility FROM &quot;,
+database_name, &quot;.&quot;, table_name,
+&quot; WHERE Maturity = 91
+AND Symbol IN (&#39;&quot;, symbol, &quot;&#39;);&quot;)
+
+result &lt;- dbGetQuery(con, sql_command)
+
+# 关闭连接
+dbDisconnect(con)</code></pre>
+<p>如果数据量太大，也可以分段分块地提取表。</p>
+<pre><code>results &lt;- dbSendQuery(con, sql_command)
+partial_results &lt;- fetch(results, n = 100)</code></pre>
+<h2 id="dplyr包">dplyr包</h2>
+<p>dplyr 包是 Hadley Wickham 和Romain Francois的另一个贡献[45，44]。它由上一代的plyr 包进化而来，plyr也非常受欢迎。最新的 dplyr提供处理R数据框的有效方法。名称中的d代表数据框。dplyr 的开发凝结了大量的思考，大多数运行比较耗时的代码成分都直接由C++实现。（我）希望看到 R 用户迁移到dplyr完成各种各样的数据操作任务。该包源代码目前托管在 github上︰<a href="https://github.com/hadley/dplyr。下载CRAN版本或" class="uri">https://github.com/hadley/dplyr。下载CRAN版本或</a> github上的最新开发版本来安装dplyr均可︰</p>
+<pre><code># 获取CRAN版本
+install.packages(&quot;dplyr&quot;)
+require(dplyr)
+# 或者先加载devtools包
+install.packages(&quot;devtools&quot;)
+require(devtools)
+# 再获取 github版本
+devtools::install_github(&quot;hadley/dplyr&quot;)
+require(dplyr)</code></pre>
+<p>Hadley建议，dplyr包的用户应该先熟悉整理数据（tidy data）的相关原则，再去深入dplyr开始严肃的数据工作。相关信息可以在这里找到︰ <a href="http://vita.had.co.nz/papers/tidy-data.pdf" class="uri">http://vita.had.co.nz/papers/tidy-data.pdf</a></p>
+<p>根据 github上的发布说明，下面是一些 dplyr 目前支持的格式：</p>
+<ul>
+<li>数据框</li>
+<li>数据表格</li>
+<li>SQLite</li>
+<li>PostgreSQL/Redshift</li>
+<li>MySQL/MariaDB</li>
+<li>Bigquery</li>
+<li>MonetDB</li>
+<li>多维数据集</li>
+</ul>
+<p>dplyr实现的精妙之处于，用户免于了解繁琐的底层数据容器的细节。tbl()结构作为表格替代物 ，将数据从上述库中提取出来。</p>
+<p>下面是处理dplyr时应熟知的一些重要命令︰</p>
+<ul>
+<li>tbl()</li>
+<li>group by()</li>
+<li>summarise()</li>
+<li>do()</li>
+<li>%&gt;%</li>
+</ul>
+<p>下面的例子中，我们将关注一些核心函数，使用的数据集与dplyr包同步安装（译者注：最新的dplyr包改为建议安装另一航线数据集成的包nycflights13）。完整示例请参考： <a href="https://github.com/hadley/dplyr" class="uri">https://github.com/hadley/dplyr</a>.</p>
+<pre><code># 加载dplyr相关的航线数据集hflights
+library(hflights)
+# 检查行数和列数
+dim(hflights)
+## [1] 227496 21</code></pre>
+<p>数据框的一行记录就像下面这样：</p>
+<pre><code>library(dplyr)
+library(knitr)
+library(hflights)
+
+hflights %&gt;%
+  head(1) %&gt;%
+  t() %&gt;%
+  kable()</code></pre>
+<p>现在我们想要做的是，计算这个数据集某一子集的汇总统计量。第一步，将数据强制转换成 data.table[72]。也可以将之转化为一个数据框。（译者注：tbl_dt函数已经被Hadley转移到新的dtplyr包，该包致力于让用户通过dplyr语法对data.table对象进行操作。）</p>
+<pre><code># 首先，将数据强制转换成data.table
+flights_dt &lt;- dtplyr::tbl_dt(hflights)
+# 该对象的类型是什么？
+class(flights_dt)
+## [1] &quot;tbl_dt&quot; &quot;tbl&quot; &quot;data.table&quot; &quot;data.frame&quot;</code></pre>
+<p>要查找所有航空公司航班到达延误时间的中位数，我们先按航空公司对数据进行分组︰</p>
+<p id="tab-3-2">表3.2 dplyr的数据行示例</p>
+<table>
+<colgroup>
+<col style="width: 67%" />
+<col style="width: 32%" />
+</colgroup>
+<thead>
+<tr>
+<th colspan="2" style="text-align: center;">
+Sample hflights row
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">
+Year
+</td>
+<td style="text-align: center;">
+2011
+</td>
+</tr>
+<tr>
+<td style="text-align: center;">
+Month
+</td>
+<td style="text-align: center;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align: center;">
+DayOfMonth
+</td>
+<td style="text-align: center;">
+2
+</td>
+</tr>
+<tr>
+<td style="text-align: center;">
+DayOfWeek
+</td>
+<td style="text-align: center;">
+7
+</td>
+</tr>
+<tr>
+<td style="text-align: center;">
+DepTime
+</td>
+<td style="text-align: center;">
+1401
+</td>
+</tr>
+<tr>
+<td style="text-align: center;">
+ArrTime
+</td>
+<td style="text-align: center;">
+1500
+</td>
+</tr>
+<tr>
+<td style="text-align: center;">
+UniqueCarrier
+</td>
+<td style="text-align: center;">
+AA
+</td>
+</tr>
+<tr>
+<td style="text-align: center;">
+FlightNum
+</td>
+<td style="text-align: center;">
+428
+</td>
+</tr>
+<tr>
+<td style="text-align: center;">
+TailNum
+</td>
+<td style="text-align: center;">
+N576AA
+</td>
+</tr>
+<tr>
+<td style="text-align: center;">
+ActualElapsedTime
+</td>
+<td style="text-align: center;">
+60
+</td>
+</tr>
+<tr>
+<td style="text-align: center;">
+AirTime
+</td>
+<td style="text-align: center;">
+40
+</td>
+</tr>
+<tr>
+<td style="text-align: center;">
+AirDelay
+</td>
+<td style="text-align: center;">
+−10
+</td>
+</tr>
+<tr>
+<td style="text-align: center;">
+DepDelay
+</td>
+<td style="text-align: center;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align: center;">
+Origin
+</td>
+<td style="text-align: center;">
+IAH
+</td>
+</tr>
+<tr>
+<td style="text-align: center;">
+Dest
+</td>
+<td style="text-align: center;">
+DFW
+</td>
+</tr>
+<tr>
+<td style="text-align: center;">
+Distance
+</td>
+<td style="text-align: center;">
+224
+</td>
+</tr>
+<tr>
+<td style="text-align: center;">
+TaxiIn
+</td>
+<td style="text-align: center;">
+7
+</td>
+</tr>
+<tr>
+<td style="text-align: center;">
+TaxiOut
+</td>
+<td style="text-align: center;">
+13
+</td>
+</tr>
+<tr>
+<td style="text-align: center;">
+Cancelled
+</td>
+<td style="text-align: center;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align: center;">
+CancellationCode
+</td>
+<td style="text-align: center;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align: center;">
+Diverted
+</td>
+<td style="text-align: center;">
+0
+</td>
+</tr>
+</tbody>
+</table>
+<pre><code># 按照航空公司分组
+carrier_group &lt;- group_by(flights_dt, UniqueCarrier)
+
+# 现在计算汇总统计量
+summarise(carrier_group, avg_delay = mean(ArrDelay, na.rm = TRUE))</code></pre>
+<p><code>汇总统计的执行时间为十毫秒。确实很快。表3.2给出了统计量大致情况。</code></p>
+<p><code>do()</code> 函数允许将任意函数应用于分组后的数据。<code>%&gt;%</code> <code>管道</code>运算符用于串联运算结果。关于此功能的例子可以通过在控制台中输入<code>?do</code>查阅到。</p>
+<p>我衷心推荐有抱负的数据分析师掌握dplyr这个工具，它应该成为在R中进行任何数据整理和数据分析工作流的一部分但是，你需要花时间精力去熟悉<em>整洁数据（tidy data）</em>的范式，我认为这个任务的难度尚属中级，因此，我将光辉灿烂的dplyr 的更多细节留给读者自己去探索发现。</p>
+<p id="tab-3-3">表3.3 dplyr中summarise的输出结果示例</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">UniqueCarrier</th>
+<th style="text-align: center;">Mean Delay</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">AA</td>
+<td style="text-align: center;">0.89</td>
+</tr>
+<tr>
+<td style="text-align: center;">AS</td>
+<td style="text-align: center;">3.19</td>
+</tr>
+<tr>
+<td style="text-align: center;">B6</td>
+<td style="text-align: center;">9.85</td>
+</tr>
+<tr>
+<td style="text-align: center;">CO</td>
+<td style="text-align: center;">6.09</td>
+</tr>
+<tr>
+<td style="text-align: center;">DL</td>
+<td style="text-align: center;">6.08</td>
+</tr>
+<tr>
+<td style="text-align: center;">EV</td>
+<td style="text-align: center;">7.25</td>
+</tr>
+<tr>
+<td style="text-align: center;">F9</td>
+<td style="text-align: center;">7.66</td>
+</tr>
+<tr>
+<td style="text-align: center;">FL</td>
+<td style="text-align: center;">1.85</td>
+</tr>
+<tr>
+<td style="text-align: center;">MQ</td>
+<td style="text-align: center;">7.15</td>
+</tr>
+<tr>
+<td style="text-align: center;">OO</td>
+<td style="text-align: center;">8.69</td>
+</tr>
+<tr>
+<td style="text-align: center;">UA</td>
+<td style="text-align: center;">10.46</td>
+</tr>
+<tr>
+<td style="text-align: center;">US</td>
+<td style="text-align: center;">−0.63</td>
+</tr>
+<tr>
+<td style="text-align: center;">WN</td>
+<td style="text-align: center;">7.58</td>
+</tr>
+<tr>
+<td style="text-align: center;">XE</td>
+<td style="text-align: center;">8.18</td>
+</tr>
+<tr>
+<td style="text-align: center;">YV</td>
+<td style="text-align: center;">4.01</td>
+</tr>
+</tbody>
+</table>
+<h2 id="使用xts包">使用xts包</h2>
+<p>在这一章的开始，我们了解了苹果公司的股票价格轨迹。数据下载自雅虎网，以.csv文件格式保存并读入R。生成的图象相当粗糙，除了线图，它没有包含任何有用信息，例如，在 x 轴 上的时间或股票交易者可能 感兴趣的其他度量。</p>
+<p>本章的目标之一，是从网站自动抓取金融时间序列，并制作更好（信息量更大）的图表。quantmod 包可以完成包括以上功能的诸多任务。</p>
+<p>quantmod 的依赖包之一是 xts [49]。这个包提供用于处理时间数据的函数。xts最值得了解的一点是它结合核心数据和时间索引来创建一个新的对象，进而你可以基于索引执行查询和对底层数据进行转换，因此非常趁手。</p>
+<p>xts 的文档相当翔实。帮助页面上的示例通常对了解可用功能很有帮助。</p>
+<pre><code># 加载xts包
+library(xts)
+
+# 加载xts自带的一个小数据集
+# 我们也可以使用我们自己的.csv文件
+data(sample_matrix)
+
+# 检查数据
+head(sample_matrix)
+##            Open     High      Low    Close
+## 2007-01-02 50.03978 50.11778 49.95041 50.11778
+## 2007-01-03 50.23050 50.42188 50.23050 50.39767
+## 2007-01-04 50.42096 50.42096 50.26414 50.33236
+## 2007-01-05 50.37347 50.37347 50.22103 50.33459
+## 2007-01-06 50.24433 50.24433 50.11121 50.18112
+## 2007-01-07 50.13211 50.21561 49.99185 49.99185
+
+# 该数据对象的类型是？ 
+class(sample_matrix)
+## [1] &quot;matrix&quot;
+
+# 使用str() 命令得到关于该数据对象的更多细节
+str(sample_matrix)
+## num [1:180, 1:4] 50 50.2 50.4 50.4 50.2 ...
+## - attr(*, &quot;dimnames&quot;)=List of 2
+## ..$ : chr [1:180] &quot;2007-01-02&quot; &quot;2007-01-03&quot;
+## &quot;2007-01-04&quot; &quot;2007-01-05&quot; ...
+## ..$ : chr [1:4] &quot;Open&quot; &quot;High&quot; &quot;Low&quot; &quot;Close&quot;</code></pre>
+<p>str() 的输出结果可能有点让人凌乱。它告诉我们该矩阵有 180 行和 4列。它还显示行名称等于日期，列名称等于字符串:"Open"、"high"、"Low"，和"Close"。我们可以接受该数据并将其转换成 xts 对象。对用户而言，所有的一切都会看起来和以前一样。然而，R在底层做着清洁整理索引的工作。</p>
+<pre><code>xts_matrix &lt;- as.xts(sample_matrix, descr =&#39;my new xts object&#39;)</code></pre>
+<p>在声明xts对象时，descr（描述）并不是必须的，它只是一个可选参数。再一次对 xts_matrix使用 str() 命令。</p>
+<pre><code>str(xts_matrix)
+## An &#39;xts&#39; object on 2007-01-02/2007-06-30 containing: 
+## Data: num [1:180, 1:4] 50 50.2 50.4 50.4 50.2 ...
+## - attr(*, &quot;dimnames&quot;)=List of 2
+## ..$ : NULL
+## ..$ : chr [1:4] &quot;Open&quot; &quot;High&quot; &quot;Low&quot; &quot;Close&quot;
+## Indexed by objects of class: [POSIXct,POSIXt] TZ: 
+## xts Attributes:
+## List of 3
+## $ tclass: chr [1:2] &quot;POSIXct&quot; &quot;POSIXt&quot;
+## $tzone:chr&quot;&quot;
+## $ descr : chr &quot;my new xts object&quot;</code></pre>
+<p><img src="media/fig-03-05.png" style="width:3.06000in;height:1.97333in" alt="图3.5" /></p>
+<p id="fig-3-5"><strong>图3.5</strong> 第一幅xts图</p>
+<p><img src="media/fig-03-06.png" style="width:3.84000in;height:4.43333in" alt="图3.6" /></p>
+<p id="fig-3-6"><strong>图3.6</strong> xts的K线图</p>
+<p>信息的差异显现出来了。行名已经被<strong>POSIX</strong><sup>10</sup>时间集[132]替代。<code>class(xts matrix)</code>命令揭示了，我们对象的一些属性也继承自zoo类。</p>
+<p>这里给出一个绘图的例子。plot()函数知道它现在处理xts输入对象，所以，会产生不同的图形布局。这就是多态<sup>11</sup>在作用。</p>
+<pre><code># 简单时间序列图 
+plot(xts_matrix[,1], main = &quot;Our first xts plot&quot;,
+cex.main = 0.8)
+# 或者我们尝试一些更花哨的图
+plot(xts_matrix, main = &quot;Candle plot on xts object&quot;,
+cex.main = 0.8, type = &quot;candles&quot;)</code></pre>
+<p><img src="media/fig-03-07.png" style="width:3.22000in;height:2.00667in" alt="图3.7" /></p>
+<p id="fig-3-7"><strong>图3.7</strong> 绘制xts子集图</p>
+<p>我们想要把时间序列转换为xts对象的主要原因是为了便于利用索引这一特性。那么，如何绘制两个日期之间的股票价格呢？</p>
+<p>这里有一些示例︰</p>
+<pre><code>plot(xts_matrix[&quot;2007-01-01::2007-02-12&quot;],
+  main = &quot;An xts candle plot with subsetting&quot;,
+  cex.main = 0.8, type = &quot;candles&quot;)</code></pre>
+<p>注意传递给价格矩阵的单一字符串参数。这种时间格式的便利在于，上下界限采用肉眼可读的日期。</p>
+<pre><code>range &lt;- &quot;2007-03-15::2007-06-15&quot;
+plot(xts_matrix(range))</code></pre>
+<p>paste() 函数用于连接字符串。它将输入的参数值粘贴在一起。默认情况下，它将用空格分隔字符串，除非指定sep =""。</p>
+<pre><code>start_date &lt;- &quot;2007-05-05&quot;
+end_date &lt;- &quot;2007-12-31&quot;
+
+plot(xts_matrix[paste(start_date, &quot;::&quot;,
+                      end_date, sep = &quot;&quot;)])
+
+# 默认使用空格连接符
+paste(&quot;Hello&quot;, &quot;World&quot;, &quot;in R&quot;)
+## [1] &quot;Hello World in R&quot;
+
+paste(&quot;Hello&quot;, &quot;Again&quot;, sep = &quot;**&quot;)
+## [1] &quot;Hello**Again&quot;</code></pre>
+<p>指定的运算符号可以将字符串向量的各个元素首尾连接。</p>
+<pre><code>paste(c(1,2,3,4,5), collapse = &quot;oooo&quot;)
+## [1] &quot;1oooo2oooo3oooo4oooo5&quot;</code></pre>
+<p>我们需要深入研究xts对象更多方面的细节，才可以进行一些有趣的时间序列分析。通常会出现的一个问题是的时间戳格式。尤其是，xts怎么知道一个任意的字符串表示什么时间？在前面的示例之一，我们使用as.xts()函数将一个矩阵转换为xts对象。该函数知道行名称用作时间指标，它也明白，2007-01-04意思是yyyy-mm-dd （四位数年-两位数月份-两位数日期）。</p>
+<p>要是提供的时间戳形式为04012007或01-04-2007或者甚至2007/01/04呢？在大多数情况下，用户必须明确指定时间索引的具体格式。 下面的例子说明这个观点：</p>
+<pre><code># 编造一个包含10个股票以及以微秒为单位的时间索引信息的价格向量
+price_vector &lt;- c(101.02, 101.03, 101.03, 101.04, 101.05,
+                  101.03, 101.02, 101.01, 101.00, 100.99)
+
+dates &lt;- c(&quot;03/12/2013 08:00:00.532123&quot;,
+           &quot;03/12/2013 08:00:01.982333&quot;,
+           &quot;03/12/2013 08:00:01.650321&quot;,
+           &quot;03/12/2013 08:00:02.402321&quot;,
+           &quot;03/12/2013 08:00:02.540432&quot;,
+           &quot;03/12/2013 08:00:03.004554&quot;,
+           &quot;03/12/2013 08:00:03.900213&quot;,
+           &quot;03/12/2013 08:00:04.050323&quot;,
+           &quot;03/12/2013 08:00:04.430345&quot;,
+           &quot;03/12/2013 08:00:05.700123&quot;)
+
+# 允许R控制台显示到微秒级别options(digits.secs = 6)
+
+# 创建经过正确格式化的时间索引
+time_index &lt;- strptime(dates, format = &quot;%d/%m/%Y %H:%M:%OS&quot;)
+
+# 将时间索引值传递给数据对象
+xts_price_vector &lt;- xts(price_vector, time_index)</code></pre>
+<p><img src="media/fig-03-08.png" style="width:3.37667in;height:1.99333in" alt="图3.8" /></p>
+<p id="fig-3-8"><strong>图3.8</strong> <strong>xts</strong>图与直线</p>
+<p>options(digits.secs)命令控制秒数打印在屏幕上的最大位数。它确保当在控制台引用xts_price_vector时，时间戳中的微秒位能够露脸。</p>
+<p>strptime() 函数接受一个字符串或含多个字符串的向量作为输入，并将它们转换成指定的格式。须牢记，指定的时间戳具有微秒级的分辨率。因此，在时间格式的末尾我们指定%OS符号而非%S（秒）。关于?strptime的文档包括格式的详细信息。</p>
+<p>给定完全有效的xts时间序列对象，我们不仅可以画出它本身，还可以添加一些纵向和横向的线，就像我们以前做过的。垂直的线现在可按时间戳索引。有关垂直的线，唯一棘手的部分是我们需要确定时间戳是哪种格式。这可以通过.POSIXct() 函数完成。</p>
+<pre><code># 绘制编造股票价格数据图
+plot(xts_price_vector, main = &quot;Fictitious price series&quot;,
+  cex.main = 0.8)
+  
+# 添加一个表示均值的横线
+abline(h = mean(xts_price_vector), lwd = 2)
+
+# 添加标识一个特定时间戳的竖线
+my_time &lt;- as.POSIXct(&quot;03/12/2013 08:00:03.004554&quot;,
+  format = &quot;%d/%m/%Y %H:%M:%OS&quot;)
+
+abline(v = my_time, lwd = 2, lty = 2)</code></pre>
+<p>那么，POSIXct是个什么东西呢？它提供一个封装，将日期时间对象转换为前面提到的POSIX格式。R里还有不少包可以帮助构造日期和时间<sup>12</sup>。</p>
+<p>若要提取价格向量的数据部件，我们可以使用coredata()命令。下面的示例中，我们直接操作时间索引。为了更好的示范本例，我们将创建一个非齐次时间序列。时间的非齐次性在实践中很常见。重要事件之间往往存在不规则的时间隔。举例来说，在指定的时间间隔内，S&amp;P 500 E-mini(ES)期货合约交易的一个子集。它可能看起来像这样：</p>
+<pre><code>es_price &lt;- c(1700.00, 1700.25, 1700.50, 1700.00, 1700.75,
+  1701.25, 1701.25, 1701.25, 1700.75, 1700.50)
+
+es_time &lt;- c(&quot;09/12/2013 08:00:00.532123&quot;,
+  &quot;09/12/2013 08:00:01.982333&quot;,
+  &quot;09/12/2013 08:00:05.650321&quot;,
+  &quot;09/12/2013 08:10:02.402321&quot;,
+  &quot;09/12/2013 08:12:02.540432&quot;,
+  &quot;09/12/2013 08:12:03.004554&quot;,
+  &quot;09/12/2013 08:14:03.900213&quot;,
+  &quot;09/12/2013 08:15:07.090323&quot;,
+  &quot;09/12/2013 08:16:04.430345&quot;,
+  &quot;09/12/2013 08:18:05.700123&quot;)
+
+# 创建一个xts时间序列对象
+xts_es &lt;- xts(es_price, as.POSIXct(es_time,
+  format = &quot;%d/%m/%Y %H:%M:%OS&quot;))
+
+names(xts_es) &lt;- c(&quot;price&quot;)</code></pre>
+<p>关于高频交易的一个我们感兴趣的量度是交易订单的抵达率。可以通过看行业的连续时间戳差异探讨此度量。difftime()函数计算两个日期时间对象之间的时间差异。本例明确地设置时间单位为秒。默认设置正好也是秒。</p>
+<pre><code>time_diff &lt;- difftime(index(xts_es)[2], index(xts_es)[1],
+  units = &quot;secs&quot;)
+
+time_diff
+## Time difference of 1.45021 secs</code></pre>
+<p>我们可以创建一个经过所有数对的循环，然后将结果存储于一个向量。</p>
+<pre><code>diffs &lt;- c()
+
+for(i in 2:length(index(xts_es))) {
+  diffs[i] &lt;- difftime(index(xts_es)[i], index(xts_es)[i - 1],
+    units = &quot;secs&quot;)
+}</code></pre>
+<p>这当然能得到我们想要的结果，但不是最优方法。下面是向量化的解决方案：</p>
+<pre><code>diffs &lt;- index(xts_es)[-1] - index(xts_es)[-length(index(xts_es))]
+
+diffs
+## Time differences in secs
+## [1] 1.4502099 3.6679881 596.7520001
+## [4] 120.1381109 0.4641221 120.8956590
+## [7] 63.1901100 57.3400221 121.2697780
+## attr(,&quot;tzone&quot;)
+
+class(diffs)
+## [1] &quot;difftime&quot;</code></pre>
+<p>上面代码可以被进一步优化，只调用index()函数一次，而非三次。</p>
+<pre><code>es_times &lt;- index(xts_es)
+diffs &lt;- es_times[-1] - es_times[-length(es_times)]
+
+diffs
+## Time differences in secs
+## [1] 1.4502099 3.6679881 596.7520001
+## [4] 120.1381109 0.4641221 120.8956590
+## [7] 63.1901100 57.3400221 121.2697780
+## attr(,&quot;tzone&quot;)</code></pre>
+<p>为表现虚构的ES期货连续交易之间的时间差异，我们还可以生成图形。</p>
+<pre><code>par(mfrow = c(2, 1))
+diffs &lt;- as.numeric(diffs)
+plot(diffs, main = &quot;Time difference in seconds for ES trades&quot;,
+     xlab = &quot;&quot;, ylab = &quot;Time differences&quot;,
+     cex.lab = 0.8,
+     cex.main = 0.8)
+grid()
+
+hist(diffs, main = &quot;Time difference in seconds for ES trades&quot;,
+     xlab = &quot;Time difference (secs)&quot;, ylab = &quot;Observations&quot;,
+     breaks = 20,
+     cex.lab = 0.8,
+     cex.main = 0.8)
+grid()</code></pre>
+<p><img src="media/fig-03-09.png" style="width:3.29000in;height:2.10667in" alt="图3.9" /></p>
+<p id="fig-3-9"><strong>图3.9</strong> 交易时间差的图</p>
+<h2 id="使用quantmod包">使用quantmod包</h2>
+<p>quantmod包支持在线和离线方式访问xts格式的财务数据。除此之外，它也提供配套工具，用于绘制针对财务数据的精致图形。</p>
+<p>从雅虎网抓取苹果股票数据的方法如下：</p>
+<pre><code># 本地安装之后加载quantmod包
+library(quantmod)
+AAPL &lt;- getSymbols(&quot;AAPL&quot;, auto.assign=FALSE)
+head(AAPL)</code></pre>
+<p><img src="media/fig-03-10.png" style="width:4.50000in;height:3.46841in" alt="图3.10" /></p>
+<p id="fig-3-10"><strong>图3.10</strong> 用quantmod包生成的苹果股票AAPL数据</p>
+<p>AAPL现在是一个xts对象，包含开盘价、最高价、最低价、收盘价、交易量和调整后的价格数据。</p>
+<p>auto.assign 参数允许返回的对象存储在一个本地变量，而不是 R 会话的全局环境（.GlobalEnv）中。getSymbols() 的其他参数包括︰src，time，和verbose。 src参数指定输入数据的来源。它可以设置为下列信息来源之一︰</p>
+<ul>
+<li>Yahoo</li>
+<li>Google</li>
+<li>Fred</li>
+<li>Oanda</li>
+<li>mysql</li>
+<li>.csv files</li>
+</ul>
+<p>time参数的形式为“2011/”或“2010-08-09::2010-08-12”二者之一。</p>
+<h2 id="quantmod包与图表">quantmod包与图表</h2>
+<p>chartSeries 函数可以直接应用于开盘价、收盘价、最高价、最低价数据的xts 对象。chartSeries有很多参数可以帮助我们生成深度定制的图表。像往常一样，我们可以输入 ?chartSeries获得详细信息。使用之前创建的苹果股票价格对象，我们得到如下输出结果：</p>
+<pre><code># 在原图基础上添加一些技术指标
+chartSeries(AAPL, subset=&#39;2010::2010-04&#39;,
+theme = chartTheme(&#39;white&#39;),
+TA = &quot;addVo(); addBBands()&quot;)</code></pre>
+<p>reChart() 函数用于更新原始图表，无需指定完整的一组参数︰</p>
+<pre><code>reChart(subset=&#39;2009-01-01::2009-03-03&#39;)</code></pre>
+<p>quantmod 包囊括了一系列技术指标，他们可以与任何图表无缝叠加。这些技术指标来自Josh Ulrich [59]创建的TTR包。TTR 是quantmod 安装过程中自动加载的依赖包之一。</p>
+<pre><code>chartSeries(AAPL, subset=&#39;2011::2012&#39;, theme = chartTheme(&#39;white&#39;), TA = &quot;addBBands(); addDEMA()&quot;)</code></pre>
+<p><img src="media/fig-03-11.png" style="width:3.22333in;height:4.02000in" alt="图3.11" /></p>
+<p id="fig-3-11"><strong>图3.11</strong> 叠加指标的股票价格chartSeries图</p>
+<p>绘图完成以后，技术指标也可以调用下面函数来添加：</p>
+<pre><code>addVo()
+addDPO()</code></pre>
+<p>另外两个绝对值得研究的函数是addTA()和newTA()。它们允许用户创建的自定义指标在子图中呈现或叠加到主要的图表之上。</p>
+<p>在下面例子中，我们首先绘制不含任何技术指标的苹果股价，然后自定义一个关于股票收盘价的指标。自定义指标简单地将 90 添加到现有的价格。当然，你可以用这种方法创建任意复杂的指标。</p>
+<pre><code># 创建不包含任何技术指标的基础图
+chartSeries(AAPL, theme = chartTheme(&#39;white&#39;), TA = NULL)
+
+# 自定义函数
+my_indicator &lt;- function(x) {
+  return(x + 90)
+}
+
+add_my_indicator &lt;- newTA(FUN = my_indicator, preFUN=Cl,
+  legend.name = &quot;My Fancy Indicator&quot;, on = 1)
+add_my_indicator()</code></pre>
+<p><img src="media/fig-03-12.png" style="width:3.28667in;height:4.09000in" alt="图3.12" /></p>
+<p id="fig-3-12"><strong>图3.12</strong> 重新绘制叠加指标的股票价格chartSeries图</p>
+<p><img src="media/fig-03-13.png" style="width:3.28333in;height:4.02000in" alt="图3.13" /></p>
+<p id="fig-3-13"><strong>图3.13</strong> 叠加自定义指标的股票价格chartSeries图</p>
+<h2 id="用ggplot2包绘图">用ggplot2包绘图</h2>
+<p>ggplot2 [40]提供了另一套好用的画图功能。包的作者也是Hadley Wickham，是到目前为止最受欢迎的 R 包之一。ggplot2 包的灵感源自Grammar of Graphics<sup>13</sup>。</p>
+<p>为了说明ggplot2的一些功能，我们来画一下AAPL不同水平的百分比回报率的交易量分布图︰</p>
+<pre><code># 创建一个包含价格和交易量的矩阵
+df &lt;- AAPL[, c(&quot;AAPL.Adjusted&quot;, &quot;AAPL.Volume&quot;)]
+names(df) &lt;- c(&quot;price&quot;, &quot;volume&quot;)
+
+# 构造
+df$return &lt;- diff(log(df[, 1]))
+df &lt;- df[-1, ]</code></pre>
+<p>接下来，我们使用cut()函数创建收益率的分组。我们对收益率的大小尤其感兴趣。下面代码演示中一共有三个分组︰</p>
+<pre><code>df$cuts &lt;- cut(abs(df$return),
+  breaks = c(0, 0.02, 0.04, 0.25),
+  include.lowest = TRUE)
+  
+# 构造另外一列用来保存均值
+df$means &lt;- NA
+for(i in 1:3) {
+  group &lt;- which(df$cuts == i)
+  if(length(group) &gt; 0) {
+    df$means[group] &lt;- mean(df$volume[group])
+  }
+}  </code></pre>
+<p><img src="media/fig-03-14.png" style="width:3.95667in;height:5.46667in" alt="图3.14" /></p>
+<p id="fig-3-14"><strong>图3.14</strong> 生成cuts向量</p>
+<p>标记为 1的分组，聚集了最低的收益率，而值为3的分组包括最高收益率。收益率的其他水平居于二者之间。我们想要画出每一分组收益率的交易量分布。</p>
+<pre><code># 加载ggplot2包
+library(ggplot2)
+ggplot(df) +
+geom_histogram(aes(x=volume)) +
+facet_grid(cuts ~ .) +
+geom_vline(aes(xintercept=means), linetype=&quot;dashed&quot;, size=1)</code></pre>
+<p><img src="media/fig-03-15.png" style="width:4.11333in;height:5.12333in" alt="图3.15" /></p>
+<p id="fig-3-15"><strong>图3.15</strong> 用ggplot2绘制交易量信息</p>
+<p>乍看之下，<strong>ggplot2</strong> 语法可能有些令人费解。aes() 指定数据呈现在x或y轴的美学属性。geom 定义需要显示的图表类型。<code>+</code>运算符用于将图层串联成完整的图。</p>
+<p>想要全面了解<strong>ggplot2</strong>，可以参考Hadley Wickham的书ggplot2: Elegant Graphics for Data Analysis[40]（译者注：中译本《ggplot2:数据分析与图形艺术》已出版）</p>
+<h2 id="总结">总结</h2>
+<p>本章关注一些 R 用户日常可能遇见的数据处理任务。探究了将金融价格信息导入R环境的各种方法，并说明如何对常见的文件格式 (.csv，.xml、.xls、.yaml。json)进行操作。提供了几个通过访问关系型数据库获取数据的例子。接着我们引入非常重要 <strong>xts</strong>包，以及基于时间索引的大量范例。给出了一个基于 <strong>dplyr</strong> 包进行数据操作的示例， 以及多个<strong>quantmod</strong>包和 <strong>ggplot2</strong>包的典型用例。</p>
+<p>翻译：杨环 审校：冯凌秉</p>
+
+    <div class="pager"><a class="prev" href="ch02.html"><span class="dir">上一页</span>第2章 交易工具</a><a class="next" href="ch04.html"><span class="dir">下一页</span>第4章 统计和概率基础</a></div>
+  </div>
+</main>
+<script>
+(function () {
+  var box = document.getElementById('q');
+  var panel = document.getElementById('hits');
+  if (!box) return;
+  var idx = [];
+  fetch('search-index.json')
+    .then(function (r) { return r.json(); })
+    .then(function (d) { idx = d; })
+    .catch(function () {});
+
+  function esc(s) {
+    return s.replace(/[&<>"]/g, function (c) {
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];
+    });
+  }
+  function run() {
+    var q = box.value.trim().toLowerCase();
+    if (!q) { panel.classList.remove('on'); panel.innerHTML = ''; return; }
+    var terms = q.split(/\s+/);
+    var out = [];
+    for (var i = 0; i < idx.length && out.length < 24; i++) {
+      var e = idx[i];
+      var hay = (e.h + ' ' + e.p + ' ' + e.t).toLowerCase();
+      var ok = true;
+      for (var k = 0; k < terms.length; k++) {
+        if (hay.indexOf(terms[k]) < 0) { ok = false; break; }
+      }
+      if (!ok) continue;
+      var pos = e.t.toLowerCase().indexOf(terms[0]);
+      var snip = pos > 40 ? e.t.slice(pos - 30, pos + 90)
+                          : e.t.slice(0, 110);
+      out.push('<a href="' + e.u + '"><div class="p">' + esc(e.p) +
+               '</div><div class="h">' + esc(e.h) +
+               '</div><div class="s">' + esc(snip) + '</div></a>');
+    }
+    panel.innerHTML = out.length
+      ? out.join('')
+      : '<div class="none">没有匹配的内容</div>';
+    panel.classList.add('on');
+  }
+  box.addEventListener('input', run);
+  box.addEventListener('focus', run);
+  document.addEventListener('click', function (e) {
+    if (!panel.contains(e.target) && e.target !== box) {
+      panel.classList.remove('on');
+    }
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') { panel.classList.remove('on'); box.blur(); }
+  });
+})();
+</script>
+</body>
+</html>

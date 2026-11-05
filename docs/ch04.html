@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>第4章 统计和概率基础 · 量化金融与R语言</title>
+<meta name="description" content="Quantitative Trading with R 中文翻译稿" />
+<style>
+:root {
+  --bg: #ffffff;
+  --fg: #1f2328;
+  --muted: #6b7280;
+  --line: #e5e7eb;
+  --soft: #f7f8fa;
+  --accent: #0f5c8c;
+  --code-bg: #f6f8fa;
+  --sidebar-w: 288px;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  color: var(--fg);
+  background: var(--bg);
+  font-family: -apple-system, "PingFang SC", "Hiragino Sans GB",
+               "Microsoft YaHei", "Source Han Sans SC", sans-serif;
+  font-size: 16px;
+  line-height: 1.85;
+  -webkit-font-smoothing: antialiased;
+}
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* 侧边栏 */
+.sidebar {
+  position: fixed; inset: 0 auto 0 0; width: var(--sidebar-w);
+  border-right: 1px solid var(--line);
+  background: var(--soft);
+  display: flex; flex-direction: column;
+  overflow: hidden;
+}
+.brand {
+  padding: 22px 20px 14px;
+  border-bottom: 1px solid var(--line);
+}
+.brand .t { font-size: 17px; font-weight: 700; line-height: 1.4; }
+.brand .s { font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.5; }
+.search { padding: 12px 16px; border-bottom: 1px solid var(--line); }
+.search input {
+  width: 100%; padding: 8px 10px; font-size: 13px;
+  border: 1px solid var(--line); border-radius: 6px;
+  background: #fff; color: var(--fg); outline: none;
+}
+.search input:focus { border-color: var(--accent); }
+.nav { flex: 1; overflow-y: auto; padding: 10px 0 40px; }
+.nav .group { padding: 12px 20px 6px; font-size: 11px; font-weight: 700;
+  color: var(--muted); letter-spacing: .08em; }
+.nav a.item {
+  display: block; padding: 7px 20px 7px 20px;
+  font-size: 14px; color: var(--fg); border-left: 3px solid transparent;
+}
+.nav a.item:hover { background: #eef1f5; text-decoration: none; }
+.nav a.item.active {
+  border-left-color: var(--accent); background: #e8eff5;
+  font-weight: 600; color: var(--accent);
+}
+.nav details summary {
+  padding: 7px 20px; font-size: 14px; cursor: pointer; list-style: none;
+}
+.nav details summary::-webkit-details-marker { display: none; }
+.nav details summary:hover { background: #eef1f5; }
+.nav details a.sub {
+  display: block; padding: 4px 20px 4px 34px;
+  font-size: 12.5px; color: var(--muted); line-height: 1.5;
+}
+.nav details a.sub:hover { color: var(--accent); }
+
+/* 正文 */
+.main { margin-left: var(--sidebar-w); }
+.wrap { max-width: 860px; margin: 0 auto; padding: 40px 40px 96px; }
+.crumb { font-size: 12px; color: var(--muted); margin-bottom: 10px; }
+h1 { font-size: 30px; line-height: 1.35; margin: 0 0 26px;
+     font-weight: 700; letter-spacing: .01em; }
+h2 { font-size: 21px; margin: 40px 0 14px; padding-bottom: 8px;
+     border-bottom: 1px solid var(--line); font-weight: 700; }
+h3 { font-size: 17px; margin: 28px 0 10px; font-weight: 700; }
+h4 { font-size: 15px; margin: 22px 0 8px; font-weight: 700; }
+p { margin: 0 0 16px; text-align: justify; }
+p.signature { text-align: right; }
+ul, ol { margin: 0 0 16px; padding-left: 26px; }
+li { margin: 4px 0; }
+img { max-width: 100%; height: auto; display: block; margin: 22px auto;
+      border-radius: 4px; }
+figure { margin: 24px 0; text-align: center; }
+figcaption { font-size: 13px; color: var(--muted); margin-top: 8px; }
+
+code {
+  font-family: "SF Mono", Menlo, Consolas, "Courier New", monospace;
+  font-size: 0.88em; background: var(--code-bg);
+  padding: 2px 5px; border-radius: 4px;
+  border: 1px solid #eaecef;
+}
+pre {
+  background: var(--code-bg); border: 1px solid var(--line);
+  border-radius: 6px; padding: 14px 16px; overflow-x: auto;
+  line-height: 1.6; margin: 0 0 18px;
+}
+pre code { background: none; border: 0; padding: 0; font-size: 12.5px; }
+
+table { border-collapse: collapse; width: 100%; margin: 20px 0;
+        font-size: 14px; }
+th, td { border: 1px solid var(--line); padding: 7px 11px; }
+th { background: var(--soft); font-weight: 700; }
+tr:nth-child(even) td { background: #fcfcfd; }
+
+blockquote { margin: 0 0 18px; padding: 10px 18px;
+  border-left: 3px solid var(--line); color: var(--muted); background: var(--soft); }
+
+/* 插图目录 / 表格目录 */
+.cap-list { list-style: none; padding: 0; margin: 4px 0 0; }
+.cap-list li { border-bottom: 1px solid var(--line); }
+.cap-list a { display: flex; align-items: baseline; gap: 12px;
+  padding: 9px 2px; font-size: 14px; color: var(--fg); }
+.cap-list a:hover { background: var(--soft); text-decoration: none;
+  color: var(--accent); }
+.cap-num { min-width: 68px; color: var(--muted); font-size: 12.5px;
+  font-variant-numeric: tabular-nums; }
+.cap-title { flex: 1; }
+.cap-where { color: var(--muted); font-size: 11.5px; white-space: nowrap; }
+.cap-empty { color: var(--muted); font-size: 14px; }
+
+/* MathML 居中与缩放 */
+math[display="block"] { display: block; margin: 20px auto; font-size: 1.05em; }
+
+/* 页脚翻页 */
+.pager { display: flex; justify-content: space-between; gap: 16px;
+         margin-top: 56px; padding-top: 22px; border-top: 1px solid var(--line); }
+.pager a { flex: 1; padding: 12px 16px; border: 1px solid var(--line);
+           border-radius: 8px; font-size: 13px; }
+.pager a:hover { border-color: var(--accent); text-decoration: none;
+                 background: var(--soft); }
+.pager .dir { display: block; font-size: 11px; color: var(--muted);
+              margin-bottom: 3px; }
+.pager .next { text-align: right; }
+
+/* 首页 */
+.cover { padding: 56px 0 8px; }
+.cover h1 { font-size: 38px; margin-bottom: 8px; }
+.cover .sub { font-size: 15px; color: var(--muted); margin-bottom: 34px; }
+.toc-list { border-top: 1px solid var(--line); }
+.toc-list > li { list-style: none; margin: 0; border-bottom: 1px solid var(--line); }
+.toc-list { padding-left: 0; }
+.toc-row { display: flex; align-items: baseline; gap: 10px;
+           padding: 13px 2px; font-size: 15px; }
+.toc-row .no { color: var(--muted); font-size: 12px; min-width: 26px; }
+.toc-subs { padding: 0 0 12px 36px; margin: 0; }
+.toc-subs li { list-style: none; font-size: 13px; color: var(--muted);
+               padding: 3px 0; }
+
+/* 搜索结果 */
+#hits { display: none; position: absolute; left: 16px; right: 16px; top: 96px;
+        background: #fff; border: 1px solid var(--line); border-radius: 8px;
+        box-shadow: 0 8px 24px rgba(0,0,0,.12); max-height: 60vh;
+        overflow-y: auto; z-index: 50; }
+#hits.on { display: block; }
+#hits a { display: block; padding: 10px 14px; border-bottom: 1px solid var(--line); }
+#hits a:last-child { border-bottom: 0; }
+#hits a:hover { background: var(--soft); text-decoration: none; }
+#hits .h { font-size: 13px; font-weight: 600; color: var(--fg); }
+#hits .p { font-size: 11px; color: var(--accent); margin-bottom: 2px; }
+#hits .s { font-size: 12px; color: var(--muted); line-height: 1.5; }
+#hits .none { padding: 14px; font-size: 13px; color: var(--muted); }
+
+@media (max-width: 900px) {
+  .sidebar { display: none; }
+  .main { margin-left: 0; }
+  .wrap { padding: 24px 20px 72px; }
+  .cover h1 { font-size: 28px; }
+}
+@media print {
+  .sidebar, .pager, .search { display: none; }
+  .main { margin-left: 0; }
+  .wrap { max-width: none; padding: 0; }
+}
+</style>
+</head>
+<body>
+<aside class="sidebar">
+  <div class="brand">
+    <div class="t">量化金融与R语言</div>
+    <div class="s">Quantitative Trading with R 中文翻译稿</div>
+  </div>
+  <div class="search">
+    <input id="q" type="search" placeholder="搜索全书…" autocomplete="off" />
+  </div>
+  <nav class="nav"><div class="group">前言</div><a class="item" href="figures.html">插图目录</a><a class="item" href="tables.html">表格目录</a><a class="item" href="preface.html">译者序</a><a class="item" href="translators.html">译者简介</a><a class="item" href="acknowledgements.html">致谢</a><div class="group">正文</div><a class="item" href="ch01.html">第1章 总览</a><a class="item" href="ch02.html">第2章 交易工具</a><a class="item" href="ch03.html">第3章 与数据打交道</a><details open><summary><a class="item active" style="display:inline;padding:0;border:0" href="ch04.html">第4章 统计和概率基础</a></summary><a class="sub" href="ch04.html#什么是统计量">什么是统计量？</a><a class="sub" href="ch04.html#总体和样本">总体和样本</a><a class="sub" href="ch04.html#中心极限定理在r里的实现">中心极限定理在R里的实现</a><a class="sub" href="ch04.html#无偏性和有效性">无偏性和有效性</a><a class="sub" href="ch04.html#概率基础">概率基础</a><a class="sub" href="ch04.html#随机变量">随机变量</a><a class="sub" href="ch04.html#概率">概率</a><a class="sub" href="ch04.html#概率分布">概率分布</a><a class="sub" href="ch04.html#贝叶斯和频率方法">贝叶斯和频率方法</a><a class="sub" href="ch04.html#掷硬币模拟器">掷硬币模拟器</a><a class="sub" href="ch04.html#关于rstan的使用">关于RStan的使用</a><a class="sub" href="ch04.html#总结">总结</a></details><a class="item" href="ch05.html">第5章 统计和概率中级</a><a class="item" href="ch06.html">第6章 价格差，贝塔系数和风险</a><a class="item" href="ch07.html">第7章 基于Quantstrat包的回溯测试</a><a class="item" href="ch08.html">第8章 高频数据分析</a><a class="item" href="ch09.html">第9章 期权</a><a class="item" href="ch10.html">第10章 最优化</a><a class="item" href="ch11.html">第11章 速度，测试与报告</a><div class="group">附录</div><a class="item" href="appendix.html">补充</a><a class="item" href="references.html">参考文献</a><a class="item" href="terms.html">索引</a></nav>
+  <div id="hits"></div>
+</aside>
+<main class="main">
+  <div class="wrap">
+    <div class="crumb">正文</div>
+    <h1>第4章 统计和概率基础</h1>
+<p>现在我们知道了怎样把原始时间序列转化为<strong>xts</strong>对象，怎样使用<strong>quantmod</strong>从本地和远程库里检索数据，以及如何用<strong>ggplot2</strong>创造基本的可视化效果。接下来，我们就着手探索数据模式，寻找可利用的交易机会。磨刀不误砍柴工，行动前我们先来了解一下金融时间序列的相关统计特性。</p>
+<p>本章涵盖统计分析基础，试图揭开统计术语的神秘面纱。</p>
+<h2 id="什么是统计量">什么是统计量？</h2>
+<p>从实用主义的角度出发，统计量可以视为对一组数值进行运算的函数（公式），但是这种说法略欠严谨。例如，计算N个数算术平均值的公式为<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>μ</mi><mo>=</mo><msubsup><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>N</mi></msubsup><mfrac><msub><mi>X</mi><mi>i</mi></msub><mi>N</mi></mfrac></mrow><annotation encoding="application/x-tex">\mu = \sum_{i = 1}^{N}\frac{X_{i}}{N}</annotation></semantics></math>。算术平均值自然是一个统计量，因为它满足我们的基本定义。另一个统计量可以是<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>W</mi><mo>=</mo><msubsup><mi mathvariant="normal">Π</mi><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>N</mi></msubsup><msubsup><mi>X</mi><mi>i</mi><mn>2</mn></msubsup><mi>l</mi><mi>o</mi><mi>g</mi><mo stretchy="false" form="prefix">(</mo><msub><mi>X</mi><mi>i</mi></msub><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">W = \Pi_{i = 1}^{N}X_{i}^{2}log(X_{i})</annotation></semantics></math>。 同样地，公式明确指出输入值是这组X。到现在我们还没有讨论过统计量的有用性。一些熟悉的统计量包括方差，标准差，峰度和相关系数等。</p>
+<h2 id="总体和样本">总体和样本</h2>
+<p>考虑一组数值： 102，103.2，102，101.2，499，103.2，101.23，99.2。我们也许想要回答下面这些问题：</p>
+<ol type="1">
+<li>这些数据来自哪里？</li>
+<li>它们是全体数据，还是我们应该期待还有更多？</li>
+<li>数据中有没有呈现出可预测的序列？</li>
+</ol>
+<p>基于前面的脑力练习，很明显地，考虑到有限的数据来源信息，我们需要做一些预先假设。如果已知这些是集合中全部的数据，那么我们就说整个总体是可得的。如果这些数据抽样自一个更大的集合，就称为一个样本。</p>
+<p><img src="media/fig-04-01.png" style="width:2.01333in;height:1.34000in" alt="图4.1" /></p>
+<p id="fig-4-1"><strong>图4.1</strong> 总体与样本</p>
+<p>很多时候，很难分清楚我们是与样本还是总体数据在工作。拿不准的时候，稳妥起见，我们假设数据为样本。能获得所有还是部分数据，令随后的分析方法有天壤之别。比如，如果想测量地球上所有山峰的平均高度，定义总体为地球上所有山峰的高度。来自此总体的一个样本就是地球上的很多山峰。从总体中抽样是一个棘手的问题<sup>1</sup>。</p>
+<p>为了最终回答平均山峰高度的问题，你得测量世界上每一座山峰的高度。即使有了总体数据，在这一数据集上计算统计量也会费用惊人。样本就可以来解围了。经过合适的选取，无偏样本会极大地有助于回答关于总体统计量的问题。</p>
+<p>可以把统计量想象成将样本特性转化为总体特性的数学工具。虽然过度简化，但它确实有助于启发式思考来保持基本概念通俗易懂。对基础数据作假设，然后用样本平均统计量来近似描述总体参数。观测值的数量和选择观测值的方法会影响最终结果。</p>
+<p>直观地说，样本中观测值越多，样品的平均高度将接近真实的总体平均高度。给定大小的样本越多，真实总体平均的估计量也更优。统计学家给这两个朴素的概念起了动听别致的名字：<strong>大数定律</strong>和<strong>中心极限定理</strong>[117, 126]。</p>
+<p>下面的例子用R产生1,000,000个正态（高斯）分布随机数，即总体。我们将均值设为2.33，标准差为0.5。然后从此总体抽出大小不一的样本，并计算每个样本的均值。最后结果是这些样本均值的分布图。我们已经明白总体均值的来历（我们创造了它），图有助于描述大数定律的收敛性。</p>
+<pre><code># 设置随机数种子
+set.seed(100)
+X &lt;- rnorm(1000000, mean = 2.33, sd = 0.5)
+mu &lt;- mean(X)
+sd &lt;- sd(X)
+hist(X, breaks = 100)
+abline(v = mu, lwd = 3, lty = 2)</code></pre>
+<p><img src="media/fig-04-02.png" style="width:5.04167in;height:4.04167in" /></p>
+<p id="fig-4-2"><strong>图4.2</strong> 高斯总体</p>
+<p>函数<code>set.seed()</code>保证每次函数和参数不变而得到同一批随机数：</p>
+<pre><code>set.seed(12)
+rnorm(5)
+## [1] -1.4805676 1.5771695 -0.9567445 -0.9200052 -1.9976421</code></pre>
+<p>再次运行<code>rnorm(5)</code>，但不在前面加<code>set.seed(12)</code>会产生一组完全不同的数：</p>
+<pre><code>rnorm(5)
+## [1] -0.2722960 -0.3153487 -0.6282552 -0.1064639  0.4280148</code></pre>
+<p>从X产生大小为5，10和50的三组向量：</p>
+<pre><code>sample5  &lt;- sample(X, 5, replace = TRUE)
+sample10 &lt;- sample(X, 10, replace = TRUE)
+sample50 &lt;- sample(X, 50, replace = TRUE)
+
+sample5
+## [1] 2.497921 2.635927 2.291848 2.127974 2.268268
+
+sample10
+## [1] 2.064451 2.274464 2.468938 1.800007 2.557669
+## [6] 2.535241 1.331020 1.159151 1.661762 2.285889
+
+sample50
+## [1] 2.581844 2.138331 3.003670 1.864148 2.049141
+## [6] 2.808971 1.400057 2.527640 3.639216 3.311873
+
+mean(sample5)
+## [1] 2.364388
+
+mean(sample10)
+## 2.013859
+
+mean(sample50)
+## 2.447003
+
+mean(sample(X, 1000, replace = TRUE))
+## 2.323124
+
+mean(sample(X, 10000, replace = TRUE))
+## [1] 2.334109</code></pre>
+<p>注意，随着样本量变大，样本均值也趋于总体均值。</p>
+<p><img src="media/fig-04-03.png" style="width:2.78333in;height:1.73000in" alt="图4.3" /></p>
+<p id="fig-4-3"><strong>图4.3</strong> 大样本量下的收敛</p>
+<h2 id="中心极限定理在r里的实现">中心极限定理在R里的实现</h2>
+<p>本例建立在前面代码的基础上。这一次，我们从X重复测量，但样本量不变。</p>
+<pre><code>mean_list &lt;- list()
+for(i in 1:10000) {
+  mean_list[[i]] &lt;- mean(sample(X, 10, replace = TRUE))
+}
+
+hist(unlist(mean_list), breaks = 500,
+  xlab = &quot;Mean of 10 samples from X&quot;,
+  main = &quot;Convergence of sample distribution&quot;,
+  cex.main = 0.8)
+abline(v = mu, lwd = 3, col = &quot;white&quot;, lty = 2)</code></pre>
+<p><img src="media/fig-04-04.png" style="width:5.04167in;height:4.04167in" /></p>
+<p id="fig-4-4"><strong>图4.4</strong> 向正态收敛</p>
+<p>样本均值的分布趋于一个貌似正态的分布！要知道中心极限定理有多强大，在应用于高度非正态的总体。我们创造一个总体，以50%的概率重复抽取0或1.</p>
+<pre><code>population &lt;- sample(c(0, 1), 100000, replace = TRUE)
+hist(population, main = &quot;Non-normal&quot;, cex.main = 0.8)
+abline(v = mean(population), lwd = 3, lty = 3)</code></pre>
+<p><img src="media/fig-04-05.png" style="width:5.04167in;height:4.04167in" /></p>
+<p id="fig-4-5"><strong>图4.5</strong> 非正态总体</p>
+<p>从这个高度非正态分布中反复提取样本量为10的样本，我们获得的样本均值分布仍然看起来服从正态分布。</p>
+<pre><code>mean_list &lt;- list()
+for(i in 1:10000) {
+  mean_list[[i]] &lt;- mean(sample(population, 10, replace = TRUE))
+}
+
+hist(unlist(mean_list), main = &quot;Distribution of averages&quot;,
+  cex.main = 0.8,
+  xlab = &quot;Average of 10 samples&quot;)
+abline(v = 0.5, lwd = 3)</code></pre>
+<p><img src="media/fig-04-06.png" style="width:5.04167in;height:4.04167in" /></p>
+<p id="fig-4-6"><strong>图4.6</strong> 非正态样本分布</p>
+<h2 id="无偏性和有效性">无偏性和有效性</h2>
+<p>从业人员花费大量的时间询问有关样本统计量属性的问题，如“样本统计量有多接近真实的总体统计量？”或“我需要多少样本，才能自信地认为样本统计量接近总体统计量？”</p>
+<p>理想情况下，好的样本统计量有如下特征：</p>
+<p>1. 样本统计量的期望值应该等于真实的总体统计量。估计量的偏度捕捉了这种效应。</p>
+<p>2.样本统计量的方差应该越小越好。有效性描述了这种特性。</p>
+<p>3.样本分布应该随样本量变大而收敛于真实的总体参数。这被称为估计量的一致性。</p>
+<p><img src="media/fig-04-07.png" style="width:3.24126in;height:2.31104in" /></p>
+<p id="fig-4-7"><strong>图4.7</strong> 偏差和有效性</p>
+<p>下面的插图展示了估计量的偏度和有效性之间的差别︰ 真实总体参数是 0。有两个分布，均值都等于总体参数。其中具有较大的方差是有偏和和无效的。方差较小的是无偏和有效的。同样，其他两个显示的分布都是有篇的（因为他们的样本均值没有落在真实的参数水平上）。其中一个比另一个更具有效性[123]。</p>
+<p>在之前一个例子中，我们定义总体均值为<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>μ</mi><mo>=</mo><msubsup><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>N</mi></msubsup><mfrac><msub><mi>X</mi><mi>i</mi></msub><mi>N</mi></mfrac></mrow><annotation encoding="application/x-tex">\mu = \sum_{i = 1}^{N}\frac{X_{i}}{N}</annotation></semantics></math>。巧合的是，总体均值的最佳样本估计量也是样本均值：<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mover><mi>x</mi><mo accent="true">¯</mo></mover><mo>=</mo><msubsup><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>N</mi></msubsup><mfrac><msub><mi>X</mi><mi>i</mi></msub><mi>n</mi></mfrac></mrow><annotation encoding="application/x-tex">\overline{x} = \sum_{i = 1}^{N}\frac{X_{i}}{n}</annotation></semantics></math>，其中<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi><mo>&lt;</mo><mi>N</mi></mrow><annotation encoding="application/x-tex">n &lt; N</annotation></semantics></math>. 在这个例子中，公式是一致的。为什么恰好是最佳估计量？我们可以试着用上面提及的前两条标准来估计，结果不言而喻。我们想要显示</p>
+<p><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>E</mi><mo stretchy="false" form="prefix">(</mo><mover><mrow><mi>x</mi><mo stretchy="false" form="postfix">)</mo></mrow><mo accent="true">¯</mo></mover><mo>=</mo><mi>µ</mi></mrow><annotation encoding="application/x-tex">E(\overline{x)} = µ</annotation></semantics></math></p>
+<p>(4.1)</p>
+<p>由于期望的运算是线性的，我们可以毫不费劲地把总和从E中捞出来：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>E</mi><mo stretchy="false" form="prefix">(</mo><mover><mi>x</mi><mo accent="true">¯</mo></mover><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mi>E</mi><mo stretchy="false" form="prefix">(</mo><mfrac><mn>1</mn><mi>N</mi></mfrac><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>N</mi></munderover><msub><mi>X</mi><mi>i</mi></msub><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">
+E(\overline{x}) = E(\frac{1}{N}\sum_{i = 1}^{N}X_{i})
+</annotation></semantics></math></p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>=</mo><mfrac><mn>1</mn><mi>N</mi></mfrac><mi>E</mi><mo stretchy="false" form="prefix">(</mo><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>N</mi></munderover><msub><mi>X</mi><mi>i</mi></msub><mo stretchy="false" form="postfix">)</mo><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">
+= \frac{1}{N}E(\sum_{i = 1}^{N}X_{i}))
+</annotation></semantics></math></p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>=</mo><mfrac><mn>1</mn><mi>N</mi></mfrac><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>N</mi></munderover><mi>E</mi><mo stretchy="false" form="prefix">(</mo><msub><mi>X</mi><mi>i</mi></msub><mo stretchy="false" form="postfix">)</mo><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">
+= \frac{1}{N}\sum_{i = 1}^{N}E(X_{i}))
+</annotation></semantics></math></p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>=</mo><mfrac><mrow><mi>N</mi><mi>μ</mi></mrow><mi>N</mi></mfrac><mo>=</mo><mi>μ</mi></mrow><annotation encoding="application/x-tex">
+= \frac{N\mu}{N} = \mu
+</annotation></semantics></math></p>
+<p>一个描述估计量偏度的经典例子是方差统计量。和之前一样，我们造出已知均值和方差的整个总体。由定义，总体的方差为</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi>σ</mi><mn>2</mn></msup><mo>=</mo><mfrac><mrow><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>N</mi></munderover><mo stretchy="false" form="prefix">(</mo><msub><mi>X</mi><mi>i</mi></msub><mo>−</mo><mi>μ</mi><msup><mo stretchy="false" form="postfix">)</mo><mn>2</mn></msup></mrow><mi>N</mi></mfrac></mrow><annotation encoding="application/x-tex">
+\sigma^{2} = \frac{\sum_{i = 1}^{N}(X_{i} - \mu)^{2}}{N}
+</annotation></semantics></math></p>
+<p>下面的函数可以计算方差：</p>
+<pre><code># 总体方差公式
+population_variance &lt;- function(x) {
+  mean &lt;- sum(x) / length(x)
+  return(sum((x - mean) ^ 2) / length(x))
+}
+
+# 创建一个总体
+population &lt;- as.numeric(1:100000)
+variance &lt;- population_variance(population)
+
+variance
+## [1] 833333333</code></pre>
+<p>将相同的公式用于总体重复抽样的样本时，会发生什么？重复调用population_variance()函数，并设定样本量为100。</p>
+<pre><code>output &lt;- list()
+for(i in 1:1000) {
+  output[[i]] &lt;- population_variance(sample(population,
+                                            10, replace = TRUE))
+}
+
+variance_estimates &lt;- unlist(output)
+hist(variance_estimates, breaks = 100, cex.main = 0.9)
+average_variance &lt;- mean(variance_estimates)
+abline(v = average_variance, , lty = 2, lwd = 2)
+abline(v = variance, lwd = 2)
+
+average_variance
+## [1] 738123625</code></pre>
+<p><img src="media/fig-04-08.png" style="width:2.94333in;height:1.86000in" alt="图4.8" /></p>
+<p id="fig-4-8"><strong>图4.8</strong> 估计方差</p>
+<p>当我们使用不同于总体统计量公式的样本统计量公式时，会发生什么呢？分布的均值会更接近真实统计量吗？换句话说，我们能不能降低估计量的偏度？答案是肯定的。样本统计量公式如下：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi>s</mi><mn>2</mn></msup><mo>=</mo><mfrac><mrow><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>N</mi></munderover><mo stretchy="false" form="prefix">(</mo><msub><mi>X</mi><mi>i</mi></msub><mo>−</mo><mi>μ</mi><msup><mo stretchy="false" form="postfix">)</mo><mn>2</mn></msup></mrow><mrow><mi>N</mi><mo>−</mo><mn>1</mn></mrow></mfrac></mrow><annotation encoding="application/x-tex">
+s^{2} = \frac{\sum_{i = 1}^{N}(X_{i} - \mu)^{2}}{N - 1}
+</annotation></semantics></math></p>
+<pre><code># 无偏方差估计量的公式
+sample_variance &lt;- function(x) {
+  mean &lt;- sum(x) / length(x)
+  return(sum((x - mean) ^ 2) / (length(x) - 1))
+}
+
+output &lt;- list()
+
+for( i in 1:1000 ) {
+  output[[i]] &lt;- sample_variance(sample(population,
+                                        10, replace = TRUE))
+}
+
+sample_variance_estimates &lt;- unlist(output)
+average_sample_variance &lt;- mean(sample_variance_estimates)
+
+average_sample_variance
+## [1] 836184961</code></pre>
+<p>分母为N-1的新公式似乎比总体方差公式更好地逼近真实的方差。显而易见，836184961比738123625更接近833333333. 但这是模拟所导致的人为效果吗？这一结果其实可以在数学上被严格证明。</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>E</mi><mo stretchy="false" form="prefix">[</mo><msubsup><mi>s</mi><mrow><mi>b</mi><mi>i</mi><mi>a</mi><mi>s</mi><mi>e</mi><mi>d</mi></mrow><mn>2</mn></msubsup><mo stretchy="false" form="postfix">]</mo><mo>=</mo><mi>E</mi><mo stretchy="false" form="prefix">[</mo><mfrac><mn>1</mn><mi>N</mi></mfrac><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>N</mi></munderover><mo stretchy="false" form="prefix">(</mo><msub><mi>x</mi><mi>i</mi></msub><mo>−</mo><mover><mi>x</mi><mo accent="true">¯</mo></mover><msup><mo stretchy="false" form="postfix">)</mo><mn>2</mn></msup><mo stretchy="false" form="postfix">]</mo><mo>=</mo><mi>E</mi><mo stretchy="false" form="prefix">[</mo><mfrac><mn>1</mn><mi>N</mi></mfrac><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>N</mi></munderover><mo stretchy="false" form="prefix">(</mo><msub><mi>x</mi><mi>i</mi></msub><mo>−</mo><mfrac><mn>1</mn><mi>N</mi></mfrac><munderover><mo>∑</mo><mrow><mi>j</mi><mo>=</mo><mn>1</mn></mrow><mi>N</mi></munderover><msub><mi>x</mi><mi>j</mi></msub><msup><mo stretchy="false" form="postfix">)</mo><mn>2</mn></msup><mo stretchy="false" form="postfix">]</mo></mrow><annotation encoding="application/x-tex">
+E\lbrack s_{biased}^{2}\rbrack = E\lbrack\frac{1}{N}\sum_{i = 1}^{N}(x_{i} - \overline{x})^{2}\rbrack = E\lbrack\frac{1}{N}\sum_{i = 1}^{N}(x_{i} - \frac{1}{N}\sum_{j = 1}^{N}x_{j})^{2}\rbrack
+</annotation></semantics></math></p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>=</mo><mfrac><mn>1</mn><mi>N</mi></mfrac><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>N</mi></munderover><mrow><mi>E</mi><mo stretchy="false" form="prefix">[</mo><msup><msub><mi>x</mi><mi>i</mi></msub><mn>2</mn></msup><mo>−</mo><mfrac><mn>2</mn><mi>N</mi></mfrac><msub><mi>x</mi><mi>i</mi></msub><munderover><mo>∑</mo><mrow><mi>j</mi><mo>=</mo><mn>1</mn></mrow><mi>N</mi></munderover><msub><mi>x</mi><mi>j</mi></msub><mo>+</mo><mfrac><mn>1</mn><msup><mi>N</mi><mn>2</mn></msup></mfrac><munderover><mo>∑</mo><mrow><mi>j</mi><mo>=</mo><mn>1</mn></mrow><mi>N</mi></munderover><msub><mi>x</mi><mi>j</mi></msub><munderover><mo>∑</mo><mrow><mi>k</mi><mo>=</mo><mn>1</mn></mrow><mi>N</mi></munderover><msub><mi>x</mi><mi>k</mi></msub><mo stretchy="false" form="postfix">]</mo></mrow></mrow><annotation encoding="application/x-tex">
+= \frac{1}{N}\sum_{i = 1}^{N}{E\lbrack{x_{i}}^{2} - \frac{2}{N}x_{i}\sum_{j = 1}^{N}x_{j} + \frac{1}{N^{2}}\sum_{j = 1}^{N}x_{j}\sum_{k = 1}^{N}x_{k}\rbrack}
+</annotation></semantics></math></p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>=</mo><mfrac><mn>1</mn><mi>N</mi></mfrac><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>N</mi></munderover><mrow><mo stretchy="true" form="prefix">[</mo><mfrac><mrow><mi>N</mi><mo>−</mo><mn>2</mn></mrow><mi>N</mi></mfrac><mi>E</mi><mrow><mo stretchy="true" form="prefix">[</mo><msup><msub><mi>x</mi><mi>i</mi></msub><mn>2</mn></msup><mo stretchy="true" form="postfix">]</mo></mrow><mo>−</mo><mfrac><mn>2</mn><mi>N</mi></mfrac><munderover><mo>∑</mo><mrow><mi>j</mi><mo>≠</mo><mi>i</mi></mrow><mi>N</mi></munderover><mrow><msub><mrow><mi>E</mi><mo stretchy="false" form="prefix">[</mo><mi>x</mi></mrow><mi>i</mi></msub><msub><mi>x</mi><mi>j</mi></msub><mo stretchy="false" form="postfix">]</mo></mrow><mo>+</mo><mfrac><mn>1</mn><msup><mi>N</mi><mn>2</mn></msup></mfrac><munderover><mo>∑</mo><mrow><mi>j</mi><mo>=</mo><mn>1</mn></mrow><mi>N</mi></munderover><mrow></mrow><munderover><mo>∑</mo><mrow><mi>k</mi><mo>≠</mo><mi>j</mi></mrow><mrow></mrow></munderover><mrow><msub><mrow><mi>E</mi><mo stretchy="false" form="prefix">[</mo><mi>x</mi></mrow><mi>j</mi></msub><msub><mi>x</mi><mi>k</mi></msub><mo stretchy="false" form="postfix">]</mo></mrow><mo>+</mo><mfrac><mn>1</mn><msup><mi>N</mi><mn>2</mn></msup></mfrac><munderover><mo>∑</mo><mrow><mi>j</mi><mo>=</mo><mn>1</mn></mrow><mi>N</mi></munderover><mrow><mi>E</mi><mo stretchy="false" form="prefix">[</mo><msubsup><mi>x</mi><mi>j</mi><mn>2</mn></msubsup><mo stretchy="false" form="postfix">]</mo></mrow><mo stretchy="true" form="postfix">]</mo></mrow></mrow><annotation encoding="application/x-tex">
+= \frac{1}{N}\sum_{i = 1}^{N}\left\lbrack \frac{N - 2}{N}E\left\lbrack {x_{i}}^{2} \right\rbrack - \frac{2}{N}\sum_{j \neq i}^{N}{{E\lbrack x}_{i}x_{j}\rbrack} + \frac{1}{N^{2}}\sum_{j = 1}^{N}{}\sum_{k \neq j}^{}{{E\lbrack x}_{j}x_{k}\rbrack} + \frac{1}{N^{2}}\sum_{j = 1}^{N}{E\lbrack x_{j}^{2}\rbrack} \right\rbrack
+</annotation></semantics></math></p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>=</mo><mfrac><mn>1</mn><mi>N</mi></mfrac><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>N</mi></munderover><mrow><mo stretchy="true" form="prefix">[</mo><mfrac><mrow><mi>N</mi><mo>−</mo><mn>2</mn></mrow><mi>N</mi></mfrac><mo stretchy="false" form="prefix">(</mo><msup><mi>σ</mi><mn>2</mn></msup><mo>+</mo><msup><mi>μ</mi><mn>2</mn></msup><mo stretchy="false" form="postfix">)</mo><mo>−</mo><mfrac><mn>2</mn><mi>N</mi></mfrac><mo stretchy="false" form="prefix">(</mo><mi>N</mi><mo>−</mo><mn>1</mn><mo stretchy="false" form="postfix">)</mo><msup><mi>μ</mi><mn>2</mn></msup><mo>+</mo><mfrac><mn>1</mn><msup><mi>N</mi><mn>2</mn></msup></mfrac><mi>N</mi><mo stretchy="false" form="prefix">(</mo><mi>N</mi><mo>−</mo><mn>1</mn><mo stretchy="false" form="postfix">)</mo><msup><mi>μ</mi><mn>2</mn></msup><mo>+</mo><mfrac><mn>1</mn><mi>N</mi></mfrac><mo stretchy="false" form="prefix">(</mo><msup><mi>σ</mi><mn>2</mn></msup><mo>+</mo><msup><mi>μ</mi><mn>2</mn></msup><mo stretchy="false" form="postfix">)</mo><mo stretchy="true" form="postfix">]</mo></mrow></mrow><annotation encoding="application/x-tex">
+= \frac{1}{N}\sum_{i = 1}^{N}\left\lbrack \frac{N - 2}{N}(\sigma^{2} + \mu^{2}) - \frac{2}{N}(N - 1)\mu^{2} + \frac{1}{N^{2}}N(N - 1)\mu^{2} + \frac{1}{N}(\sigma^{2} + \mu^{2}) \right\rbrack
+</annotation></semantics></math></p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo>=</mo><mfrac><mrow><mi>N</mi><mo>−</mo><mn>1</mn></mrow><mi>N</mi></mfrac><msup><mi>σ</mi><mn>2</mn></msup></mrow><annotation encoding="application/x-tex">
+= \frac{N - 1}{N}\sigma^{2}
+</annotation></semantics></math></p>
+<p>(4.5)</p>
+<p>分母从N换成N-1，可以消去乘积项<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mfrac><mrow><mi>N</mi><mo>−</mo><mn>1</mn></mrow><mi>N</mi></mfrac><annotation encoding="application/x-tex">\frac{N - 1}{N}</annotation></semantics></math>.</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>E</mi><mo stretchy="false" form="prefix">[</mo><msup><mi>s</mi><mn>2</mn></msup><mo stretchy="false" form="postfix">]</mo><mo>=</mo><mi>E</mi><mo stretchy="false" form="prefix">[</mo><mfrac><mn>1</mn><mrow><mi>N</mi><mo>−</mo><mn>1</mn></mrow></mfrac><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>N</mi></munderover><mo stretchy="false" form="prefix">(</mo><msub><mi>x</mi><mi>i</mi></msub><mo>−</mo><mover><mi>x</mi><mo accent="true">¯</mo></mover><msup><mo stretchy="false" form="postfix">)</mo><mn>2</mn></msup><mo stretchy="false" form="postfix">]</mo><mo>=</mo><msup><mi>σ</mi><mn>2</mn></msup></mrow><annotation encoding="application/x-tex">
+E\lbrack s^{2}\rbrack = E\lbrack\frac{1}{N - 1}\sum_{i = 1}^{N}(x_{i} - \overline{x})^{2}\rbrack = \sigma^{2}
+</annotation></semantics></math></p>
+<p>(4.6)</p>
+<p>我们可以推断，分母中的N−1项有助于提高数值结果以弥补为估计样本均值而损失的自由度。样本均值也出现在上面公式中。以上是在统计学入门教科书中经常遇到的解释。它可以帮助解释简单的例子，但当事情变得更复杂，这种中学启发式教学法就失效了。考虑总体标准差的无偏估计量。这儿是暗示︰它并不是无偏的方差估计量的平方根。</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>s</mi><mo>≠</mo><msqrt><mfrac><mrow><munderover><mo>∑</mo><mi>i</mi><mi>N</mi></munderover><mo stretchy="false" form="prefix">(</mo><msub><mi>X</mi><mi>i</mi></msub><mo>−</mo><mi>μ</mi><msup><mo stretchy="false" form="postfix">)</mo><mn>2</mn></msup></mrow><mrow><mi>N</mi><mo>−</mo><mn>1</mn></mrow></mfrac></msqrt></mrow><annotation encoding="application/x-tex">
+s \neq \sqrt{\frac{\sum_{i}^{N}(X_{i} - \mu)^{2}}{N - 1}}
+</annotation></semantics></math></p>
+<p>(4.7)</p>
+<p>对于一个正态分布的总体，正确而无偏的标准差统计量是</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>s</mi><mo>=</mo><mfrac><msqrt><mfrac><mrow><munderover><mo>∑</mo><mi>i</mi><mi>N</mi></munderover><mo stretchy="false" form="prefix">(</mo><msub><mi>X</mi><mi>i</mi></msub><mo>−</mo><mi>μ</mi><msup><mo stretchy="false" form="postfix">)</mo><mn>2</mn></msup></mrow><mrow><mi>N</mi><mo>−</mo><mn>1</mn></mrow></mfrac></msqrt><msub><mi>c</mi><mn>4</mn></msub></mfrac></mrow><annotation encoding="application/x-tex">
+s = \frac{\sqrt{\frac{\sum_{i}^{N}(X_{i} - \mu)^{2}}{N - 1}}}{c_{4}}
+</annotation></semantics></math></p>
+<p>(4.8)</p>
+<p>校正因子C<sub>4</sub> 的计算公式为</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>c</mi><mn>4</mn><mo>=</mo><mspace width="0.222em"></mspace><msqrt><mfrac><mn>2</mn><mrow><mi>N</mi><mo>−</mo><mn>1</mn></mrow></mfrac></msqrt><mfrac><mrow><mi mathvariant="normal">Γ</mi><mo stretchy="false" form="prefix">(</mo><mfrac><mi>N</mi><mn>2</mn></mfrac><mo stretchy="false" form="postfix">)</mo></mrow><mrow><mi mathvariant="normal">Γ</mi><mo stretchy="false" form="prefix">(</mo><mfrac><mrow><mi>N</mi><mo>−</mo><mn>1</mn></mrow><mn>2</mn></mfrac><mo stretchy="false" form="postfix">)</mo></mrow></mfrac></mrow><annotation encoding="application/x-tex">
+c4 = \ \sqrt{\frac{2}{N - 1}}\frac{\Gamma(\frac{N}{2})}{\Gamma(\frac{N - 1}{2})}
+</annotation></semantics></math></p>
+<p>（4.9）</p>
+<p>该公式是詹森不等式<sup>3</sup>的结果，以及期望运算的定义。<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi mathvariant="normal">Γ</mi><annotation encoding="application/x-tex">\Gamma</annotation></semantics></math>是已知的gamma函数，定义为</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="normal">Γ</mi><mo stretchy="false" form="prefix">(</mo><mi>t</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><msubsup><mo>∫</mo><mn>0</mn><mi>∞</mi></msubsup><msup><mi>x</mi><mrow><mi>t</mi><mo>−</mo><mn>1</mn></mrow></msup><msup><mi>e</mi><mrow><mi>−</mi><mi>x</mi></mrow></msup><mi>d</mi><mi>x</mi></mrow><annotation encoding="application/x-tex">
+\Gamma(t) = \int_{0}^{\infty}x^{t - 1}e^{- x}dx
+</annotation></semantics></math></p>
+<p>（4.10）</p>
+<p>对正整数N，gamma函数可简化为</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="normal">Γ</mi><mo stretchy="false" form="prefix">(</mo><mi>N</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mo stretchy="false" form="prefix">(</mo><mi>N</mi><mo>−</mo><mn>1</mn><mo stretchy="false" form="postfix">)</mo><mi>!</mi></mrow><annotation encoding="application/x-tex">
+\Gamma(N) = (N - 1)!
+</annotation></semantics></math></p>
+<p>（4.11）</p>
+<p>目前为止，我们只研究了统计估计量的偏差。偏差可以表达为<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>B</mi><mi>i</mi><mi>a</mi><mi>s</mi><mrow><mo stretchy="true" form="prefix">(</mo><mover><mi>θ</mi><mo accent="true">̂</mo></mover><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mi>E</mi><mrow><mo stretchy="true" form="prefix">(</mo><mover><mi>θ</mi><mo accent="true">̂</mo></mover><mo stretchy="true" form="postfix">)</mo></mrow><mo>−</mo><mi>θ</mi></mrow><annotation encoding="application/x-tex">Bias\left( \widehat{\theta} \right) = E\left( \widehat{\theta} \right) - \theta</annotation></semantics></math> 。 估计量的效度<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>V</mi><mi>a</mi><mi>r</mi><mrow><mo stretchy="true" form="prefix">(</mo><mover><mi>θ</mi><mo accent="true">̂</mo></mover><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">Var\left( \widehat{\theta} \right)</annotation></semantics></math>也是一个定义均方误差Mean Square Error(MSE)的重要度量。MSE是一个描述估计量准确度的测量。统计量的MSE可以分解为该统计量的方差（效度）和偏差[38]。</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mrow><mi>M</mi><mi>S</mi><mi>E</mi></mrow><mover><mi>θ</mi><mo accent="true">̂</mo></mover></msub><mo>=</mo><mi>E</mi><mrow><mo stretchy="true" form="prefix">(</mo><msup><mrow><mo stretchy="true" form="prefix">|</mo><mrow><mo stretchy="true" form="prefix">|</mo><mover><mi>θ</mi><mo accent="true">̂</mo></mover><mo>−</mo><mi>θ</mi><mo stretchy="true" form="postfix">|</mo></mrow><mo stretchy="true" form="postfix">|</mo></mrow><mn>2</mn></msup><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mi>E</mi><mrow><mo stretchy="true" form="prefix">(</mo><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>N</mi></munderover><mo stretchy="false" form="prefix">(</mo><msub><mover><mi>θ</mi><mo accent="true">̂</mo></mover><mi>i</mi></msub><mo>−</mo><msub><mi>θ</mi><mi>i</mi></msub><msup><mo stretchy="false" form="postfix">)</mo><mn>2</mn></msup><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mi>V</mi><mi>a</mi><mi>r</mi><mrow><mo stretchy="true" form="prefix">(</mo><mover><mi>θ</mi><mo accent="true">̂</mo></mover><mo stretchy="true" form="postfix">)</mo></mrow><mo>+</mo><msup><mrow><mi>B</mi><mi>i</mi><mi>a</mi><mi>s</mi><mo stretchy="false" form="prefix">(</mo><mover><mi>θ</mi><mo accent="true">̂</mo></mover><mo stretchy="false" form="postfix">)</mo></mrow><mn>2</mn></msup></mrow><annotation encoding="application/x-tex">
+{MSE}_{\widehat{\theta}} = E\left( \left| \left| \widehat{\theta} - \theta \right| \right|^{2} \right) = E\left( \sum_{i = 1}^{N}({\widehat{\theta}}_{i} - \theta_{i})^{2} \right) = Var\left( \widehat{\theta} \right) + {Bias(\widehat{\theta})}^{2}
+</annotation></semantics></math></p>
+<p>(4.12)</p>
+<p>上述公式称为偏差方差分解，它告诉我们，对于给定的均方误差，偏差和方差之间总是存在折衷。我们还注意到无偏估计(<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>B</mi><mi>i</mi><mi>a</mi><mi>s</mi><mrow><mo stretchy="true" form="prefix">(</mo><mover><mi>θ</mi><mo accent="true">̂</mo></mover><mo stretchy="true" form="postfix">)</mo></mrow><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">Bias\left( \widehat{\theta} \right) = 0</annotation></semantics></math>)的MSE恰恰是估计量的方差<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>V</mi><mi>a</mi><mi>r</mi><mrow><mo stretchy="true" form="prefix">(</mo><mover><mi>θ</mi><mo accent="true">̂</mo></mover><mo stretchy="true" form="postfix">)</mo></mrow></mrow><annotation encoding="application/x-tex">Var\left( \widehat{\theta} \right)</annotation></semantics></math>。</p>
+<p>一致性是另一个我们希望看到的估计量属性。一致估计量是当样本大小接近无穷大时其偏差和方差接近0的估计量。考虑下图。值得注意的是，对于小样本量，抽样分布如何偏离真实参数<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>θ</mi><annotation encoding="application/x-tex">\theta</annotation></semantics></math> 。随着样本量变大，分布的均值趋向于真实的参数值，分布的方差接近于零。当样本量N等于总体时，不确定性所剩无几。</p>
+<p><img src="media/fig-04-09.png" style="width:3.22000in;height:2.58000in" alt="图4.9" /></p>
+<p id="fig-4-9"><strong>图4.9</strong> 估计量的连续性</p>
+<p>为什么我们量化交易员需要关心偏差，有效性和一致性？当我们开始思考如何为交易策略开发模型时，一个不可避免的任务是，基于可观察数据对模型进行参数估计。我们必须对数据本身和需要拟合的参数做出假设。提出相关统计量来逼近假设性的全局参数就变得非常重要。为具体阐述这一点，请考虑以下情形：</p>
+<p>假如我们在酝酿一个做市策略，在其他各种可能的操作中，它根据当前实现的市场波动率动态调整其愿意持有的库存量。从近期可观察到的市场数据，如何确定当前市场实现的波动性？一种方法是首先假设一种底层机制，可观测的价格由之产生，例如，如下所示的模型<sup>4</sup>：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mfrac><mrow><mi>d</mi><mi>s</mi></mrow><mi>s</mi></mfrac><mo>=</mo><mi>σ</mi><mi>d</mi><msub><mi>W</mi><mi>t</mi></msub></mrow><annotation encoding="application/x-tex">
+\frac{ds}{s} = \sigma dW_{t}
+</annotation></semantics></math></p>
+<p>(4.13)</p>
+<p>这是一个含有单一未知参数的模型：即时方差<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msup><mi>σ</mi><mn>2</mn></msup><annotation encoding="application/x-tex">\sigma^{2}</annotation></semantics></math> 。把它想象为总体参数。我们可否得出一个可以推出真实方差的一个估计<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mover><mi>σ</mi><mo accent="true">̂</mo></mover><mn>2</mn></msup><mi>。</mi></mrow><annotation encoding="application/x-tex">{\widehat{\sigma}}^{2}。</annotation></semantics></math>我们可以进一步追踪金融工具的历史价格。实际上，这样的估计量确有不少，较为常用的有以下几个：</p>
+<ul>
+<li>Parkinson估计量</li>
+<li>Yang估计量</li>
+<li>Garman-Klass估计量</li>
+</ul>
+<p>其导数和统计特性的细节都超出了本书范围。总的来说，它们都试图平衡偏差和方差，同时保持计算易处理。尾注给出了估计量的一个概览<sup>5</sup>。</p>
+<p><img src="media/fig-04-10.png" style="width:2.02333in;height:1.31667in" alt="图4.10" /></p>
+<p id="fig-4-10"><strong>图4.10</strong> 作为映射的随机变量</p>
+<h2 id="概率基础">概率基础</h2>
+<p><strong>概率论</strong>是数学的一门分支，试图量化事件的内在不确定性。概率间接指代不确定性，可以把它想象为0到1之间的一个数，用来表达某个特定事件发生的可能性。难题在于将不确定性映射到概率。概率论随之接手任务，利用概率产生有用的结果。这里有更多需要牢记的定义。以数学的角度，这些定义都不够严格，但足以传达概率论的重要概念。</p>
+<p>我们可以将一个实验简单定义为，从随机过程收集数据的一种方法。一个样本空间则是这个实验的所有可能结果的集合。在这种背景下，样本有着完全不同于以前讨论中关于样本统计量的意义。</p>
+<p>举个例子，如果实验被定义为投掷一枚硬币，那么样本空间是集合｛正，反｝。如果实验被定义为投掷两枚硬币，样本空间就变为｛｛正，正｝，｛正，反｝，｛反，正｝，｛反，反｝｝。如果实验是产生股票价格，那么样本空间可以看作<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false" form="prefix">[</mo><mn>0</mn><mo>,</mo><mi>∞</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">\lbrack 0,\infty)</annotation></semantics></math>区间所有可能的实数。一个给定股票的价格跌为0是可以想象的。无论可能性多么低，Google股票也可能升至每股10,000,000美元。</p>
+<h2 id="随机变量">随机变量</h2>
+<p>一个随机变量是从样本空间的元素到实数的一个映射。下面的关系图说明了这一点：</p>
+<p>通常我们将随机变量记为大写字母。样本空间本身通常记作大写的希腊字母欧密嘎（<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi mathvariant="normal">Ω</mi><annotation encoding="application/x-tex">\Omega</annotation></semantics></math>）。样本空间的一个元素记为小写的欧密嘎（<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>ω</mi><annotation encoding="application/x-tex">\omega</annotation></semantics></math>）. 数学标记为<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>X</mi><mo stretchy="false" form="prefix">(</mo><mi>ω</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mi>r</mi></mrow><annotation encoding="application/x-tex">X(\omega) = r</annotation></semantics></math>，其中<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>r</mi><mo>∈</mo><mi>R</mi></mrow><annotation encoding="application/x-tex">r \in R</annotation></semantics></math>.</p>
+<p>在我们的抛骰子实验中，可以将随机变量定义为为</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>X</mi><mo stretchy="false" form="prefix">(</mo><mi>H</mi><mi>e</mi><mi>a</mi><mi>d</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mn>32</mn></mrow><annotation encoding="application/x-tex">
+X(Head) = 32
+</annotation></semantics></math></p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>X</mi><mo stretchy="false" form="prefix">(</mo><mi>T</mi><mi>a</mi><mi>i</mi><mi>l</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mn>65.2</mn></mrow><annotation encoding="application/x-tex">
+X(Tail) = 65.2
+</annotation></semantics></math></p>
+<p>为什么是32和65.2？为什么不呢？随机变量的定义中并没有指定将什么实数分配给公式的右边。但是，为了解决某些问题，使用某些数字会更有意义。这里是一个可能更加直观的映射：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>X</mi><mo stretchy="false" form="prefix">(</mo><mi>H</mi><mi>e</mi><mi>a</mi><mi>d</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">
+X(Head) = 1
+</annotation></semantics></math></p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>X</mi><mo stretchy="false" form="prefix">(</mo><mi>T</mi><mi>a</mi><mi>i</mi><mi>l</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">
+X(Tail) = 0
+</annotation></semantics></math></p>
+<p>或者，另一种可能的取值如下：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>X</mi><mo stretchy="false" form="prefix">(</mo><mi>H</mi><mi>e</mi><mi>a</mi><mi>d</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">
+X(Head) = 1
+</annotation></semantics></math></p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>X</mi><mo stretchy="false" form="prefix">(</mo><mi>T</mi><mi>a</mi><mi>i</mi><mi>l</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mi>−</mi><mn>1</mn></mrow><annotation encoding="application/x-tex">
+X(Tail) = - 1
+</annotation></semantics></math></p>
+<p>股票价格过程呢？什么样的映射有意义？由于可能的股票价格的样本空间已经由正的实数组成，我们可以只使用那些值作为映射。</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>X</mi><mo stretchy="false" form="prefix">(</mo><mn>100.0</mn><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mn>100.0</mn></mrow><annotation encoding="application/x-tex">
+X(100.0) = 100.0
+</annotation></semantics></math></p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>X</mi><mo stretchy="false" form="prefix">(</mo><mn>120.32</mn><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mn>120.32</mn></mrow><annotation encoding="application/x-tex">
+X(120.32) = 120.32
+</annotation></semantics></math></p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>.</mi><mi>.</mi><mi>.</mi></mrow><annotation encoding="application/x-tex">
+...
+</annotation></semantics></math></p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>X</mi><mo stretchy="false" form="prefix">(</mo><mi>ω</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mi>ω</mi></mrow><annotation encoding="application/x-tex">
+X(\omega) = \omega
+</annotation></semantics></math></p>
+<h2 id="概率">概率</h2>
+<p>接下来，我们需要谈谈概率。可以把它们看作分配给随机变量每个取值的权重。概率是描述一个特定事件发生似然性的一种量度。概率可以取0到1之间的任何实数。概率为零意味着事件绝对不可能发生，而概率为1则暗示事件必定会发生。</p>
+<p>更正式地，根据柯尔莫哥洛夫（Kolmogorov），我们可以考虑概率必备的三个基本属性[63, 134]。</p>
+<p>1. E是样本空间的一个事件，它的概率是一个大于等于零的实数。</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mo stretchy="false" form="prefix">(</mo><mi>E</mi><mo stretchy="false" form="postfix">)</mo><mo>∈</mo><mi>R</mi><mo>,</mo><mi>P</mi><mo stretchy="false" form="prefix">(</mo><mi>E</mi><mo stretchy="false" form="postfix">)</mo><mo>≥</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">
+P(E) \in R,P(E) \geq 0
+</annotation></semantics></math></p>
+<p>2. 一个样本空间的所有事件概率之和为1.</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mo stretchy="false" form="prefix">(</mo><mi mathvariant="normal">Ω</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">
+P(\Omega) = 1
+</annotation></semantics></math></p>
+<p>3. 互斥事件并集的总概率等于独立事件概率之和。</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mo stretchy="false" form="prefix">(</mo><msub><mi>E</mi><mn>1</mn></msub><mo>∪</mo><msub><mi>E</mi><mn>2</mn></msub><mo>∪</mo><mi>.</mi><mi>.</mi><mi>.</mi><msub><mi>E</mi><mi>N</mi></msub><mo stretchy="false" form="postfix">)</mo><mo>=</mo><munderover><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>N</mi></munderover><mi>P</mi><mo stretchy="false" form="prefix">(</mo><msub><mi>E</mi><mi>i</mi></msub><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">
+P(E_{1} \cup E_{2} \cup ...E_{N}) = \sum_{i = 1}^{N}P(E_{i})
+</annotation></semantics></math></p>
+<h2 id="概率分布">概率分布</h2>
+<p>概率分布是将概率分配到随机变量结果的函数。对于取离散的随机变量，我们使用概率质量函数来表示y轴上的概率和在x轴上的随机变量的值。下面的概率质量函数，描述了投掷一枚硬币实验的随机变量。</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>X</mi><mo stretchy="false" form="prefix">(</mo><mi>H</mi><mi>e</mi><mi>a</mi><mi>d</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mi>P</mi><mo stretchy="false" form="prefix">(</mo><mi>X</mi><mo>=</mo><mn>1</mn><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mn>0.5</mn></mrow><annotation encoding="application/x-tex">
+X(Head) = P(X = 1) = 0.5
+</annotation></semantics></math></p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>X</mi><mo stretchy="false" form="prefix">(</mo><mi>T</mi><mi>a</mi><mi>i</mi><mi>l</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mi>P</mi><mo stretchy="false" form="prefix">(</mo><mi>X</mi><mo>=</mo><mi>−</mi><mn>1</mn><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mn>0.5</mn></mrow><annotation encoding="application/x-tex">
+X(Tail) = P(X = - 1) = 0.5
+</annotation></semantics></math></p>
+<p>(4.21)</p>
+<pre><code>plot(c(-1, 1), c(0.5, 0.5), type = &quot;h&quot;, lwd = 3,
+xlim = c(-2, 2), main = &quot;Probability mass function of coin
+toss&quot;,
+ylab = &quot;Probability&quot;,
+xlab = &quot;Random Variable&quot;,
+cex.main = 0.9)</code></pre>
+<p><img src="media/fig-04-11.png" style="width:5.08403in;height:3.66238in" /></p>
+<p id="fig-4-11"><strong>图4.11</strong> 硬币投掷的概率质量函数</p>
+<p>概率质量函数的暗示了一枚公平的硬币，因为每个面发生的概率是0.5，另外一个重要属性是它的概率之和为1。</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mo stretchy="false" form="prefix">(</mo><mi>X</mi><mo>=</mo><mn>1</mn><mo stretchy="false" form="postfix">)</mo><mo>+</mo><mi>P</mi><mo stretchy="false" form="prefix">(</mo><mi>X</mi><mo>=</mo><mi>−</mi><mn>1</mn><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">
+P(X = 1) + P(X = - 1) = 1
+</annotation></semantics></math></p>
+<p>(4.22)</p>
+<p><img src="media/fig-04-12.png" style="width:3.40333in;height:3.82000in" alt="图4.12" /></p>
+<p id="fig-4-12"><strong>图4.12</strong> 正态分布</p>
+<p>概率质量函数的表示只能用于离散型分布。对于连续型分布，概率之于一个实数而言是毫无意义的，因为它永远是0.变通的方法是将一个概率赋予一段值。一个最重要的连续概率分布是高斯分布。概率质量函数曲线下的面积为1。数学表达式如下：</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msubsup><mo>∫</mo><mrow><mi>−</mi><mi>∞</mi></mrow><mi>∞</mi></msubsup><mfrac><mn>1</mn><msqrt><mrow><mn>2</mn><mi>π</mi></mrow></msqrt></mfrac><msup><mi>e</mi><mrow><mi>−</mi><msup><mi>x</mi><mn>2</mn></msup></mrow></msup><mspace width="0.167em"></mspace><mi>d</mi><mi>x</mi><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">
+\int_{- \infty}^{\infty}\frac{1}{\sqrt{2\pi}}e^{- x^{2}}\, dx = 1
+</annotation></semantics></math></p>
+<p>(4.23)</p>
+<p>有趣的是，正态分布的极大值发生在x = 0 处。在这一点，有<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>f</mi><mo stretchy="false" form="prefix">(</mo><mn>0</mn><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mfrac><mn>1</mn><msqrt><mrow><mn>2</mn><mi>π</mi></mrow></msqrt></mfrac></mrow><annotation encoding="application/x-tex">f(0) = \frac{1}{\sqrt{2\pi}}</annotation></semantics></math>。但是，说</p>
+<p><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mo stretchy="false" form="prefix">(</mo><mi>x</mi><mo>=</mo><mn>0</mn><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mfrac><mn>1</mn><msqrt><mrow><mn>2</mn><mi>π</mi></mrow></msqrt></mfrac></mrow><annotation encoding="application/x-tex">P(x = 0) = \frac{1}{\sqrt{2\pi}}</annotation></semantics></math>却是错误的。X随机变量可以取负无穷到正无穷的任意值。从这个区间取得任何一个随机X的概率为0。这就是为什么有<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mo stretchy="false" form="prefix">(</mo><mi>X</mi><mo>=</mo><mn>0</mn><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">P(X = 0) = 0</annotation></semantics></math>。下面这个表达式更为准确：<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mo stretchy="false" form="prefix">(</mo><mi>X</mi><mo>≤</mo><mn>0</mn><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mn>0.5</mn></mrow><annotation encoding="application/x-tex">P(X \leq 0) = 0.5</annotation></semantics></math>。它的意思是，图下面从负无穷到0的面积等于0.5。</p>
+<p>当在R里绘制概率分布时，y轴的值大于1是完全可能的。这可能让你发问了，如果你把y轴想象成实际的概率。对于离散型随机变量，这没错。但对于连续型，这并不对。对于离散随机变量，曲线下方的面积必须等于1。高度依据直方的宽度进行调整以令其面积等于1。</p>
+<p>一些常用的连续型分布图在下面列出：</p>
+<p><img src="media/fig-04-13.png" style="width:2.47667in;height:1.85333in" alt="图4.13" /></p>
+<p id="fig-4-13"><strong>图4.13</strong> 连续分布示例</p>
+<h2 id="贝叶斯和频率方法">贝叶斯和频率方法</h2>
+<p>再次考虑抛硬币实验。可以想象，一枚硬币可能以边缘着陆并竖直站立。另外，这枚硬币也可能在着陆前消失在了稀薄的空气中。所以我们当然可以给这些事件分配概率。P(X = Head) = 0. 499, P(X = Tail) = 0. 499, P(X = Edge) = 0. 001, P(X = Disappears) = 0. 001。尽管这类边缘事件极为罕见，我们仍然必须确保总概率为 1。但我们怎么将有关将概率指派给此类事件呢？</p>
+<p>这是一道主观题，答案也极为主观。数学家已经为此辩论了几个世纪，我们这里也就不再探讨细枝末节了[135]。在这个问题上，主要有两种思想。频率学派将概率定义为大量实验的相对频率的极限，然而贝叶斯方法认为概率是基于新到来的数据而改变的[115, 122]。</p>
+<p>贝叶斯思想中，数据是唯一。数据塑造了概率，而不是相反。数据隐含地改造任何参数的分布，对于一个特定现象进行建模，参数会随着分布而改变。贝叶斯法则提供更新这种分布的机制。这条规则可以由下列公式表示︰</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mo stretchy="false" form="prefix">(</mo><mi>E</mi><mi>v</mi><mi>i</mi><mi>d</mi><mi>e</mi><mi>n</mi><mi>c</mi><mi>e</mi><mo stretchy="false" form="prefix">|</mo><mi>D</mi><mi>a</mi><mi>t</mi><mi>a</mi><mo stretchy="false" form="postfix">)</mo><mo>=</mo><mfrac><mrow><mi>P</mi><mo stretchy="false" form="prefix">(</mo><mi>D</mi><mi>a</mi><mi>t</mi><mi>a</mi><mo stretchy="false" form="prefix">|</mo><mi>E</mi><mi>v</mi><mi>i</mi><mi>d</mi><mi>e</mi><mi>n</mi><mi>c</mi><mi>e</mi><mo stretchy="false" form="postfix">)</mo><mi>P</mi><mo stretchy="false" form="prefix">(</mo><mi>E</mi><mi>v</mi><mi>i</mi><mi>d</mi><mi>e</mi><mi>n</mi><mi>c</mi><mi>e</mi><mo stretchy="false" form="postfix">)</mo></mrow><mrow><mi>P</mi><mo stretchy="false" form="prefix">(</mo><mi>D</mi><mi>a</mi><mi>t</mi><mi>a</mi><mo stretchy="false" form="postfix">)</mo></mrow></mfrac></mrow><annotation encoding="application/x-tex">
+P(Evidence|Data) = \frac{P(Data|Evidence)P(Evidence)}{P(Data)}
+</annotation></semantics></math></p>
+<p>(4.24)</p>
+<p>这一公式指出，给定数据已知时证据的概率（我们对证据的信念）等于证据给定时数据的概率乘以没有任何数据时证据的概率。公式中的分母实际上是一个比例因子，用来计算结果。<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mo stretchy="false" form="prefix">(</mo><mi>E</mi><mi>v</mi><mi>i</mi><mi>d</mi><mi>e</mi><mi>n</mi><mi>c</mi><mi>e</mi><mo stretchy="false" form="prefix">|</mo><mi>D</mi><mi>a</mi><mi>t</mi><mi>a</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">P(Evidence|Data)</annotation></semantics></math>的数学表达式是后验分布。<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mo stretchy="false" form="prefix">(</mo><mi>D</mi><mi>a</mi><mi>t</mi><mi>a</mi><mo stretchy="false" form="prefix">|</mo><mi>E</mi><mi>v</mi><mi>i</mi><mi>d</mi><mi>e</mi><mi>n</mi><mi>c</mi><mi>e</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">P(Data|Evidence)</annotation></semantics></math>表达式是似然函数。<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>P</mi><mo stretchy="false" form="prefix">(</mo><mi>E</mi><mi>v</mi><mi>i</mi><mi>d</mi><mi>e</mi><mi>n</mi><mi>c</mi><mi>e</mi><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">P(Evidence)</annotation></semantics></math>是先验分布。</p>
+<p><img src="media/fig-04-14.png" style="width:2.88333in;height:1.75667in" alt="图4.14" /></p>
+<p id="fig-4-14"><strong>图4.14</strong> 硬币翻转的密度</p>
+<h2 id="掷硬币模拟器">掷硬币模拟器</h2>
+<p>接下来的几行R代码模拟了抛掷硬币1000次的结果。产生一组为0的向量表示反面，1表示正面。样本空间｛正，反｝到0和1是一组映射。用生成的向量估计实验的内在概率。</p>
+<pre><code>outcomes &lt;- sample(c(0, 1), 1000, replace = TRUE)</code></pre>
+<p>结果的直方图类似下图：</p>
+<p>大约500个正面和500个反面通过函数<code>sample()</code>而产生。一个频率学派可能声称，每次发生正面或反面事件的概率均为500/1000。而实际上，每一面的观察值应该除以试验总次数。</p>
+<p>下面，我们考虑用一枚有偏差的硬币进行实验。仍然使用函数<code>sample()</code>，但重新定义正面出现的默认概率。</p>
+<pre><code>set.seed(101) 
+biased_outcomes &lt;- sample(c(0, 1), 1000, 
+  replace = TRUE, prob = c(0.4, 0.6))</code></pre>
+<p><img src="media/fig-04-15.png" style="width:2.30000in;height:2.32000in" alt="图4.15" /></p>
+<p id="fig-4-15"><strong>图4.15</strong> 贝叶斯先验与后验</p>
+<p>现在，获取任何数据之前, 频率学派认为，没有办法定义{head}事件发生的概率。只有数据开始进来后才能估计概率。另一方面，贝叶斯概率始于一个隐含假设，即概率在50%附近。这种信念以先验分布来表达。先验甚至可能不同于一个公平的硬币假设。它取决于贝叶斯学者的心情和偏见。这里的细微差别是贝叶斯学派表达意见之前没有见过任何数据，而频率学派则不然。随着数据开始流入，频率和贝叶斯都将更新他们对正面发生概率的估计。在运行结束时，频率学派的最终结果为点估计：</p>
+<pre><code>prob_estimate &lt;- sum(biased_outcomes) / 
+  length(biased_outcomes)
+prob_estimate 
+## [1] 0.603</code></pre>
+<p>贝叶斯先验会随着新鲜信息到达而改变。最后，它的均值会趋向真正的概率。连续更新过程的最终结果是一个后验概率，而不是点估计。下图中，均值从0.5移向0.6. 后验的变化是先验的变化和数据特征的函数。</p>
+<p>最后，两者对正面发生概率的估计达成一致。但在很多其他估计问题中，先验的选择可能严重影响最后得出的参数估计值。</p>
+<p>如果你还想进一步了解关于有偏硬币的贝叶斯方法论，可以参考链接里的例子：<a href="http://www.win-vector.com/blog/2014/07/frequenstist-inference-only-seems-easy/" class="uri">http://www.win-vector.com/blog/2014/07/frequenstist-inference-only-seems-easy/</a>.</p>
+<h2 id="关于rstan的使用">关于RStan的使用</h2>
+<p>这个话题稍微深入，但值得一提。使用<code>Stan</code>概率语言可以完整地进行贝叶斯统计推断[105]。这里是Stan的项目主页：<a href="http://mc-stan.org/" class="uri">http://mc-stan.org/</a>.。Stan是由美国顶级高校和研究机构参与的一个多团队合作项目。它包含高效的MCMC抽样（马尔科夫链蒙特卡洛）和用C++写成的优化方法。用这些算法进行贝叶斯推断非常有用，而且幸运地，R也有Stan接口。这个包叫<strong>RStan</strong>，这里是安装说明：<a href="https://github.com/stan-dev/rstan/wiki/RStan-Getting-Started" class="uri">https://github.com/stan-dev/rstan/wiki/RStan-Getting-Started</a>. 注意，RStan不能直接从CRAN安装。它需要用C++编译器来编译Stan指定的概率模型。如果这里的讨论让你感觉意犹未尽，强烈建议将<strong>RStan</strong>收入你的工具箱，以便进一步探索贝叶斯分析和建模技术。</p>
+<h2 id="总结">总结</h2>
+<p>本章对统计和概率入门课程的一些有用又实用的话题作一概述。介绍了样本和总体统计量之间的差别，和统计估计量的思想。总括描述了大数定律和中心极限定理，伴随R代码示例以阐明概念。讨论了统计估计量的无偏性、有效性和一致性，展示了这些优良特性对抽样分布的的影响。最后，解释了MSE的偏度-方差分解，简要提及贝叶斯学派和频率学派对概率的不同主张。推荐<strong>RStan</strong>扩展包给想要进阶分析的用户。</p>
+<p>翻译：杨环 审校：冯凌秉</p>
+
+    <div class="pager"><a class="prev" href="ch03.html"><span class="dir">上一页</span>第3章 与数据打交道</a><a class="next" href="ch05.html"><span class="dir">下一页</span>第5章 统计和概率中级</a></div>
+  </div>
+</main>
+<script>
+(function () {
+  var box = document.getElementById('q');
+  var panel = document.getElementById('hits');
+  if (!box) return;
+  var idx = [];
+  fetch('search-index.json')
+    .then(function (r) { return r.json(); })
+    .then(function (d) { idx = d; })
+    .catch(function () {});
+
+  function esc(s) {
+    return s.replace(/[&<>"]/g, function (c) {
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];
+    });
+  }
+  function run() {
+    var q = box.value.trim().toLowerCase();
+    if (!q) { panel.classList.remove('on'); panel.innerHTML = ''; return; }
+    var terms = q.split(/\s+/);
+    var out = [];
+    for (var i = 0; i < idx.length && out.length < 24; i++) {
+      var e = idx[i];
+      var hay = (e.h + ' ' + e.p + ' ' + e.t).toLowerCase();
+      var ok = true;
+      for (var k = 0; k < terms.length; k++) {
+        if (hay.indexOf(terms[k]) < 0) { ok = false; break; }
+      }
+      if (!ok) continue;
+      var pos = e.t.toLowerCase().indexOf(terms[0]);
+      var snip = pos > 40 ? e.t.slice(pos - 30, pos + 90)
+                          : e.t.slice(0, 110);
+      out.push('<a href="' + e.u + '"><div class="p">' + esc(e.p) +
+               '</div><div class="h">' + esc(e.h) +
+               '</div><div class="s">' + esc(snip) + '</div></a>');
+    }
+    panel.innerHTML = out.length
+      ? out.join('')
+      : '<div class="none">没有匹配的内容</div>';
+    panel.classList.add('on');
+  }
+  box.addEventListener('input', run);
+  box.addEventListener('focus', run);
+  document.addEventListener('click', function (e) {
+    if (!panel.contains(e.target) && e.target !== box) {
+      panel.classList.remove('on');
+    }
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') { panel.classList.remove('on'); box.blur(); }
+  });
+})();
+</script>
+</body>
+</html>

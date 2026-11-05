@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>量化金融与R语言 · 量化金融与R语言</title>
+<meta name="description" content="Quantitative Trading with R 中文翻译稿" />
+<style>
+:root {
+  --bg: #ffffff;
+  --fg: #1f2328;
+  --muted: #6b7280;
+  --line: #e5e7eb;
+  --soft: #f7f8fa;
+  --accent: #0f5c8c;
+  --code-bg: #f6f8fa;
+  --sidebar-w: 288px;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  color: var(--fg);
+  background: var(--bg);
+  font-family: -apple-system, "PingFang SC", "Hiragino Sans GB",
+               "Microsoft YaHei", "Source Han Sans SC", sans-serif;
+  font-size: 16px;
+  line-height: 1.85;
+  -webkit-font-smoothing: antialiased;
+}
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* 侧边栏 */
+.sidebar {
+  position: fixed; inset: 0 auto 0 0; width: var(--sidebar-w);
+  border-right: 1px solid var(--line);
+  background: var(--soft);
+  display: flex; flex-direction: column;
+  overflow: hidden;
+}
+.brand {
+  padding: 22px 20px 14px;
+  border-bottom: 1px solid var(--line);
+}
+.brand .t { font-size: 17px; font-weight: 700; line-height: 1.4; }
+.brand .s { font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.5; }
+.search { padding: 12px 16px; border-bottom: 1px solid var(--line); }
+.search input {
+  width: 100%; padding: 8px 10px; font-size: 13px;
+  border: 1px solid var(--line); border-radius: 6px;
+  background: #fff; color: var(--fg); outline: none;
+}
+.search input:focus { border-color: var(--accent); }
+.nav { flex: 1; overflow-y: auto; padding: 10px 0 40px; }
+.nav .group { padding: 12px 20px 6px; font-size: 11px; font-weight: 700;
+  color: var(--muted); letter-spacing: .08em; }
+.nav a.item {
+  display: block; padding: 7px 20px 7px 20px;
+  font-size: 14px; color: var(--fg); border-left: 3px solid transparent;
+}
+.nav a.item:hover { background: #eef1f5; text-decoration: none; }
+.nav a.item.active {
+  border-left-color: var(--accent); background: #e8eff5;
+  font-weight: 600; color: var(--accent);
+}
+.nav details summary {
+  padding: 7px 20px; font-size: 14px; cursor: pointer; list-style: none;
+}
+.nav details summary::-webkit-details-marker { display: none; }
+.nav details summary:hover { background: #eef1f5; }
+.nav details a.sub {
+  display: block; padding: 4px 20px 4px 34px;
+  font-size: 12.5px; color: var(--muted); line-height: 1.5;
+}
+.nav details a.sub:hover { color: var(--accent); }
+
+/* 正文 */
+.main { margin-left: var(--sidebar-w); }
+.wrap { max-width: 860px; margin: 0 auto; padding: 40px 40px 96px; }
+.crumb { font-size: 12px; color: var(--muted); margin-bottom: 10px; }
+h1 { font-size: 30px; line-height: 1.35; margin: 0 0 26px;
+     font-weight: 700; letter-spacing: .01em; }
+h2 { font-size: 21px; margin: 40px 0 14px; padding-bottom: 8px;
+     border-bottom: 1px solid var(--line); font-weight: 700; }
+h3 { font-size: 17px; margin: 28px 0 10px; font-weight: 700; }
+h4 { font-size: 15px; margin: 22px 0 8px; font-weight: 700; }
+p { margin: 0 0 16px; text-align: justify; }
+p.signature { text-align: right; }
+ul, ol { margin: 0 0 16px; padding-left: 26px; }
+li { margin: 4px 0; }
+img { max-width: 100%; height: auto; display: block; margin: 22px auto;
+      border-radius: 4px; }
+figure { margin: 24px 0; text-align: center; }
+figcaption { font-size: 13px; color: var(--muted); margin-top: 8px; }
+
+code {
+  font-family: "SF Mono", Menlo, Consolas, "Courier New", monospace;
+  font-size: 0.88em; background: var(--code-bg);
+  padding: 2px 5px; border-radius: 4px;
+  border: 1px solid #eaecef;
+}
+pre {
+  background: var(--code-bg); border: 1px solid var(--line);
+  border-radius: 6px; padding: 14px 16px; overflow-x: auto;
+  line-height: 1.6; margin: 0 0 18px;
+}
+pre code { background: none; border: 0; padding: 0; font-size: 12.5px; }
+
+table { border-collapse: collapse; width: 100%; margin: 20px 0;
+        font-size: 14px; }
+th, td { border: 1px solid var(--line); padding: 7px 11px; }
+th { background: var(--soft); font-weight: 700; }
+tr:nth-child(even) td { background: #fcfcfd; }
+
+blockquote { margin: 0 0 18px; padding: 10px 18px;
+  border-left: 3px solid var(--line); color: var(--muted); background: var(--soft); }
+
+/* 插图目录 / 表格目录 */
+.cap-list { list-style: none; padding: 0; margin: 4px 0 0; }
+.cap-list li { border-bottom: 1px solid var(--line); }
+.cap-list a { display: flex; align-items: baseline; gap: 12px;
+  padding: 9px 2px; font-size: 14px; color: var(--fg); }
+.cap-list a:hover { background: var(--soft); text-decoration: none;
+  color: var(--accent); }
+.cap-num { min-width: 68px; color: var(--muted); font-size: 12.5px;
+  font-variant-numeric: tabular-nums; }
+.cap-title { flex: 1; }
+.cap-where { color: var(--muted); font-size: 11.5px; white-space: nowrap; }
+.cap-empty { color: var(--muted); font-size: 14px; }
+
+/* MathML 居中与缩放 */
+math[display="block"] { display: block; margin: 20px auto; font-size: 1.05em; }
+
+/* 页脚翻页 */
+.pager { display: flex; justify-content: space-between; gap: 16px;
+         margin-top: 56px; padding-top: 22px; border-top: 1px solid var(--line); }
+.pager a { flex: 1; padding: 12px 16px; border: 1px solid var(--line);
+           border-radius: 8px; font-size: 13px; }
+.pager a:hover { border-color: var(--accent); text-decoration: none;
+                 background: var(--soft); }
+.pager .dir { display: block; font-size: 11px; color: var(--muted);
+              margin-bottom: 3px; }
+.pager .next { text-align: right; }
+
+/* 首页 */
+.cover { padding: 56px 0 8px; }
+.cover h1 { font-size: 38px; margin-bottom: 8px; }
+.cover .sub { font-size: 15px; color: var(--muted); margin-bottom: 34px; }
+.toc-list { border-top: 1px solid var(--line); }
+.toc-list > li { list-style: none; margin: 0; border-bottom: 1px solid var(--line); }
+.toc-list { padding-left: 0; }
+.toc-row { display: flex; align-items: baseline; gap: 10px;
+           padding: 13px 2px; font-size: 15px; }
+.toc-row .no { color: var(--muted); font-size: 12px; min-width: 26px; }
+.toc-subs { padding: 0 0 12px 36px; margin: 0; }
+.toc-subs li { list-style: none; font-size: 13px; color: var(--muted);
+               padding: 3px 0; }
+
+/* 搜索结果 */
+#hits { display: none; position: absolute; left: 16px; right: 16px; top: 96px;
+        background: #fff; border: 1px solid var(--line); border-radius: 8px;
+        box-shadow: 0 8px 24px rgba(0,0,0,.12); max-height: 60vh;
+        overflow-y: auto; z-index: 50; }
+#hits.on { display: block; }
+#hits a { display: block; padding: 10px 14px; border-bottom: 1px solid var(--line); }
+#hits a:last-child { border-bottom: 0; }
+#hits a:hover { background: var(--soft); text-decoration: none; }
+#hits .h { font-size: 13px; font-weight: 600; color: var(--fg); }
+#hits .p { font-size: 11px; color: var(--accent); margin-bottom: 2px; }
+#hits .s { font-size: 12px; color: var(--muted); line-height: 1.5; }
+#hits .none { padding: 14px; font-size: 13px; color: var(--muted); }
+
+@media (max-width: 900px) {
+  .sidebar { display: none; }
+  .main { margin-left: 0; }
+  .wrap { padding: 24px 20px 72px; }
+  .cover h1 { font-size: 28px; }
+}
+@media print {
+  .sidebar, .pager, .search { display: none; }
+  .main { margin-left: 0; }
+  .wrap { max-width: none; padding: 0; }
+}
+</style>
+</head>
+<body>
+<aside class="sidebar">
+  <div class="brand">
+    <div class="t">量化金融与R语言</div>
+    <div class="s">Quantitative Trading with R 中文翻译稿</div>
+  </div>
+  <div class="search">
+    <input id="q" type="search" placeholder="搜索全书…" autocomplete="off" />
+  </div>
+  <nav class="nav"><div class="group">前言</div><a class="item" href="figures.html">插图目录</a><a class="item" href="tables.html">表格目录</a><a class="item" href="preface.html">译者序</a><a class="item" href="translators.html">译者简介</a><a class="item" href="acknowledgements.html">致谢</a><div class="group">正文</div><a class="item" href="ch01.html">第1章 总览</a><a class="item" href="ch02.html">第2章 交易工具</a><a class="item" href="ch03.html">第3章 与数据打交道</a><a class="item" href="ch04.html">第4章 统计和概率基础</a><a class="item" href="ch05.html">第5章 统计和概率中级</a><a class="item" href="ch06.html">第6章 价格差，贝塔系数和风险</a><a class="item" href="ch07.html">第7章 基于Quantstrat包的回溯测试</a><a class="item" href="ch08.html">第8章 高频数据分析</a><a class="item" href="ch09.html">第9章 期权</a><a class="item" href="ch10.html">第10章 最优化</a><a class="item" href="ch11.html">第11章 速度，测试与报告</a><div class="group">附录</div><a class="item" href="appendix.html">补充</a><a class="item" href="references.html">参考文献</a><a class="item" href="terms.html">索引</a></nav>
+  <div id="hits"></div>
+</aside>
+<main class="main">
+  <div class="wrap cover">
+    
+    <h1>量化金融与R语言</h1><div class="sub">Quantitative Trading with R 中文翻译稿</div><p><a href="figures.html">插图目录</a> · <a href="tables.html">表格目录</a> · <a href="acknowledgements.html">致谢</a></p><ul class="toc-list"><li><a class="toc-row" href="preface.html"><span class="no">·</span><span>译者序</span></a></li><li><a class="toc-row" href="translators.html"><span class="no">·</span><span>译者简介</span></a></li><li><a class="toc-row" href="acknowledgements.html"><span class="no">·</span><span>致谢</span></a></li><li><a class="toc-row" href="ch01.html"><span class="no">·</span><span>第1章 总览</span></a><ul class="toc-subs"><li><a href="ch01.html#任务综述">任务综述</a></li><li><a href="ch01.html#金融市场和工具">金融市场和工具</a></li><li><a href="ch01.html#交易策略">交易策略</a></li><li><a href="ch01.html#高频交易">高频交易</a></li><li><a href="ch01.html#关于订单orderbook">关于订单（orderbook）</a></li><li><a href="ch01.html#自动化交易">自动化交易</a></li><li><a href="ch01.html#数据从哪儿来">数据从哪儿来？</a></li><li><a href="ch01.html#总结">总结</a></li></ul></li><li><a class="toc-row" href="ch02.html"><span class="no">·</span><span>第2章 交易工具</span></a><ul class="toc-subs"><li><a href="ch02.html#r语言">R语言</a></li><li><a href="ch02.html#r入门">R入门</a></li><li><a href="ch02.html#c对象">c()对象</a></li><li><a href="ch02.html#matrix对象">matrix()对象</a></li><li><a href="ch02.html#data.frame对象">data.frame()对象</a></li><li><a href="ch02.html#list对象">list()对象</a></li><li><a href="ch02.html#new.env对象">new.env()对象</a></li><li><a href="ch02.html#使用plot函数">使用plot()函数</a></li><li><a href="ch02.html#函数式编程">函数式编程</a></li><li><a href="ch02.html#编写r函数">编写R函数</a></li><li><a href="ch02.html#分支和循环">分支和循环</a></li><li><a href="ch02.html#推荐的代码风格">推荐的代码风格</a></li><li><a href="ch02.html#两两相关示例">两两相关示例</a></li><li><a href="ch02.html#总结">总结</a></li></ul></li><li><a class="toc-row" href="ch03.html"><span class="no">·</span><span>第3章 与数据打交道</span></a><ul class="toc-subs"><li><a href="ch03.html#数据导入">数据导入</a></li><li><a href="ch03.html#r包安装">R包安装</a></li><li><a href="ch03.html#数据储藏和传输">数据储藏和传输</a></li><li><a href="ch03.html#从表单提取数据">从表单提取数据</a></li><li><a href="ch03.html#数据库登录">数据库登录</a></li><li><a href="ch03.html#dplyr包">dplyr包</a></li><li><a href="ch03.html#使用xts包">使用xts包</a></li><li><a href="ch03.html#使用quantmod包">使用quantmod包</a></li><li><a href="ch03.html#quantmod包与图表">quantmod包与图表</a></li><li><a href="ch03.html#用ggplot2包绘图">用ggplot2包绘图</a></li><li><a href="ch03.html#总结">总结</a></li></ul></li><li><a class="toc-row" href="ch04.html"><span class="no">·</span><span>第4章 统计和概率基础</span></a><ul class="toc-subs"><li><a href="ch04.html#什么是统计量">什么是统计量？</a></li><li><a href="ch04.html#总体和样本">总体和样本</a></li><li><a href="ch04.html#中心极限定理在r里的实现">中心极限定理在R里的实现</a></li><li><a href="ch04.html#无偏性和有效性">无偏性和有效性</a></li><li><a href="ch04.html#概率基础">概率基础</a></li><li><a href="ch04.html#随机变量">随机变量</a></li><li><a href="ch04.html#概率">概率</a></li><li><a href="ch04.html#概率分布">概率分布</a></li><li><a href="ch04.html#贝叶斯和频率方法">贝叶斯和频率方法</a></li><li><a href="ch04.html#掷硬币模拟器">掷硬币模拟器</a></li><li><a href="ch04.html#关于rstan的使用">关于RStan的使用</a></li><li><a href="ch04.html#总结">总结</a></li></ul></li><li><a class="toc-row" href="ch05.html"><span class="no">·</span><span>第5章 统计和概率中级</span></a><ul class="toc-subs"><li><a href="ch05.html#随机过程">随机过程</a></li><li><a href="ch05.html#股票价格分布">股票价格分布</a></li><li><a href="ch05.html#平稳性">平稳性</a></li><li><a href="ch05.html#用urca判断平稳">用urca判断平稳</a></li><li><a href="ch05.html#正态性假设">正态性假设</a></li><li><a href="ch05.html#相关性">相关性</a></li><li><a href="ch05.html#过滤数据">过滤数据</a></li><li><a href="ch05.html#r-公式">R 公式</a></li><li><a href="ch05.html#线性回归中的线性">线性回归中的线性</a></li><li><a href="ch05.html#波动性">波动性</a></li><li><a href="ch05.html#总结">总结</a></li></ul></li><li><a class="toc-row" href="ch06.html"><span class="no">·</span><span>第6章 价格差，贝塔系数和风险</span></a><ul class="toc-subs"><li><a href="ch06.html#定义股票价格差">定义股票价格差</a></li><li><a href="ch06.html#普通最小二乘法和总体最小二乘法">普通最小二乘法和总体最小二乘法</a></li><li><a href="ch06.html#构建价格差">构建价格差</a></li><li><a href="ch06.html#生成信号和验证">生成信号和验证</a></li><li><a href="ch06.html#价格差交易">价格差交易</a></li><li><a href="ch06.html#风险考量">风险考量</a></li><li><a href="ch06.html#资金曲线的进一步探究">资金曲线的进一步探究</a></li><li><a href="ch06.html#策略属性">策略属性</a></li><li><a href="ch06.html#总结">总结</a></li></ul></li><li><a class="toc-row" href="ch07.html"><span class="no">·</span><span>第7章 基于Quantstrat包的回溯测试</span></a><ul class="toc-subs"><li><a href="ch07.html#回溯测试的方法">回溯测试的方法</a></li><li><a href="ch07.html#关于blotter和perfomanceanalytics包">关于blotter和PerfomanceAnalytics包</a></li><li><a href="ch07.html#初始设置">初始设置</a></li><li><a href="ch07.html#第一个交易策略简单趋势跟踪">第一个交易策略：简单趋势跟踪</a></li><li><a href="ch07.html#回溯测试第一个交易策略">回溯测试第一个交易策略</a></li><li><a href="ch07.html#评估策略表现">评估策略表现</a></li><li><a href="ch07.html#第二个交易策略累计康纳斯相对强弱指数connors-rsi">第二个交易策略：累计康纳斯相对强弱指数（Connors RSI）</a></li><li><a href="ch07.html#评估均值回归策略">评估均值回归策略</a></li><li><a href="ch07.html#总结">总结</a></li></ul></li><li><a class="toc-row" href="ch08.html"><span class="no">·</span><span>第8章 高频数据分析</span></a><ul class="toc-subs"><li><a href="ch08.html#高频报价数据">高频报价数据</a></li><li><a href="ch08.html#内部报价更新时间">内部报价更新时间</a></li><li><a href="ch08.html#识别流动性机制">识别流动性机制</a></li><li><a href="ch08.html#市场微观价格">市场微观价格</a></li><li><a href="ch08.html#分布和自相关性">分布和自相关性</a></li><li><a href="ch08.html#highfrequency包">highfrequency包</a></li><li><a href="ch08.html#总结">总结</a></li></ul></li><li><a class="toc-row" href="ch09.html"><span class="no">·</span><span>第9章 期权</span></a><ul class="toc-subs"><li><a href="ch09.html#期权的理论价值">期权的理论价值</a></li><li><a href="ch09.html#期权的历史">期权的历史</a></li><li><a href="ch09.html#期权的定价">期权的定价</a></li><li><a href="ch09.html#探索期权交易数据">探索期权交易数据</a></li><li><a href="ch09.html#隐含波动率">隐含波动率</a></li><li><a href="ch09.html#总结">总结</a></li></ul></li><li><a class="toc-row" href="ch10.html"><span class="no">·</span><span>第10章 最优化</span></a><ul class="toc-subs"><li><a href="ch10.html#以抛物线为引子">以抛物线为引子</a></li><li><a href="ch10.html#牛顿法">牛顿法</a></li><li><a href="ch10.html#暴力求解法">暴力求解法</a></li><li><a href="ch10.html#r中的最优化程序">R中的最优化程序</a></li><li><a href="ch10.html#一个关于曲线拟合的练习">一个关于曲线拟合的练习</a></li><li><a href="ch10.html#投资组合最优化">投资组合最优化</a></li><li><a href="ch10.html#总结">总结</a></li></ul></li><li><a class="toc-row" href="ch11.html"><span class="no">·</span><span>第11章 速度，测试与报告</span></a><ul class="toc-subs"><li><a href="ch11.html#运行时执行的改进">运行时执行的改进</a></li><li><a href="ch11.html#r代码基准测试">R代码基准测试</a></li><li><a href="ch11.html#rcpp的解决方案">Rcpp的解决方案</a></li><li><a href="ch11.html#用rinside在c中调用r">用RInside在C++中调用R</a></li><li><a href="ch11.html#用testthat编写单元测试">用testthat编写单元测试</a></li><li><a href="ch11.html#使用knitr撰写文档">使用`knitr`撰写文档</a></li><li><a href="ch11.html#总结">总结</a></li></ul></li><li><a class="toc-row" href="appendix.html"><span class="no">·</span><span>补充</span></a></li><li><a class="toc-row" href="references.html"><span class="no">·</span><span>参考文献</span></a></li><li><a class="toc-row" href="terms.html"><span class="no">·</span><span>索引</span></a></li></ul>
+    <div class="pager"><a class="next" href="figures.html"><span class="dir">下一页</span>插图目录</a></div>
+  </div>
+</main>
+<script>
+(function () {
+  var box = document.getElementById('q');
+  var panel = document.getElementById('hits');
+  if (!box) return;
+  var idx = [];
+  fetch('search-index.json')
+    .then(function (r) { return r.json(); })
+    .then(function (d) { idx = d; })
+    .catch(function () {});
+
+  function esc(s) {
+    return s.replace(/[&<>"]/g, function (c) {
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];
+    });
+  }
+  function run() {
+    var q = box.value.trim().toLowerCase();
+    if (!q) { panel.classList.remove('on'); panel.innerHTML = ''; return; }
+    var terms = q.split(/\s+/);
+    var out = [];
+    for (var i = 0; i < idx.length && out.length < 24; i++) {
+      var e = idx[i];
+      var hay = (e.h + ' ' + e.p + ' ' + e.t).toLowerCase();
+      var ok = true;
+      for (var k = 0; k < terms.length; k++) {
+        if (hay.indexOf(terms[k]) < 0) { ok = false; break; }
+      }
+      if (!ok) continue;
+      var pos = e.t.toLowerCase().indexOf(terms[0]);
+      var snip = pos > 40 ? e.t.slice(pos - 30, pos + 90)
+                          : e.t.slice(0, 110);
+      out.push('<a href="' + e.u + '"><div class="p">' + esc(e.p) +
+               '</div><div class="h">' + esc(e.h) +
+               '</div><div class="s">' + esc(snip) + '</div></a>');
+    }
+    panel.innerHTML = out.length
+      ? out.join('')
+      : '<div class="none">没有匹配的内容</div>';
+    panel.classList.add('on');
+  }
+  box.addEventListener('input', run);
+  box.addEventListener('focus', run);
+  document.addEventListener('click', function (e) {
+    if (!panel.contains(e.target) && e.target !== box) {
+      panel.classList.remove('on');
+    }
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') { panel.classList.remove('on'); box.blur(); }
+  });
+})();
+</script>
+</body>
+</html>

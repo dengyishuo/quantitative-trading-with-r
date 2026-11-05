@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>第9章 期权 · 量化金融与R语言</title>
+<meta name="description" content="Quantitative Trading with R 中文翻译稿" />
+<style>
+:root {
+  --bg: #ffffff;
+  --fg: #1f2328;
+  --muted: #6b7280;
+  --line: #e5e7eb;
+  --soft: #f7f8fa;
+  --accent: #0f5c8c;
+  --code-bg: #f6f8fa;
+  --sidebar-w: 288px;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  color: var(--fg);
+  background: var(--bg);
+  font-family: -apple-system, "PingFang SC", "Hiragino Sans GB",
+               "Microsoft YaHei", "Source Han Sans SC", sans-serif;
+  font-size: 16px;
+  line-height: 1.85;
+  -webkit-font-smoothing: antialiased;
+}
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* 侧边栏 */
+.sidebar {
+  position: fixed; inset: 0 auto 0 0; width: var(--sidebar-w);
+  border-right: 1px solid var(--line);
+  background: var(--soft);
+  display: flex; flex-direction: column;
+  overflow: hidden;
+}
+.brand {
+  padding: 22px 20px 14px;
+  border-bottom: 1px solid var(--line);
+}
+.brand .t { font-size: 17px; font-weight: 700; line-height: 1.4; }
+.brand .s { font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.5; }
+.search { padding: 12px 16px; border-bottom: 1px solid var(--line); }
+.search input {
+  width: 100%; padding: 8px 10px; font-size: 13px;
+  border: 1px solid var(--line); border-radius: 6px;
+  background: #fff; color: var(--fg); outline: none;
+}
+.search input:focus { border-color: var(--accent); }
+.nav { flex: 1; overflow-y: auto; padding: 10px 0 40px; }
+.nav .group { padding: 12px 20px 6px; font-size: 11px; font-weight: 700;
+  color: var(--muted); letter-spacing: .08em; }
+.nav a.item {
+  display: block; padding: 7px 20px 7px 20px;
+  font-size: 14px; color: var(--fg); border-left: 3px solid transparent;
+}
+.nav a.item:hover { background: #eef1f5; text-decoration: none; }
+.nav a.item.active {
+  border-left-color: var(--accent); background: #e8eff5;
+  font-weight: 600; color: var(--accent);
+}
+.nav details summary {
+  padding: 7px 20px; font-size: 14px; cursor: pointer; list-style: none;
+}
+.nav details summary::-webkit-details-marker { display: none; }
+.nav details summary:hover { background: #eef1f5; }
+.nav details a.sub {
+  display: block; padding: 4px 20px 4px 34px;
+  font-size: 12.5px; color: var(--muted); line-height: 1.5;
+}
+.nav details a.sub:hover { color: var(--accent); }
+
+/* 正文 */
+.main { margin-left: var(--sidebar-w); }
+.wrap { max-width: 860px; margin: 0 auto; padding: 40px 40px 96px; }
+.crumb { font-size: 12px; color: var(--muted); margin-bottom: 10px; }
+h1 { font-size: 30px; line-height: 1.35; margin: 0 0 26px;
+     font-weight: 700; letter-spacing: .01em; }
+h2 { font-size: 21px; margin: 40px 0 14px; padding-bottom: 8px;
+     border-bottom: 1px solid var(--line); font-weight: 700; }
+h3 { font-size: 17px; margin: 28px 0 10px; font-weight: 700; }
+h4 { font-size: 15px; margin: 22px 0 8px; font-weight: 700; }
+p { margin: 0 0 16px; text-align: justify; }
+p.signature { text-align: right; }
+ul, ol { margin: 0 0 16px; padding-left: 26px; }
+li { margin: 4px 0; }
+img { max-width: 100%; height: auto; display: block; margin: 22px auto;
+      border-radius: 4px; }
+figure { margin: 24px 0; text-align: center; }
+figcaption { font-size: 13px; color: var(--muted); margin-top: 8px; }
+
+code {
+  font-family: "SF Mono", Menlo, Consolas, "Courier New", monospace;
+  font-size: 0.88em; background: var(--code-bg);
+  padding: 2px 5px; border-radius: 4px;
+  border: 1px solid #eaecef;
+}
+pre {
+  background: var(--code-bg); border: 1px solid var(--line);
+  border-radius: 6px; padding: 14px 16px; overflow-x: auto;
+  line-height: 1.6; margin: 0 0 18px;
+}
+pre code { background: none; border: 0; padding: 0; font-size: 12.5px; }
+
+table { border-collapse: collapse; width: 100%; margin: 20px 0;
+        font-size: 14px; }
+th, td { border: 1px solid var(--line); padding: 7px 11px; }
+th { background: var(--soft); font-weight: 700; }
+tr:nth-child(even) td { background: #fcfcfd; }
+
+blockquote { margin: 0 0 18px; padding: 10px 18px;
+  border-left: 3px solid var(--line); color: var(--muted); background: var(--soft); }
+
+/* 插图目录 / 表格目录 */
+.cap-list { list-style: none; padding: 0; margin: 4px 0 0; }
+.cap-list li { border-bottom: 1px solid var(--line); }
+.cap-list a { display: flex; align-items: baseline; gap: 12px;
+  padding: 9px 2px; font-size: 14px; color: var(--fg); }
+.cap-list a:hover { background: var(--soft); text-decoration: none;
+  color: var(--accent); }
+.cap-num { min-width: 68px; color: var(--muted); font-size: 12.5px;
+  font-variant-numeric: tabular-nums; }
+.cap-title { flex: 1; }
+.cap-where { color: var(--muted); font-size: 11.5px; white-space: nowrap; }
+.cap-empty { color: var(--muted); font-size: 14px; }
+
+/* MathML 居中与缩放 */
+math[display="block"] { display: block; margin: 20px auto; font-size: 1.05em; }
+
+/* 页脚翻页 */
+.pager { display: flex; justify-content: space-between; gap: 16px;
+         margin-top: 56px; padding-top: 22px; border-top: 1px solid var(--line); }
+.pager a { flex: 1; padding: 12px 16px; border: 1px solid var(--line);
+           border-radius: 8px; font-size: 13px; }
+.pager a:hover { border-color: var(--accent); text-decoration: none;
+                 background: var(--soft); }
+.pager .dir { display: block; font-size: 11px; color: var(--muted);
+              margin-bottom: 3px; }
+.pager .next { text-align: right; }
+
+/* 首页 */
+.cover { padding: 56px 0 8px; }
+.cover h1 { font-size: 38px; margin-bottom: 8px; }
+.cover .sub { font-size: 15px; color: var(--muted); margin-bottom: 34px; }
+.toc-list { border-top: 1px solid var(--line); }
+.toc-list > li { list-style: none; margin: 0; border-bottom: 1px solid var(--line); }
+.toc-list { padding-left: 0; }
+.toc-row { display: flex; align-items: baseline; gap: 10px;
+           padding: 13px 2px; font-size: 15px; }
+.toc-row .no { color: var(--muted); font-size: 12px; min-width: 26px; }
+.toc-subs { padding: 0 0 12px 36px; margin: 0; }
+.toc-subs li { list-style: none; font-size: 13px; color: var(--muted);
+               padding: 3px 0; }
+
+/* 搜索结果 */
+#hits { display: none; position: absolute; left: 16px; right: 16px; top: 96px;
+        background: #fff; border: 1px solid var(--line); border-radius: 8px;
+        box-shadow: 0 8px 24px rgba(0,0,0,.12); max-height: 60vh;
+        overflow-y: auto; z-index: 50; }
+#hits.on { display: block; }
+#hits a { display: block; padding: 10px 14px; border-bottom: 1px solid var(--line); }
+#hits a:last-child { border-bottom: 0; }
+#hits a:hover { background: var(--soft); text-decoration: none; }
+#hits .h { font-size: 13px; font-weight: 600; color: var(--fg); }
+#hits .p { font-size: 11px; color: var(--accent); margin-bottom: 2px; }
+#hits .s { font-size: 12px; color: var(--muted); line-height: 1.5; }
+#hits .none { padding: 14px; font-size: 13px; color: var(--muted); }
+
+@media (max-width: 900px) {
+  .sidebar { display: none; }
+  .main { margin-left: 0; }
+  .wrap { padding: 24px 20px 72px; }
+  .cover h1 { font-size: 28px; }
+}
+@media print {
+  .sidebar, .pager, .search { display: none; }
+  .main { margin-left: 0; }
+  .wrap { max-width: none; padding: 0; }
+}
+</style>
+</head>
+<body>
+<aside class="sidebar">
+  <div class="brand">
+    <div class="t">量化金融与R语言</div>
+    <div class="s">Quantitative Trading with R 中文翻译稿</div>
+  </div>
+  <div class="search">
+    <input id="q" type="search" placeholder="搜索全书…" autocomplete="off" />
+  </div>
+  <nav class="nav"><div class="group">前言</div><a class="item" href="figures.html">插图目录</a><a class="item" href="tables.html">表格目录</a><a class="item" href="preface.html">译者序</a><a class="item" href="translators.html">译者简介</a><a class="item" href="acknowledgements.html">致谢</a><div class="group">正文</div><a class="item" href="ch01.html">第1章 总览</a><a class="item" href="ch02.html">第2章 交易工具</a><a class="item" href="ch03.html">第3章 与数据打交道</a><a class="item" href="ch04.html">第4章 统计和概率基础</a><a class="item" href="ch05.html">第5章 统计和概率中级</a><a class="item" href="ch06.html">第6章 价格差，贝塔系数和风险</a><a class="item" href="ch07.html">第7章 基于Quantstrat包的回溯测试</a><a class="item" href="ch08.html">第8章 高频数据分析</a><details open><summary><a class="item active" style="display:inline;padding:0;border:0" href="ch09.html">第9章 期权</a></summary><a class="sub" href="ch09.html#期权的理论价值">期权的理论价值</a><a class="sub" href="ch09.html#期权的历史">期权的历史</a><a class="sub" href="ch09.html#期权的定价">期权的定价</a><a class="sub" href="ch09.html#探索期权交易数据">探索期权交易数据</a><a class="sub" href="ch09.html#隐含波动率">隐含波动率</a><a class="sub" href="ch09.html#总结">总结</a></details><a class="item" href="ch10.html">第10章 最优化</a><a class="item" href="ch11.html">第11章 速度，测试与报告</a><div class="group">附录</div><a class="item" href="appendix.html">补充</a><a class="item" href="references.html">参考文献</a><a class="item" href="terms.html">索引</a></nav>
+  <div id="hits"></div>
+</aside>
+<main class="main">
+  <div class="wrap">
+    <div class="crumb">正文</div>
+    <h1>第9章 期权</h1>
+<p>期权是可交易的衍生品合同，它的价值是从其标的资产中“衍生”出来的。维基百科是这样定义该工具的：“一个期权就是一个合同，该合同赋予期权的买方（期权拥有者）在未来某个确定的时间或此时间之前以预先敲定的价格买入或者卖出某项标的资产或者金融工具的权利，而非义务[130]”。期权与期货合同相似，都是提供了一种在未来的某个时点以现在可敲定的价格买入或者卖出某项特定的实务或者金融资产的机制。然而不同的是，期货合同的持有者负有以商定价格买入或者卖出某项标的资产的义务，而期权则只是提供给了持有者以敲定价格买入或者卖出某项标的资产的“权利”。这种附加的灵活性或者<strong>选择权</strong>是有一定成本的。买家或者卖家进入期货市场并不需要预付现金，但若想要买入一个期权合同，买家则必须支付一笔溢价款。同样，期权合同的卖方则得以收取这笔溢价费用。</p>
+<h2 id="期权的理论价值">期权的理论价值</h2>
+<p>期权合同的溢价值是多个变量的函数。这些变量包括双方同意的买入或者卖出某个资产的价格K（也称之为敲定价格，strike price），标的资产的现价（S），期权合同的转换期限（T），从时间为0（也就是现在）算起至到期日为止这段时间内该标的资产可能会以分红等形式产生的现金流（d）,无风险利率值（r）,以及一个容差系数（<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>σ</mi><annotation encoding="application/x-tex">\sigma</annotation></semantics></math>）。这个容差系数也称作期权的隐含波动率。</p>
+<p><img src="media/fig-09-01.png" style="width:3.99667in;height:1.43667in" alt="图9.1" /></p>
+<p id="fig-9-1"><strong>图9.1</strong> Black Scholes模型的输入变量</p>
+<h2 id="期权的历史">期权的历史</h2>
+<p>期权，从某种形式上来说是自古有之。亚里士多德讲过一个关于泰利斯的故事（古希腊哲学家，米丽都城人），说泰利斯曾经就在一个橄榄油榨油坊押了一笔钱，目的就是为了确保第二年橄榄丰收的时候能够用上榨油机。因为泰利斯坚信次年的橄榄将比今年更加丰收。因此，他实际上是买入了一个为了使用榨油机的看涨期权。据说他从这笔交易中收益颇丰[51]。再迅速的快进几千年，在1848年，芝加哥交易所（CBOT）正式开门迎客。直到现在， CBOT仍然是世界上最大的期权交易所之一，也被认为是世界上最古老的期权交易所。2007年，CBOT与CME（芝加哥商业交易所）合并。</p>
+<p>虽然期权的交易有很长的历史，但直到1973年，期权业界才发生了里程碑式的转变。这一年，Fisher Black和Myron Scholes发表了一篇具有里程碑意义的论文，他们用优雅的数学公式揭示了期权的理论价值。这个公式现在被称作<strong>Black-Scholes</strong>偏微分方程（PDE），它将期权的市场价格（V）与之前提到的一系列变量参数（S, K, r, T, d, σ）直接联系了起来[27].</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mfrac><mrow><mi>∂</mi><mi>V</mi></mrow><mrow><mi>∂</mi><mi>t</mi></mrow></mfrac><mo>+</mo><mi>r</mi><mi>V</mi><mfrac><mrow><mi>∂</mi><mi>V</mi></mrow><mrow><mi>∂</mi><mi>S</mi></mrow></mfrac><mo>+</mo><mfrac><mn>1</mn><mn>2</mn></mfrac><msup><mi>V</mi><mn>2</mn></msup><msup><mi>σ</mi><mn>2</mn></msup><mfrac><mrow><msup><mi>∂</mi><mn>2</mn></msup><mi>V</mi></mrow><mrow><mi>∂</mi><msup><mi>S</mi><mn>2</mn></msup></mrow></mfrac><mo>−</mo><mi>r</mi><mi>V</mi><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">
+\frac{\partial V}{\partial t} + rV\frac{\partial V}{\partial S} + \frac{1}{2}V^{2}\sigma^{2}\frac{\partial^{2}V}{\partial S^{2}} - rV = 0
+</annotation></semantics></math></p>
+<p>期权有很多种形式。其中最常见的两种是“欧式”和“美式”。欧式期权只能在合同规定的到期日行权，美式期权则可以在到期日之前的任意时间行权。这个看似细微的差别，对定价的影响是巨大的。比如说，对于美式看跌期权来说，给定上面的所有变量参数并不能给出一个显式的定价公式。当然，这种情况还可以通过数值方法计算得出，但不能像上面的公式那样给出解析公式。</p>
+<h2 id="期权的定价">期权的定价</h2>
+<p>R中有数个用于期权定价的第三方包，它们提供了针对欧式和美式期权的一系列计算方法，既包括显示解的方法，也包括树形、栈格形以及蒙特卡洛模拟解法等。这些包的名称为<code>fOptions</code>, <code>RQuantLib</code>, <code>AmericanCallOpt</code>和<code>LSMonteCarlo</code>。本章我们将使用<code>RQuantLib</code>包。</p>
+<p>根据该包的官网介绍http://www.quantlib.org: “<code>QuantLib</code>是一个进行实战型建模、交易和风险管理的免费/开源工具。”<code>QuantLib</code>的源代码用C++编写，具有干净的基于对象的模型，然后被输出到其他语言，比如C#, Objective Caml, Java, Perl, Python, GNU R, Ruby以及Scheme等。</p>
+<p>安装和加载完此包之后，可以用lsf.str()命令查看所有可以使用的函数：</p>
+<pre><code>install.packages(&quot;RQuantLib&quot;)
+library(RQuantLib)
+
+lsf.str(&quot;package:RQuantLib&quot;)
+## adjust : function (calendar = &quot;TARGET&quot;, dates = Sys.Date(),
+## bdc = 0)
+## advance : function (calendar = &quot;TARGET&quot;, dates = Sys.Date(),
+## n, timeUnit, period, bdc = 0, emr = 0)
+## AmericanOption : function (type, underlying, strike, dividendYield,
+## riskFreeRate, maturity, volatility, timeSteps = 150,
+## gridPoints = 149, engine = &quot;BaroneAdesiWhaley&quot;)
+## AmericanOption.default : function (type, underlying, strike,
+## dividendYield, riskFreeRate, maturity, volatility,
+## timeSteps = 150, gridPoints = 149, engine = &quot;BaroneAdesiWhaley&quot;)
+## AmericanOptionImpliedVolatility : function (type, value,
+## underlying, strike, dividendYield, riskFreeRate,
+## maturity, volatility, timeSteps = 150, gridPoints = 151)
+## AmericanOptionImpliedVolatility.default : function (type, value,
+## underlying, strike, dividendYield, riskFreeRate, maturity,
+## volatility, timeSteps = 150, gridPoints = 151)
+## ...</code></pre>
+<p>求一个欧式期权的定价，我们可以使用<code>EuropeanOption()</code>函数。一个看涨期权定价的解析解为:</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>c</mi><mo>=</mo><mi>S</mi><mi>N</mi><mo stretchy="false" form="prefix">(</mo><msub><mi>d</mi><mn>1</mn></msub><mo stretchy="false" form="postfix">)</mo><mo>−</mo><mi>K</mi><msup><mi>e</mi><mrow><mi>−</mi><mi>r</mi><mi>T</mi></mrow></msup><mi>N</mi><mo stretchy="false" form="prefix">(</mo><msub><mi>d</mi><mn>2</mn></msub><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">
+c = SN(d_{1}) - Ke^{- rT}N(d_{2})
+</annotation></semantics></math></p>
+<p>对于一个看跌期权，解析解的公式为</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>p</mi><mo>=</mo><mi>−</mi><mi>K</mi><msup><mi>e</mi><mrow><mi>−</mi><mi>r</mi><mi>T</mi></mrow></msup><mi>N</mi><mo stretchy="false" form="prefix">(</mo><mi>−</mi><msub><mi>d</mi><mn>2</mn></msub><mo stretchy="false" form="postfix">)</mo><mo>−</mo><mi>S</mi><mi>N</mi><mo stretchy="false" form="prefix">(</mo><msub><mi>d</mi><mn>1</mn></msub><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">
+p = - Ke^{- rT}N( - d_{2}) - SN(d_{1})
+</annotation></semantics></math></p>
+<p>上式中<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>d</mi><mn>1</mn></msub><annotation encoding="application/x-tex">d_{1}</annotation></semantics></math>与<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mi>d</mi><mn>2</mn></msub><annotation encoding="application/x-tex">d_{2}</annotation></semantics></math>分别为</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>d</mi><mn>1</mn></msub><mo>=</mo><mfrac><mrow><mi>l</mi><mi>n</mi><mo stretchy="false" form="prefix">(</mo><mi>S</mi><mi>/</mi><mi>K</mi><mo stretchy="false" form="postfix">)</mo><mo>+</mo><mo stretchy="false" form="prefix">(</mo><mi>r</mi><mo>+</mo><msup><mi>σ</mi><mn>2</mn></msup><mo stretchy="false" form="postfix">)</mo><mi>T</mi></mrow><mrow><mi>σ</mi><msqrt><mi>T</mi></msqrt></mrow></mfrac><mo>,</mo><msub><mi>d</mi><mn>2</mn></msub><mo>=</mo><msub><mi>d</mi><mn>1</mn></msub><mo>−</mo><mi>σ</mi><msqrt><mi>T</mi></msqrt></mrow><annotation encoding="application/x-tex">
+d_{1} = \frac{ln(S/K) + (r + \sigma^{2})T}{\sigma\sqrt{T}},d_{2} = d_{1} - \sigma\sqrt{T}
+</annotation></semantics></math></p>
+<p>欧式看涨和看跌期权求解公式中的其他希腊字母所代表的元素也具有相似的解析解。 让我们先看一个数值例子：</p>
+<pre><code>call_value &lt;- EuropeanOption(type = &quot;call&quot;, underlying = 100, 
+                             strike = 100, dividendYield = 0, riskFreeRate = 0.03, maturity = 1.0, volatility = 0.30)
+call_value
+## Concise summary of valuation for EuropeanOption
+## value delta gamma vega theta
+## 13.2833 0.5987 0.0129 38.6668 -7.1976
+## rho divRho
+## 46.5873 -59.8706</code></pre>
+<p><code>call_value</code>对象的类属性为</p>
+<pre><code>class(call_value)
+## [1] &quot;EuropeanOption&quot; &quot;Option&quot;</code></pre>
+<p>EuropeanOption()输出对象的优雅之处在于它既包含了该期权的定价值，还输出了希腊字母所代表的元素值。这里我们给出一些R代码帮助我们进一步探索欧式看涨期权的盈利分析与其相关的希腊字母元素与价格之间的函数关系。类似的敏感度分析也可以用于波动率，到期日，利率和分红等。</p>
+<pre><code>type &lt;- &quot;call&quot;
+underlying &lt;- 20:180
+strike &lt;- 100
+dividendYield &lt;- 0
+riskFreeRate &lt;- 0.03
+maturity &lt;- 1.0
+volatility &lt;- 0.10
+
+# Function to create plots of option values and Greeks.
+option_values &lt;- function(type, underlying, strike, dividendYield, riskFreeRate,
+                          maturity, volatility) {
+    # Output list with option values and Greeks
+    out &lt;- list()
+    for(i in seq_along(underlying)) {
+        out[[i]] &lt;- EuropeanOption(type = type, underlying = i,
+                                   strike = strike, dividendYield = dividendYield,
+                                   riskFreeRate = riskFreeRate, maturity = maturity,
+                                   volatility = volatility)
+    }
+    
+    # Set up the plot window
+    par(mfrow = c(3, 2))
+    names &lt;- c(&quot;Value&quot;, &quot;Delta&quot;, &quot;Gamma&quot;, &quot;Vega&quot;, &quot;Theata&quot;, &quot;Rho&quot;)
+    
+    for(i in 1:6) {
+        plot(unlist(lapply(out, &quot;[&quot;, i)), type = &quot;l&quot;,
+             main = paste(names[i], &quot;vs. Underlying&quot;),
+             xlab = &quot;Underlying&quot;, ylab = names[i])
+        grid()
+        abline(v = strike, col = &quot;red&quot;)
+    }
+    return(out)
+}</code></pre>
+<p>调用该函数会返回下面的输出结果：</p>
+<pre><code>option_values(type, underlying, strike, dividendYield, riskFreeRate, maturity, 
+              volatility)
+## ...
+## [[96]]
+## Concise summary of valuation for EuropeanOption
+## value delta gamma vega theta
+## 3.3493 0.4768 0.0415 38.2336 -3.1843
+## rho divRho
+## 42.4222 -45.7715
+## [[97]]
+## Concise summary of valuation for EuropeanOption
+## value delta gamma vega theta
+## 3.8468 0.5181 0.0411 38.6575 -3.3252
+## rho divRho
+## 46.4098 -50.2566
+## [[98]]
+## Concise summary of valuation for EuropeanOption
+## value delta gamma vega theta
+## 4.3853 0.5588 0.0403 38.6707 -3.4449
+## rho divRho
+## 50.3788 -54.7642</code></pre>
+<p><img src="media/fig-09-02.png" style="width:4.21667in;height:3.19667in" alt="图9.2" /></p>
+<p id="fig-9-2"><strong>图9.2</strong> 期权敏感性分析结果</p>
+<p>如果将到期日缩短，让我们看一下输出图。</p>
+<pre><code>option_values(type, underlying, strike, dividendYield, riskFreeRate, maturity = 0.1, 
+              volatility)</code></pre>
+<p>这种类型的分析对于处理期权组合时也十分有用.这些基础参数对于冲击的反应可以被有效的模拟出来，这些希腊字母所代表的成分对于冲击的敏感度也可以方便的得到。</p>
+<p><img src="media/fig-09-03.png" style="width:4.40667in;height:7.26333in" alt="图9.3" /></p>
+<p id="fig-9-3"><strong>图9.3</strong> 到期日缩短的期权敏感性分析结果</p>
+<h2 id="探索期权交易数据">探索期权交易数据</h2>
+<p>我们将研究一下SPY期权链发生在2013年4月15日当天的所有期权交易。该交易信息仍然取自于<em>Tick Data, Inc</em>。每个文件的命名方式为Symbol, Call/Put, Expiration, Strike, Data, Trade。比如某个文件的名称可能为：SPY_C_20130420_124.00_XX_20130415_t.csv</p>
+<pre><code># 生成文件名向量
+folder &lt;- &quot;path/Options/SPY_20130415_T/&quot;
+available_files &lt;- list.files(folder)
+
+# 看一下文件的前几行 
+temp &lt;- read.csv(file = paste0(folder, available_files[1]), header = FALSE,
+                 stringsAsFactors = FALSE)
+## head(temp)
+## V1 V2 V3 V4 V5 V6 V7
+## 1 04/15/2013 15:11:32.191 TRUE 7943215 A L 35.94
+## 2 04/15/2013 15:24:54.590 TRUE 24152315 N L 36.21
+## 3 04/15/2013 15:24:54.629 TRUE 24152415 N L 36.21
+## 4 04/15/2013 15:45:51.843 TRUE 45189165 N L 35.60
+## 5 04/15/2013 15:46:22.622 TRUE 45773488 I Q 35.63
+## 6 04/15/2013 15:46:53.716 TRUE 46313964 A L 35.74
+## V8 V9 V10 V11 V12 V13 V14 V15 V16
+## 1 2500 155.92 400 P @ 155.91 3 155.92 41
+## 2 2400 156.05 300 P F 156.06 10 156.07 155
+## 3 100 156.05 300 P F 156.06 10 156.07 155
+## 4 5000 155.61 100 P F 155.59 75 155.61 83
+## 5 2500 155.66 1900 P @ 155.65 55 155.66 21
+## 6 4500 155.72 200 P F 155.71 73 155.72 24</code></pre>
+<p>让我们给这些列取一些更有实际含义的列名：</p>
+<pre><code>column_names &lt;- c(&quot;date&quot;, &quot;time&quot;, &quot;trade_indicator&quot;,
+  &quot;sequence_number&quot;, &quot;option_exchange_code&quot;,
+  &quot;option_condition_code&quot;, &quot;sale_price&quot;, &quot;sale_size&quot;,
+  &quot;underlying_last_trade_price&quot;,
+  &quot;underling_last_trade_size&quot;,
+  &quot;stock_exchange_code&quot;, &quot;stock_condition_code&quot;,
+  &quot;underlying_bid_price&quot;, &quot;underlying_bid_size&quot;,
+  &quot;underlying_ask_price&quot;, &quot;underlying_ask_size&quot;)
+names(temp) &lt;- column_names</code></pre>
+<p>对于这样的期权交易数据，我们经常会按照敲定价格和到期日的不同对相应的交易合同量作图。</p>
+<pre><code>output &lt;- list()
+for(i in 1:length(available_files)) {
+  file_name &lt;- available_files[i]
+
+  type &lt;- substr(file_name, 5, 5)
+  date &lt;- substr(file_name, 7, 14)
+  date &lt;- as.Date(date, format = &quot;%Y%m%d&quot;)
+  strike &lt;- substr(file_name, 16, 26)
+  strike &lt;- strsplit(strike, &quot;_XX&quot;)[[1]][1]
+
+  temp &lt;- read.csv(file = paste0(folder, file_name),
+    header = FALSE, stringsAsFactors = FALSE)
+  names(temp) &lt;- column_names
+
+  number_of_trades &lt;- nrow(temp)
+  avg_trade_price &lt;- round(mean(temp$sale_price,
+    na.rm = TRUE), 3)
+
+  if(number_of_trades &lt;= 1) {
+    sd_trade_price &lt;- 0
+  } else {
+    sd_trade_price &lt;- round(sd(temp$sale_price,
+      na.rm = TRUE), 3)
+  }
+
+  total_volume &lt;- sum(temp$sale_size, na.rm = TRUE)
+  avg_underlying_price &lt;- round(mean(
+    temp$underlying_bid_price, na.rm = TRUE), 2)
+  underlying_range &lt;- max(temp$underlying_ask_price) -
+    min(temp$underlying_bid_price)
+
+  output[[i]] &lt;- data.frame(symbol = &#39;SPY&#39;, date = date,
+    type = type, strike = strike,
+    trades = number_of_trades,
+    volume = total_volume,
+    avg_price = avg_trade_price,
+    sd_price = sd_trade_price,
+    avg_stock_price = avg_underlying_price,
+    stock_range = underlying_range,
+    stringsAsFactors = FALSE)
+}
+
+# 将列别转换为表格
+results &lt;- do.call(rbind, output)
+
+head(results)
+
+##  symbol       date type strike trades volume
+## 1   SPY 2013-04-20  C  120.00   12    33000
+## 2   SPY 2013-04-20  C  124.00    1       15
+## 3   SPY 2013-04-20  C  130.00    1        2
+## 4   SPY 2013-04-20  C  133.00    1        1
+## 5   SPY 2013-04-20  C  140.00    1       95
+## 6   SPY 2013-04-20  C  142.00    1        6
+
+## avg_price sd_price avg_stock_price stock_range
+## 35.973    0.261      155.74      0.68
+## 31.380    0.000      155.44      0.01
+## 26.210    0.000      156.24      0.02
+## 24.600    0.000      157.58      0.01
+## 16.465    0.751      156.44      1.51
+## 13.920    0.000      155.87      0.01</code></pre>
+<p>上面的输出结果已经非常结构化了，便于下一步操作使用，我们就此看一下期权交易量在不同的到期日和敲定价格下的分布如何。这些图也可以根据期权的类型进行拆分显示（比如将看涨和看跌期权分开来显示）。</p>
+<pre><code>unique_maturities &lt;- unique(results$date)
+
+today &lt;- as.Date(&quot;2013-04-15&quot;)
+days_to_expiration &lt;- as.Date(unique_maturities[1]) - today
+
+# 只提取相关的到期日范围
+single_maturity_table &lt;- results[results$date ==
+  unique_maturities[1], ]
+
+# 将看涨和看跌期权分开来看
+calls &lt;- single_maturity_table[
+  single_maturity_table$type == &quot;C&quot;, ]
+puts &lt;- single_maturity_table[
+  single_maturity_table$type == &quot;P&quot;, ]
+
+par(mfrow = c(2, 1))
+plot(calls$strike, calls$volume,
+  xlab = &quot;Strike&quot;, ylab = &quot;Volume&quot;,
+  main = &quot;Call volume&quot;, cex.main = 0.9)
+abline(v = mean(calls$avg_stock_price), lty = 2)
+grid()
+
+plot(puts$strike, puts$volume,
+  xlab = &quot;Strike&quot;, ylab = &quot;Volume&quot;,
+  main = &quot;Put volume&quot;, cex.main = 0.9)
+abline(v = mean(puts$avg_stock_price), lty = 2)
+grid()</code></pre>
+<p><img src="media/fig-09-04.png" style="width:3.39667in;height:2.90333in" alt="图9.4" /></p>
+<p id="fig-9-4"><strong>图9.4</strong> 期权交易量图</p>
+<p>对于到期日为5天的期权来说，我们从图中观察到大部分的交易都是价外期权。有意思的是，在敲定价格为120的位置，能够看到一部分异常值。</p>
+<h2 id="隐含波动率">隐含波动率</h2>
+<p>在很多投资者眼中，期权的价格并不是他们最为关心的变量。他们真正关心的是期权的<em>隐含波动率</em>，尤其是不同敲定价格、不同的到期日下，甚至是不同的期权产品的隐含波动率的动态变化。 尝试感受一下下面两个评论：</p>
+<ol type="1">
+<li>“隐含波动率是在错误的公式中出现的错误的数值，但却能够导出正确的价格”- Riccardo Bebonato [90].</li>
+<li>"本质上来说，所有的模型都是错误的，但有些是有用的。" - George Box.</li>
+</ol>
+<p>对于期权交易来说，这两个评论都是一针见血的。即便Black-Scholes模型在捕捉期权的真实动态价格时乏善可陈，它还是被世界范围内的绝大部分期权交易者所广泛使用。</p>
+<p>从隐含波动率的角度来考虑这样的一个虽然错误但却不失有用性的模型，已经成为业界范式。</p>
+<p>期权的报价数据中有很多有用的信息。每一个列出的到期日都有很多敲定价格的看涨和看跌期权所组成。反过来，每一个期权合约在当天都有自己的报价和交易数据。 期权报价数据的格式与之前我们看到的期权交易数据类似。通过数据名就可以看出它是看涨的还是看跌的，它的到期日、敲定价格是多少，以及在哪一天交易的（比如，数据文件名称可能为SPY_C_20130412_145.00_XX_20130410_QT.csv）。</p>
+<p>对于下一个例子，我们将按照以下步骤进行： 1. 对于每个到期日，提取出所有的买卖价格， 2. 根据报价计算出中间价并估算出隐含波动率， 3. 画出该日隐含波动率的微笑曲线。</p>
+<pre><code># 创建一个包含文件名的向量
+folder &lt;- &quot;Chapter_09/SPY_20130410_QT/&quot;
+
+available_files &lt;- list.files(folder)
+
+# 检视文件的前几行
+temp &lt;- read.csv(file = paste0(folder, available_files[1]),
+header = FALSE, stringsAsFactors = FALSE)
+head(temp)
+# 为了行文清晰此处的输出已省略没有列出
+
+column_names &lt;- c(&quot;date&quot;, &quot;time&quot;, &quot;trade_indicator&quot;,
+  &quot;sequence_number&quot;, &quot;option_exchange_code&quot;,
+  &quot;option_condition_code&quot;, &quot;bid_price&quot;, &quot;bid_size&quot;,
+  &quot;ask_price&quot;, &quot;ask_size&quot;, &quot;stock_exchange_code&quot;,
+  &quot;stock_condition_code&quot;, &quot;underlying_bid_price&quot;,
+  &quot;underlying_bid_size&quot;, &quot;underlying_ask_price&quot;,
+  &quot;underlying_ask_size&quot;)</code></pre>
+<p>此处，我们把注意力放在到期日为2013年7月20日的期权上。作为参考，可知当前的交易日期是2013年4月10日。因此这是一个离到期日还有101天的期权。</p>
+<pre><code># 找到2013年7月20日到期的期权数据文件
+files_to_use &lt;- available_files[grep(&quot;20130720&quot;,
+  available_files)]
+
+length(files_to_use)
+## [1] 142
+
+strikes &lt;- sapply(strsplit(files_to_use, &quot;_&quot;), &quot;[&quot;, 4)
+type &lt;- sapply(strsplit(files_to_use, &quot;_&quot;), &quot;[&quot;, 2)
+
+# 提取数据中有关的列
+quote_list &lt;- list()
+
+for(i in 1:length(files_to_use)) {
+  temp &lt;- read.csv(file = paste0(folder, files_to_use[i]),
+    header = FALSE, stringsAsFactors = FALSE)
+  names(temp) &lt;- column_names
+
+  # 只提取CBOE的报价数据
+  filter &lt;- temp$trade_indicator == &quot;Q&quot; &amp;
+    temp$option_exchange_code == &quot;C&quot;
+
+  data &lt;- temp[filter, ]
+
+  # 创建一个xts对象 
+  require(xts)
+  time_index &lt;- as.POSIXct(paste(data$date, data$time),
+    format = &quot;%m/%d/%Y %H:%M:%OS&quot;)
+  data_filtered &lt;- data[, c(&quot;bid_price&quot;, &quot;ask_price&quot;,
+    &quot;underlying_bid_price&quot;, &quot;underlying_ask_price&quot;)]
+  data_filtered$type &lt;- type[i]
+  data_filtered$strike &lt;- strikes[i]
+  xts_prices &lt;- xts(data_filtered, time_index)
+
+  quote_list[[i]] &lt;- xts_prices
+}</code></pre>
+<p><img src="media/fig-09-05.png" style="width:3.47333in;height:2.76667in" alt="图9.5" /></p>
+<p id="fig-9-5"><strong>图9.5</strong> 期权买卖报价价差图</p>
+<p>在某个交易日内，期权报价的买卖价差是什么样子呢？我们来看一下敲定价格为158的期权时间序列图，这是一个在价期权。</p>
+<pre><code>data &lt;- quote_list[[49]]
+spread &lt;- as.numeric(data$ask_price) -
+  as.numeric(data$bid_price)
+plot(xts(spread, index(data)),
+  main = &quot;SPY | Expiry = July 20, 2013 | K = 158&quot;,
+  cex.main = 0.8, ylab = &quot;Quote bid-ask spread&quot;)</code></pre>
+<p>然后，让我们看一下在某个特定时间点的截面信息。</p>
+<pre><code>time_of_interest &lt;- &quot;2013-04-10 10:30:00::
+  2013-04-10 10:30:10&quot;
+
+strike_list &lt;- list()
+for(i in 1:length(quote_list)) {
+  data &lt;- quote_list[[i]][time_of_interest]
+  if(nrow(data) &gt; 0) {
+    mid_quote &lt;- (as.numeric(data$bid_price) +
+      as.numeric(data$ask_price)) / 2
+    mid_underlying &lt;- (as.numeric(data$underlying_bid_price) +
+      as.numeric(data$underlying_ask_price)) / 2
+    strike_list[[i]] &lt;- c(as.character(index(data[1])),
+      data$type[1], data$strike[1], names(quote_list[i]),
+      mid_quote[1], mid_underlying[1])
+  }
+}
+
+# 整合数据列
+df &lt;- as.data.frame(do.call(rbind, strike_list),
+  stringsAsFactors = FALSE)
+names(df) &lt;- c(&quot;time&quot;, &quot;type&quot;, &quot;strike&quot;,
+  &quot;mid_quote&quot;, &quot;mid_underlying&quot;)
+
+head(df)
+# 为了行文清晰此处的输出已省略没有列出
+
+plot(as.numeric(df$strike), as.numeric(df$mid_quote),
+  main = &quot;Option Price vs. Strike for Calls and Puts&quot;,
+  ylab = &quot;Premium&quot;,
+  xlab = &quot;Strike&quot;,
+  cex.main = 0.8)
+grid()</code></pre>
+<p><img src="media/fig-09-06.png" style="width:3.23333in;height:2.90333in" alt="图9.6" /></p>
+<p id="fig-9-6"><strong>图9.6</strong> 看涨和看跌期权溢价图</p>
+<p>图中将看涨和看跌期权的溢价随着敲定价格变化的关系同时进行了展示。为了切换到隐含波动率空间，我们需要过滤一下数据只保留价外期权。然后接下来的部分就需要点技术了。要想估算出适合该期权价格的隐含波动率是相当困难的。关于这方面有很多正在进行的研究，而且很多期权交易公司都认为这一步是在波动率交易中保持高效的秘密武器。</p>
+<pre><code># 过滤并保留价外期权数据
+otm_calls &lt;- df$type == &quot;C&quot; &amp; df$mid_underlying &lt;= df$strike
+otm_puts &lt;- df$type == &quot;P&quot; &amp; df$mid_underlying &gt; df$strike
+otm &lt;- df[otm_calls | otm_puts, ]
+
+# 根据敲定价格进行排序
+otm &lt;- otm[order(otm[, &quot;strike&quot;]), ]
+plot(otm$strike, otm$mid_quote,
+  main = &quot;OTM prices&quot;,
+  xlab = &quot;Strike&quot;,
+  ylab = &quot;Premium&quot;,
+  cex.main = 0.8)
+grid()</code></pre>
+<p>因为SPY都是美式期权，要想根据报价数据导出隐含波动率我们则需要借助蒙特卡洛模拟的方法，二叉树模型，或者用有限差分算子来解决。<code>RQuantLib</code>包中的<code>EmericanOptionImpliedVolatility()</code>函数正适合用在此处。在下面的例子中，我们任意设定了分红收益和无风险利率值。在实际操作中，这些参数的设定对于获得良好的拟合值是至关重要的。如果正确的远期价格没有被考虑到，会导致看涨和看跌期权隐含波动率的不连续性。</p>
+<pre><code># 计算价位期权的隐含波动率
+otm$iv &lt;- NA
+for(i in 1:nrow(otm)) {
+  type &lt;- ifelse(otm$type[i] == &quot;C&quot;, &quot;call&quot;, &quot;put&quot;)
+  value &lt;- as.numeric(otm$mid_quote[i])
+  underlying &lt;- as.numeric(otm$mid_underlying[i])
+  strike &lt;- as.numeric(otm$strike[i])
+  dividendYield &lt;- 0.03
+  riskFreeRate &lt;- 0.02
+  maturity &lt;- 101/252
+  volatility &lt;- 0.15
+  otm$iv[i] &lt;- AmericanOptionImpliedVolatility(type,
+    value, underlying, strike,dividendYield,
+    riskFreeRate, maturity, volatility)$impliedVol
+}
+# 生成图
+plot(otm$strike, otm$iv,
+  main = &quot;Implied Volatility skew for SPY on April 10, 2013 10:30 am&quot;,
+  xlab = &quot;Strike&quot;,
+  ylab = &quot;Implied Volatility&quot;,
+  cex.main = 0.8)
+grid()</code></pre>
+<p><img src="media/fig-09-07.png" style="width:3.33000in;height:2.75000in" alt="图9.7" /></p>
+<p id="fig-9-7"><strong>图9.7</strong> 偏斜的隐含波动率图</p>
+<h2 id="总结">总结</h2>
+<p>本章结合<code>RQuanglib</code>包探讨了期权的定价问题。首先大致回顾了一下期权的基础理论，介绍了Black-Scholes模型。通过R代码和图形展示了一些重要希腊字母变量敏感性分析的结果。利用Tick Data Inc. 的高频数据集，我们进行了期权分笔交易和报价数据的日内分析，随后分析了单个交易日不同敲定价格的期权定价问题。本章最后部分计算了SPY EFT单个时点上的日内隐含波动率。</p>
+<p>翻译：冯凌秉 审校：邓一硕</p>
+
+    <div class="pager"><a class="prev" href="ch08.html"><span class="dir">上一页</span>第8章 高频数据分析</a><a class="next" href="ch10.html"><span class="dir">下一页</span>第10章 最优化</a></div>
+  </div>
+</main>
+<script>
+(function () {
+  var box = document.getElementById('q');
+  var panel = document.getElementById('hits');
+  if (!box) return;
+  var idx = [];
+  fetch('search-index.json')
+    .then(function (r) { return r.json(); })
+    .then(function (d) { idx = d; })
+    .catch(function () {});
+
+  function esc(s) {
+    return s.replace(/[&<>"]/g, function (c) {
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];
+    });
+  }
+  function run() {
+    var q = box.value.trim().toLowerCase();
+    if (!q) { panel.classList.remove('on'); panel.innerHTML = ''; return; }
+    var terms = q.split(/\s+/);
+    var out = [];
+    for (var i = 0; i < idx.length && out.length < 24; i++) {
+      var e = idx[i];
+      var hay = (e.h + ' ' + e.p + ' ' + e.t).toLowerCase();
+      var ok = true;
+      for (var k = 0; k < terms.length; k++) {
+        if (hay.indexOf(terms[k]) < 0) { ok = false; break; }
+      }
+      if (!ok) continue;
+      var pos = e.t.toLowerCase().indexOf(terms[0]);
+      var snip = pos > 40 ? e.t.slice(pos - 30, pos + 90)
+                          : e.t.slice(0, 110);
+      out.push('<a href="' + e.u + '"><div class="p">' + esc(e.p) +
+               '</div><div class="h">' + esc(e.h) +
+               '</div><div class="s">' + esc(snip) + '</div></a>');
+    }
+    panel.innerHTML = out.length
+      ? out.join('')
+      : '<div class="none">没有匹配的内容</div>';
+    panel.classList.add('on');
+  }
+  box.addEventListener('input', run);
+  box.addEventListener('focus', run);
+  document.addEventListener('click', function (e) {
+    if (!panel.contains(e.target) && e.target !== box) {
+      panel.classList.remove('on');
+    }
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') { panel.classList.remove('on'); box.blur(); }
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>第1章 总览 · 量化金融与R语言</title>
+<meta name="description" content="Quantitative Trading with R 中文翻译稿" />
+<style>
+:root {
+  --bg: #ffffff;
+  --fg: #1f2328;
+  --muted: #6b7280;
+  --line: #e5e7eb;
+  --soft: #f7f8fa;
+  --accent: #0f5c8c;
+  --code-bg: #f6f8fa;
+  --sidebar-w: 288px;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  color: var(--fg);
+  background: var(--bg);
+  font-family: -apple-system, "PingFang SC", "Hiragino Sans GB",
+               "Microsoft YaHei", "Source Han Sans SC", sans-serif;
+  font-size: 16px;
+  line-height: 1.85;
+  -webkit-font-smoothing: antialiased;
+}
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* 侧边栏 */
+.sidebar {
+  position: fixed; inset: 0 auto 0 0; width: var(--sidebar-w);
+  border-right: 1px solid var(--line);
+  background: var(--soft);
+  display: flex; flex-direction: column;
+  overflow: hidden;
+}
+.brand {
+  padding: 22px 20px 14px;
+  border-bottom: 1px solid var(--line);
+}
+.brand .t { font-size: 17px; font-weight: 700; line-height: 1.4; }
+.brand .s { font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.5; }
+.search { padding: 12px 16px; border-bottom: 1px solid var(--line); }
+.search input {
+  width: 100%; padding: 8px 10px; font-size: 13px;
+  border: 1px solid var(--line); border-radius: 6px;
+  background: #fff; color: var(--fg); outline: none;
+}
+.search input:focus { border-color: var(--accent); }
+.nav { flex: 1; overflow-y: auto; padding: 10px 0 40px; }
+.nav .group { padding: 12px 20px 6px; font-size: 11px; font-weight: 700;
+  color: var(--muted); letter-spacing: .08em; }
+.nav a.item {
+  display: block; padding: 7px 20px 7px 20px;
+  font-size: 14px; color: var(--fg); border-left: 3px solid transparent;
+}
+.nav a.item:hover { background: #eef1f5; text-decoration: none; }
+.nav a.item.active {
+  border-left-color: var(--accent); background: #e8eff5;
+  font-weight: 600; color: var(--accent);
+}
+.nav details summary {
+  padding: 7px 20px; font-size: 14px; cursor: pointer; list-style: none;
+}
+.nav details summary::-webkit-details-marker { display: none; }
+.nav details summary:hover { background: #eef1f5; }
+.nav details a.sub {
+  display: block; padding: 4px 20px 4px 34px;
+  font-size: 12.5px; color: var(--muted); line-height: 1.5;
+}
+.nav details a.sub:hover { color: var(--accent); }
+
+/* 正文 */
+.main { margin-left: var(--sidebar-w); }
+.wrap { max-width: 860px; margin: 0 auto; padding: 40px 40px 96px; }
+.crumb { font-size: 12px; color: var(--muted); margin-bottom: 10px; }
+h1 { font-size: 30px; line-height: 1.35; margin: 0 0 26px;
+     font-weight: 700; letter-spacing: .01em; }
+h2 { font-size: 21px; margin: 40px 0 14px; padding-bottom: 8px;
+     border-bottom: 1px solid var(--line); font-weight: 700; }
+h3 { font-size: 17px; margin: 28px 0 10px; font-weight: 700; }
+h4 { font-size: 15px; margin: 22px 0 8px; font-weight: 700; }
+p { margin: 0 0 16px; text-align: justify; }
+p.signature { text-align: right; }
+ul, ol { margin: 0 0 16px; padding-left: 26px; }
+li { margin: 4px 0; }
+img { max-width: 100%; height: auto; display: block; margin: 22px auto;
+      border-radius: 4px; }
+figure { margin: 24px 0; text-align: center; }
+figcaption { font-size: 13px; color: var(--muted); margin-top: 8px; }
+
+code {
+  font-family: "SF Mono", Menlo, Consolas, "Courier New", monospace;
+  font-size: 0.88em; background: var(--code-bg);
+  padding: 2px 5px; border-radius: 4px;
+  border: 1px solid #eaecef;
+}
+pre {
+  background: var(--code-bg); border: 1px solid var(--line);
+  border-radius: 6px; padding: 14px 16px; overflow-x: auto;
+  line-height: 1.6; margin: 0 0 18px;
+}
+pre code { background: none; border: 0; padding: 0; font-size: 12.5px; }
+
+table { border-collapse: collapse; width: 100%; margin: 20px 0;
+        font-size: 14px; }
+th, td { border: 1px solid var(--line); padding: 7px 11px; }
+th { background: var(--soft); font-weight: 700; }
+tr:nth-child(even) td { background: #fcfcfd; }
+
+blockquote { margin: 0 0 18px; padding: 10px 18px;
+  border-left: 3px solid var(--line); color: var(--muted); background: var(--soft); }
+
+/* 插图目录 / 表格目录 */
+.cap-list { list-style: none; padding: 0; margin: 4px 0 0; }
+.cap-list li { border-bottom: 1px solid var(--line); }
+.cap-list a { display: flex; align-items: baseline; gap: 12px;
+  padding: 9px 2px; font-size: 14px; color: var(--fg); }
+.cap-list a:hover { background: var(--soft); text-decoration: none;
+  color: var(--accent); }
+.cap-num { min-width: 68px; color: var(--muted); font-size: 12.5px;
+  font-variant-numeric: tabular-nums; }
+.cap-title { flex: 1; }
+.cap-where { color: var(--muted); font-size: 11.5px; white-space: nowrap; }
+.cap-empty { color: var(--muted); font-size: 14px; }
+
+/* MathML 居中与缩放 */
+math[display="block"] { display: block; margin: 20px auto; font-size: 1.05em; }
+
+/* 页脚翻页 */
+.pager { display: flex; justify-content: space-between; gap: 16px;
+         margin-top: 56px; padding-top: 22px; border-top: 1px solid var(--line); }
+.pager a { flex: 1; padding: 12px 16px; border: 1px solid var(--line);
+           border-radius: 8px; font-size: 13px; }
+.pager a:hover { border-color: var(--accent); text-decoration: none;
+                 background: var(--soft); }
+.pager .dir { display: block; font-size: 11px; color: var(--muted);
+              margin-bottom: 3px; }
+.pager .next { text-align: right; }
+
+/* 首页 */
+.cover { padding: 56px 0 8px; }
+.cover h1 { font-size: 38px; margin-bottom: 8px; }
+.cover .sub { font-size: 15px; color: var(--muted); margin-bottom: 34px; }
+.toc-list { border-top: 1px solid var(--line); }
+.toc-list > li { list-style: none; margin: 0; border-bottom: 1px solid var(--line); }
+.toc-list { padding-left: 0; }
+.toc-row { display: flex; align-items: baseline; gap: 10px;
+           padding: 13px 2px; font-size: 15px; }
+.toc-row .no { color: var(--muted); font-size: 12px; min-width: 26px; }
+.toc-subs { padding: 0 0 12px 36px; margin: 0; }
+.toc-subs li { list-style: none; font-size: 13px; color: var(--muted);
+               padding: 3px 0; }
+
+/* 搜索结果 */
+#hits { display: none; position: absolute; left: 16px; right: 16px; top: 96px;
+        background: #fff; border: 1px solid var(--line); border-radius: 8px;
+        box-shadow: 0 8px 24px rgba(0,0,0,.12); max-height: 60vh;
+        overflow-y: auto; z-index: 50; }
+#hits.on { display: block; }
+#hits a { display: block; padding: 10px 14px; border-bottom: 1px solid var(--line); }
+#hits a:last-child { border-bottom: 0; }
+#hits a:hover { background: var(--soft); text-decoration: none; }
+#hits .h { font-size: 13px; font-weight: 600; color: var(--fg); }
+#hits .p { font-size: 11px; color: var(--accent); margin-bottom: 2px; }
+#hits .s { font-size: 12px; color: var(--muted); line-height: 1.5; }
+#hits .none { padding: 14px; font-size: 13px; color: var(--muted); }
+
+@media (max-width: 900px) {
+  .sidebar { display: none; }
+  .main { margin-left: 0; }
+  .wrap { padding: 24px 20px 72px; }
+  .cover h1 { font-size: 28px; }
+}
+@media print {
+  .sidebar, .pager, .search { display: none; }
+  .main { margin-left: 0; }
+  .wrap { max-width: none; padding: 0; }
+}
+</style>
+</head>
+<body>
+<aside class="sidebar">
+  <div class="brand">
+    <div class="t">量化金融与R语言</div>
+    <div class="s">Quantitative Trading with R 中文翻译稿</div>
+  </div>
+  <div class="search">
+    <input id="q" type="search" placeholder="搜索全书…" autocomplete="off" />
+  </div>
+  <nav class="nav"><div class="group">前言</div><a class="item" href="figures.html">插图目录</a><a class="item" href="tables.html">表格目录</a><a class="item" href="preface.html">译者序</a><a class="item" href="translators.html">译者简介</a><a class="item" href="acknowledgements.html">致谢</a><div class="group">正文</div><details open><summary><a class="item active" style="display:inline;padding:0;border:0" href="ch01.html">第1章 总览</a></summary><a class="sub" href="ch01.html#任务综述">任务综述</a><a class="sub" href="ch01.html#金融市场和工具">金融市场和工具</a><a class="sub" href="ch01.html#交易策略">交易策略</a><a class="sub" href="ch01.html#高频交易">高频交易</a><a class="sub" href="ch01.html#关于订单orderbook">关于订单（orderbook）</a><a class="sub" href="ch01.html#自动化交易">自动化交易</a><a class="sub" href="ch01.html#数据从哪儿来">数据从哪儿来？</a><a class="sub" href="ch01.html#总结">总结</a></details><a class="item" href="ch02.html">第2章 交易工具</a><a class="item" href="ch03.html">第3章 与数据打交道</a><a class="item" href="ch04.html">第4章 统计和概率基础</a><a class="item" href="ch05.html">第5章 统计和概率中级</a><a class="item" href="ch06.html">第6章 价格差，贝塔系数和风险</a><a class="item" href="ch07.html">第7章 基于Quantstrat包的回溯测试</a><a class="item" href="ch08.html">第8章 高频数据分析</a><a class="item" href="ch09.html">第9章 期权</a><a class="item" href="ch10.html">第10章 最优化</a><a class="item" href="ch11.html">第11章 速度，测试与报告</a><div class="group">附录</div><a class="item" href="appendix.html">补充</a><a class="item" href="references.html">参考文献</a><a class="item" href="terms.html">索引</a></nav>
+  <div id="hits"></div>
+</aside>
+<main class="main">
+  <div class="wrap">
+    <div class="crumb">正文</div>
+    <h1>第1章 总览</h1>
+<p>我写作本书的目的，是为读者提供一个适用于业界及学术界，涵盖编程、金融和数学的基础工具箱。内容涉及R编程语言，和R环境——一种用来处理金融市场数据和解决量化分析师和交易员们平日遇到常见问题的手段。随后章节给出的这些工具，是我从事量化交易和编写程序这些年里认为有用而希望推荐给读者的。本书主要从量化分析，而非学术角度撰写。书稿大部分内容基于我在芝加哥落约拉大学（Loyola University in Chicago）时教授量化金融这门研究生课程时的授课笔记。</p>
+<p>本书属于入门级别，并不要求读者具备编程经验或者高级数学知识。话虽如此，但如果 读者有相关知识储备，对相关章节的理解会更轻松。在数学方面，我推荐读者先回顾基本微积分、线性代数、统计学和概率论。在编程方面，熟悉VBA、Python和SQL会有所帮助。</p>
+<p>本书也面向富有行业经验、需要分析金融数据或者通过R脚本自动化处理常规工作的交易人员。</p>
+<p>交易和编程本身话题宽泛，我并不打算给出每个概念的详细解释。请勿梦想通过阅读本书成为编程高手或认为听从作者建议就能获利。本书只负责提供有助于分析、实施和展示交易策略或其他相关量化主题的工具和思路。图1.1总括地展示了后续章节涉及的话题。</p>
+<p><img src="media/fig-01-01.png" style="width:3.76749in;height:2.89263in" alt="原稿插图" /></p>
+<p id="fig-1-1"><strong>图1.1</strong> 主题图</p>
+<h2 id="任务综述">任务综述</h2>
+<p>我会试着提出一个比较模糊的概念——构造交易策略，然后一些具体的问题就自然浮现。比如，怎么把我的交易想法自动化？我该用什么编程工具，基于何种理由？我需要什么数学、金融、编程工具来评估交易策略？测试交易策略的数据从何而来？如何知道我的策略是好的？怎么向他人展示相关结果？</p>
+<p>大部分编程书籍可以视为本书的参考书。根据索引中的关键词，读者就能找到感兴趣的主题，定位书页，展开阅读。不过，我更推荐读者从前往后，一章不落地顺序阅读本书。通过在R语言中完成规定的自动化任务来熟悉量化金融的思维方式，深入背景，思考现实问题，并建立解决问题的信心。作者良苦用心，日月可鉴。</p>
+<p>一个明智的做事方法是在做事之前先在大脑中画出目标相关的地图，在图上勾勒出前进的方向和路上可能遇到的障碍。与此类似，本书的目标之一，是解决量化交易员们关心的一些典型问题，积累必要的编程技能。另一个目标，是学会操作金融数据，用数学手段来评估交易策略。</p>
+<p>为了将目标表述地更具体一些，我尝试给出一个简明扼要的任务综述：</p>
+<blockquote>
+<p><em>我们将针对市场上基于流动性工具的投资组合，提出自动化交易的策略。这些策略将会是高效，稳健，可拓展的；更重要的是，低风险高收益。</em></p>
+</blockquote>
+<p>读罢，你是不是有一堆问题：</p>
+<ol type="1">
+<li>什么是市场？</li>
+<li>什么是工具？以及，流动性工具？</li>
+<li>什么是交易策略，我怎么着手制造一个交易策略？</li>
+<li>怎么定义盈利能力？</li>
+<li>什么是风险？具体地，如何量化交易策略的风险？</li>
+<li>如何自动化交易策略？</li>
+<li>怎样理解效率？</li>
+</ol>
+<h2 id="金融市场和工具">金融市场和工具</h2>
+<p>市场是一个有形或虚拟的场所，参与者在这里进行交易。在古希腊，市民们聚集在市场上，相互之间交换蜂蜜、橄榄油等农产品，以及艺术品之类的物品。交易可以是以物易物，也可以通过货币完成。市集的概念在古今中外历朝历代并不鲜见。这类市场和今天的实体市场类似，参与者必须见面，双方商定好价格和交付条件，最后确认交易。</p>
+<p>今天，世界上许多实体市场正在给虚拟市场让路。这股浪潮中有亚马逊，eBay和阿里巴巴。在这些巨型的在线市场上，买卖双方完全通过电脑来互动和谈生意。过去几年金融市场也有类似的趋势。老的期货、股票、期权交易所正在被电子平台取代。表1.1大致列出了芝加哥商品交易所（CME）电子和楼层交易量的对比。Globex为芝加哥商业交易（ChicagoMercantile Exchange，CME）电子平台。</p>
+<p>对于一个有组织的市场，其首要任务是撮合有意向的参与者，按照协定的价格进行商品或服务交易。其次，市场应该保证交易有秩序地发生。电子金融市场完全符合以上描述。</p>
+<p>近年来，上百家证券交易所和代理电子机构如雨后春笋般涌现于全球各地。表1.2罗列了几处有名的证券交易机构。</p>
+<p>表1.3罗列了著名的期货交易所。</p>
+<p>这些交易所使得标准化的金融合约高效而有序地履行。金融工具包含股票、期货、债券、货币，单纯期权（vanilla options）、奇异期权（exotic options）、互换（swaps）、互换期权（swaptions）等等。其中一些工具较另一些逐渐更受追捧。例如，芝加哥商品交易所的E-mini金融期货和欧洲美元合约，是世界上流动性最好的合约。投资者和交易员们基于这些工具经营每日市场和利率风险。下面的表格描绘了一些芝加哥商品交易所期货合约的日均成交量。</p>
+<p>流动性是对以有利的价格购买或出售一定数量金融工具的难易程度的度量。它也可以看作是成交量的一个代替。投资者和交易员喜欢持有流动性好的金融产品，因为就算他们默默买进卖出很大的量，也不会影响该金融产品的价格。</p>
+<p id="tab-1-1">表1.1 Globex 估计交易量</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">年</th>
+<th style="text-align: center;">芝加哥商品交易所交易量？</th>
+<th style="text-align: center;">其他（%）</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">1992</td>
+<td style="text-align: center;">0.2</td>
+<td style="text-align: center;">99.8</td>
+</tr>
+<tr>
+<td style="text-align: center;">1993</td>
+<td style="text-align: center;">0.4</td>
+<td style="text-align: center;">99.6</td>
+</tr>
+<tr>
+<td style="text-align: center;">1994</td>
+<td style="text-align: center;">0.5</td>
+<td style="text-align: center;">99.5</td>
+</tr>
+<tr>
+<td style="text-align: center;">...</td>
+<td style="text-align: center;">...</td>
+<td style="text-align: center;">...</td>
+</tr>
+<tr>
+<td style="text-align: center;">2007</td>
+<td style="text-align: center;">78</td>
+<td style="text-align: center;">22</td>
+</tr>
+<tr>
+<td style="text-align: center;">2008</td>
+<td style="text-align: center;">82</td>
+<td style="text-align: center;">18</td>
+</tr>
+<tr>
+<td style="text-align: center;">2009</td>
+<td style="text-align: center;">86</td>
+<td style="text-align: center;">14</td>
+</tr>
+<tr>
+<td style="text-align: center;">...</td>
+<td style="text-align: center;">...</td>
+<td style="text-align: center;">...</td>
+</tr>
+<tr>
+<td style="text-align: center;">2014</td>
+<td style="text-align: center;">93</td>
+<td style="text-align: center;">7</td>
+</tr>
+</tbody>
+</table>
+<p id="tab-1-2">表1.2 主要证券交易所</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">国家</th>
+<th style="text-align: center;">名称</th>
+<th style="text-align: center;">网站</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">美国</td>
+<td style="text-align: center;">NYSE</td>
+<td style="text-align: center;">www.nyse.nyx.com</td>
+</tr>
+<tr>
+<td style="text-align: center;">美国</td>
+<td style="text-align: center;">NASDAQ</td>
+<td style="text-align: center;">www.nasdaqomx.com</td>
+</tr>
+<tr>
+<td style="text-align: center;">美国</td>
+<td style="text-align: center;">BATS</td>
+<td style="text-align: center;">www.batstrading.com</td>
+</tr>
+<tr>
+<td style="text-align: center;">美国</td>
+<td style="text-align: center;">Direct Edge</td>
+<td style="text-align: center;">www.directedge.com</td>
+</tr>
+<tr>
+<td style="text-align: center;">日本</td>
+<td style="text-align: center;">TSE</td>
+<td style="text-align: center;">www.tse.or.jp/english</td>
+</tr>
+<tr>
+<td style="text-align: center;">英国</td>
+<td style="text-align: center;">LSE</td>
+<td style="text-align: center;">www.nasdaqomx.com</td>
+</tr>
+<tr>
+<td style="text-align: center;">英国</td>
+<td style="text-align: center;">NYSE Euronext</td>
+<td style="text-align: center;">www.euronext.com</td>
+</tr>
+</tbody>
+</table>
+<p id="tab-1-3">表1.3 主要期货交易所</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">国家</th>
+<th style="text-align: center;">名称</th>
+<th style="text-align: center;">网站</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">美国</td>
+<td style="text-align: center;">CME</td>
+<td style="text-align: center;">www.cmegroup.com</td>
+</tr>
+<tr>
+<td style="text-align: center;">美国</td>
+<td style="text-align: center;">ICE</td>
+<td style="text-align: center;">www.theice.com</td>
+</tr>
+<tr>
+<td style="text-align: center;">英国</td>
+<td style="text-align: center;">Euronext</td>
+<td style="text-align: center;">www.euronext.com</td>
+</tr>
+<tr>
+<td style="text-align: center;">德国</td>
+<td style="text-align: center;">Eurex</td>
+<td style="text-align: center;">www.eurexchange.com</td>
+</tr>
+</tbody>
+</table>
+<p id="tab-1-4">表1.4 活跃期货量</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">合约</th>
+<th style="text-align: center;">活跃合约代码</th>
+<th style="text-align: center;">交易量</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">Eurodollar</td>
+<td style="text-align: center;">GE</td>
+<td style="text-align: center;">2,482,899</td>
+</tr>
+<tr>
+<td style="text-align: center;">E-mini S&amp;P 500</td>
+<td style="text-align: center;">ES</td>
+<td style="text-align: center;">1,804,469</td>
+</tr>
+<tr>
+<td style="text-align: center;">10-Year treasury note</td>
+<td style="text-align: center;">ZN</td>
+<td style="text-align: center;">1,322,388</td>
+</tr>
+<tr>
+<td style="text-align: center;">5-Year treasury note</td>
+<td style="text-align: center;">ZF</td>
+<td style="text-align: center;">773,183</td>
+</tr>
+</tbody>
+</table>
+<h2 id="交易策略">交易策略</h2>
+<p>金融机构向来是世界上受到最严格监管的单位，凡事皆有利弊，管制虽然镇压了竞争和创新，却使市场参与者对他们交易的正当性和公平性更有信心。对交易正当性有信心非常重要，它确保投资者和交易员在电子交易平台的发展中投入大量时间和金钱，而这些平台将积极活跃于电子市场上。当投资者或交易员发现一个机会，对某些金融工具可以合法执行一个买入或卖出订单时，交易策略就发生了。随后，一旦交易员发现盈利点，这些交易也必须能够在某个时间点被抵消。交易策略的持有（holding）期从几个微秒（译者注：百万分之一秒）到数年不等。交易策略有多种类型：长期、短期、投机、高频、低延时等等。用最简单的话说，一个交易策略是交易人员利用的一组既定规则，以期在金融市场获利。这些策略或利用市场的结构效应，或运用金融工具之间的统计关系，抑或仰靠外部信息。</p>
+<h2 id="高频交易">高频交易</h2>
+<p>大部分人认为，高频交易是在很短时间内发生的交易行为。实际上，这个概念指代的内容更为宽泛。持有期不仅限于随后数秒。通常，交易在很短时间内进入市场，但会持续相当长一段时间。该短语也指为了机会而持续发酵市场，只在机会出现时发生一定数量交易的算法。这些算法仍然高频率地处理市场数据，但并不会以此频率执行交易。让你再晕一点，高频交易有时也称为低延迟型交易。由于这些交易方法总是关乎高速计算机和网络的使用，命名上的冲突也难以避免。大部分策略可进一步分为做市型（market-making）策略，接受价格型（market-taking）策略和投机型（opportunistic）策略。</p>
+<p>在一个高频做市型策略中，交易算法持续不断地提供流动性给其他市场参与者。风险在于主动投资者（交易另一边的）比被动的（做市）程序有更多内部信息。鉴于这种信息不对等，一些交易所向做市商提供补偿。相比接受价格型交易者，做市型策略获利要小一些。但是，每单获利的不足可以在数量上弥补。这样一个做市策略可能愿意获得每单一个tick的交易优势（edge）。一个tick指交易所允许的某工具的最小价格增量。精算中，由于不利价格变动，在既定条件下，这些策略可能只会捕捉到tick的少量信息。</p>
+<p>无论交易机会如何，接受价格型策略都可以发挥作用。分析市场数据的算法或者关于牛市熊市的新闻事件，都会产生买卖信号，从而导致交易机会。对这种策略，即时性通常比价格更为关键。比起做市型策略，接受价格型策略每单需要更多交易优势。</p>
+<h2 id="关于订单orderbook">关于订单（orderbook）</h2>
+<p><img src="media/fig-01-02.png" style="width:1.59276in;height:2.27744in" /></p>
+<p id="fig-1-2"><strong>图1.2</strong> 一份订单</p>
+<p>一份订单（orderbook）可以视为所有市场参与者的买卖限定单。订单是交易人员和交易所使用的一种方便的数据结构，用来点击交易和匹配买卖双方。一份订单可以是所有买家在左边，所有卖家在右边。图1.2列出了一个垂直方向配置的每层价格，交易量和交易次数。</p>
+<p>最优买入价是被动交易者愿意买入的最高价格。最优卖出价格是被动交易者愿意卖出的最低价格。在我们的例子中，最优买价是8，最优卖价是9. 最优买价和最优卖价的数量分别是125和100。我们还观察到，有1个订单上有最优买价，4个不同的订单上有最优卖价。任何时候一旦有数字的变化，我们说一个市场数据事件已经发生。一个市场数据事件可能是在7的价格水平取消一手（译者注：一个买卖单位，英文为a lot），或者在第二个最优卖价到来时发生一个新订单。在这种情况下，反映在第二最优买价的新的数量将成为199，第二位的最优卖价数量也将上升。由于这么多个产品正在发生交易，很显然通过交易所传输和存储的信息量是巨大的。不仅如此，交易所还必须时时反应订单状态变化。要完成所有复杂而艰巨的任务，能处理和存储所有数据的基础设施功不可没。</p>
+<h2 id="自动化交易">自动化交易</h2>
+<p>不久前，绝大多数交易发生在坑里。典型的交易流程如下：投资者会将交易情况通过电话或当面告知他们的经纪人。经纪人随后将信息传给坑里的同事。如果一个交易对手想交易的另一方，则将更改的指令退回给经纪人。同时，经纪人会把填充价格和数量传达给客户。</p>
+<p>今天，技术使我们能够以更快的速度进入和退出交易。自动化交易平台，如 Interactive Brokers, Etrade, Ameritrade之类，可以快速而低成本地下订单。交易所自己的集中式匹配引擎使买卖双方之间的匹配几乎瞬间发生。匹配引擎是一种电脑系统，它掌握所有订单的情况，确保准确数量的合约即时分配给买方和卖方。一旦一笔交易完成，订单确认报告就会传回给发起这笔交易的交易员。除报告之外，交易所也传回包括市场数据和交易所相关状态的其他类型信息。</p>
+<p>许多自营交易公司、银行和对冲基金与交易所的互动是通过直接连接交易所的匹配引擎和市场数据源完成的。交易所利用这些机构”对速度的需求”，为交易员提供高价位的配套设施，从而赚取一个巨大的溢价。简单地说，交易员将他们的服务器尽量靠近交易所。如果一个特定的交易策略对延迟性非常敏感，那么这种服务就物有所值。</p>
+<p>自动化交易行业目前对编程、数学和批判性思考技能的依赖和对财务技能的需求不相上下，甚至更高。各大对冲基金和交易公司纷纷将工程、计算机科学、物理和应用数学等专业的程序员纳入麾下。大多数情况下，这些技术人员负责处理网络基础设施，数据存储，系统集成，数据处理，可视化和算法开发。</p>
+<p>在今天的电子市场上，交易员，技术专家，宽客的角色确实变得模糊。从纷乱的信息源中处理、分析和展示信息，以及基于结果开发交易策略的能力在现实中大受追捧。我估计，在不太遥远的将来，交易员这个词将意味着跟今天完全不同的含义。交易员将可能是一个精明的技术人员，有着敏锐的市场意识，能够采用数据驱动的方法建立、监控和开发有利可图的交易策略。</p>
+<p>如果读者想要了解关于市场连通性、执行、算法交易和自动化的全面讨论，推荐Barry Johnson的书：Algorithmic Trading and DMA: An Introduction to Direct Access Trading Strategies ，这里是该书网站：<a href="http://www.algo-dma.com" class="uri">http://www.algo-dma.com</a>.</p>
+<h2 id="数据从哪儿来">数据从哪儿来？</h2>
+<p>财务数据是交易业务的命脉。正式交易之前，比较重要的一个步骤是摸索和感觉某支策略在生产环境中的行为。可以通过分析历史数据，监测时时数据、市场上发生的事件、以及经济方面的新闻布告以达到目的。那么这些数据从哪儿来？更具体地，我们去哪里搜集股票、期权、期货价格，以及其他经济指标的时间序列？一些广受欢迎的免费每日股价追踪网站摘录如下：</p>
+<ul>
+<li>Yahoo Finance: <a href="http://ﬁnance.yahoo.com/" class="uri">http://ﬁnance.yahoo.com/</a></li>
+<li>Quandl: <a href="http://www.quandl.com/" class="uri">http://www.quandl.com/</a></li>
+<li>GoogleFinance: <a href="http://www.google.com/ﬁnance" class="uri">http://www.google.com/ﬁnance</a></li>
+<li>Federal Reserve Bank Of St.Louis: <a href="http://research.stlouisfed.org/fred2/" class="uri">http://research.stlouisfed.org/fred2/</a></li>
+</ul>
+<p>我们将在本书中重点使用雅虎财经（Yahoo Finance）。大部分数据是单一股票名和交易所交易基金（ETF）的每日开盘、最高、最低、收盘价格。这些数据是免费的，但天下没有真正免费的午餐。我们需要警惕数据的质量，并注意在过程中对数据进行清洗、过滤和删除可能的错误。</p>
+<p>最佳备选方案是自己抓取数据。这需要大量基础设施，而且费时费力。很多机构交易员、银行和自营交易公司采用这种方法。他们直接连接全世界范围的交易所。通常，交易所会配备服务器，这些机器将数据记录到本地磁盘上。随后原始数据被处理，清洗，并存储在数据库中，为未来的检索做准备。</p>
+<p>折中的解决方案是从第三方供应商获得数据。供应商很多，他们提供数据的质量却参差不齐。一些值得推荐的数据供应商摘录如下：</p>
+<ul>
+<li>TickData,Inc: <a href="http://www.tickdata.com/" class="uri">http://www.tickdata.com/</a></li>
+<li>Bloomberg: <a href="http://www.bloomberg.com/enterprise/data/" class="uri">http://www.bloomberg.com/enterprise/data/</a></li>
+<li>ThomsonReuters: <a href="http://thomsonreuters.com/ﬁnancial/market-data/" class="uri">http://thomsonreuters.com/ﬁnancial/market-data/</a></li>
+<li>CMEGroup: <a href="http://www.cmegroup.com/market-data/datamine-historical-data/" class="uri">http://www.cmegroup.com/market-data/datamine-historical-data/</a></li>
+<li>YSEMarketData: <a href="http://www.nyxdata.com/Data-Products/NYSE" class="uri">http://www.nyxdata.com/Data-Products/NYSE</a></li>
+<li>HanweckAssociates: <a href="http://www.hanweckassoc.com/" class="uri">http://www.hanweckassoc.com/</a></li>
+<li>ActivFinancial: <a href="http://www.activﬁnancial.com/" class="uri">http://www.activﬁnancial.com/</a></li>
+<li>Markit: <a href="http://www.markit.com/" class="uri">http://www.markit.com/</a></li>
+</ul>
+<h2 id="总结">总结</h2>
+<p>本章前几小节阐明了这本书的目的和目标受众。书中推荐了一些数学和编程资源，它们对理解后面章节中的技术讨论会有所帮助。为推动后续分析，我们提出了任务综述用以概述理想的交易策略的最终目标。简要解释了金融市场，金融工具和交易策略。本章最后讨论了高频交易和策略的自动化，并简述了如何获取每日及日间金融数据。</p>
+<p>翻译：杨环 审校：邓一硕</p>
+
+    <div class="pager"><a class="prev" href="acknowledgements.html"><span class="dir">上一页</span>致谢</a><a class="next" href="ch02.html"><span class="dir">下一页</span>第2章 交易工具</a></div>
+  </div>
+</main>
+<script>
+(function () {
+  var box = document.getElementById('q');
+  var panel = document.getElementById('hits');
+  if (!box) return;
+  var idx = [];
+  fetch('search-index.json')
+    .then(function (r) { return r.json(); })
+    .then(function (d) { idx = d; })
+    .catch(function () {});
+
+  function esc(s) {
+    return s.replace(/[&<>"]/g, function (c) {
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];
+    });
+  }
+  function run() {
+    var q = box.value.trim().toLowerCase();
+    if (!q) { panel.classList.remove('on'); panel.innerHTML = ''; return; }
+    var terms = q.split(/\s+/);
+    var out = [];
+    for (var i = 0; i < idx.length && out.length < 24; i++) {
+      var e = idx[i];
+      var hay = (e.h + ' ' + e.p + ' ' + e.t).toLowerCase();
+      var ok = true;
+      for (var k = 0; k < terms.length; k++) {
+        if (hay.indexOf(terms[k]) < 0) { ok = false; break; }
+      }
+      if (!ok) continue;
+      var pos = e.t.toLowerCase().indexOf(terms[0]);
+      var snip = pos > 40 ? e.t.slice(pos - 30, pos + 90)
+                          : e.t.slice(0, 110);
+      out.push('<a href="' + e.u + '"><div class="p">' + esc(e.p) +
+               '</div><div class="h">' + esc(e.h) +
+               '</div><div class="s">' + esc(snip) + '</div></a>');
+    }
+    panel.innerHTML = out.length
+      ? out.join('')
+      : '<div class="none">没有匹配的内容</div>';
+    panel.classList.add('on');
+  }
+  box.addEventListener('input', run);
+  box.addEventListener('focus', run);
+  document.addEventListener('click', function (e) {
+    if (!panel.contains(e.target) && e.target !== box) {
+      panel.classList.remove('on');
+    }
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') { panel.classList.remove('on'); box.blur(); }
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>补充 · 量化金融与R语言</title>
+<meta name="description" content="Quantitative Trading with R 中文翻译稿" />
+<style>
+:root {
+  --bg: #ffffff;
+  --fg: #1f2328;
+  --muted: #6b7280;
+  --line: #e5e7eb;
+  --soft: #f7f8fa;
+  --accent: #0f5c8c;
+  --code-bg: #f6f8fa;
+  --sidebar-w: 288px;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  color: var(--fg);
+  background: var(--bg);
+  font-family: -apple-system, "PingFang SC", "Hiragino Sans GB",
+               "Microsoft YaHei", "Source Han Sans SC", sans-serif;
+  font-size: 16px;
+  line-height: 1.85;
+  -webkit-font-smoothing: antialiased;
+}
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* 侧边栏 */
+.sidebar {
+  position: fixed; inset: 0 auto 0 0; width: var(--sidebar-w);
+  border-right: 1px solid var(--line);
+  background: var(--soft);
+  display: flex; flex-direction: column;
+  overflow: hidden;
+}
+.brand {
+  padding: 22px 20px 14px;
+  border-bottom: 1px solid var(--line);
+}
+.brand .t { font-size: 17px; font-weight: 700; line-height: 1.4; }
+.brand .s { font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.5; }
+.search { padding: 12px 16px; border-bottom: 1px solid var(--line); }
+.search input {
+  width: 100%; padding: 8px 10px; font-size: 13px;
+  border: 1px solid var(--line); border-radius: 6px;
+  background: #fff; color: var(--fg); outline: none;
+}
+.search input:focus { border-color: var(--accent); }
+.nav { flex: 1; overflow-y: auto; padding: 10px 0 40px; }
+.nav .group { padding: 12px 20px 6px; font-size: 11px; font-weight: 700;
+  color: var(--muted); letter-spacing: .08em; }
+.nav a.item {
+  display: block; padding: 7px 20px 7px 20px;
+  font-size: 14px; color: var(--fg); border-left: 3px solid transparent;
+}
+.nav a.item:hover { background: #eef1f5; text-decoration: none; }
+.nav a.item.active {
+  border-left-color: var(--accent); background: #e8eff5;
+  font-weight: 600; color: var(--accent);
+}
+.nav details summary {
+  padding: 7px 20px; font-size: 14px; cursor: pointer; list-style: none;
+}
+.nav details summary::-webkit-details-marker { display: none; }
+.nav details summary:hover { background: #eef1f5; }
+.nav details a.sub {
+  display: block; padding: 4px 20px 4px 34px;
+  font-size: 12.5px; color: var(--muted); line-height: 1.5;
+}
+.nav details a.sub:hover { color: var(--accent); }
+
+/* 正文 */
+.main { margin-left: var(--sidebar-w); }
+.wrap { max-width: 860px; margin: 0 auto; padding: 40px 40px 96px; }
+.crumb { font-size: 12px; color: var(--muted); margin-bottom: 10px; }
+h1 { font-size: 30px; line-height: 1.35; margin: 0 0 26px;
+     font-weight: 700; letter-spacing: .01em; }
+h2 { font-size: 21px; margin: 40px 0 14px; padding-bottom: 8px;
+     border-bottom: 1px solid var(--line); font-weight: 700; }
+h3 { font-size: 17px; margin: 28px 0 10px; font-weight: 700; }
+h4 { font-size: 15px; margin: 22px 0 8px; font-weight: 700; }
+p { margin: 0 0 16px; text-align: justify; }
+p.signature { text-align: right; }
+ul, ol { margin: 0 0 16px; padding-left: 26px; }
+li { margin: 4px 0; }
+img { max-width: 100%; height: auto; display: block; margin: 22px auto;
+      border-radius: 4px; }
+figure { margin: 24px 0; text-align: center; }
+figcaption { font-size: 13px; color: var(--muted); margin-top: 8px; }
+
+code {
+  font-family: "SF Mono", Menlo, Consolas, "Courier New", monospace;
+  font-size: 0.88em; background: var(--code-bg);
+  padding: 2px 5px; border-radius: 4px;
+  border: 1px solid #eaecef;
+}
+pre {
+  background: var(--code-bg); border: 1px solid var(--line);
+  border-radius: 6px; padding: 14px 16px; overflow-x: auto;
+  line-height: 1.6; margin: 0 0 18px;
+}
+pre code { background: none; border: 0; padding: 0; font-size: 12.5px; }
+
+table { border-collapse: collapse; width: 100%; margin: 20px 0;
+        font-size: 14px; }
+th, td { border: 1px solid var(--line); padding: 7px 11px; }
+th { background: var(--soft); font-weight: 700; }
+tr:nth-child(even) td { background: #fcfcfd; }
+
+blockquote { margin: 0 0 18px; padding: 10px 18px;
+  border-left: 3px solid var(--line); color: var(--muted); background: var(--soft); }
+
+/* 插图目录 / 表格目录 */
+.cap-list { list-style: none; padding: 0; margin: 4px 0 0; }
+.cap-list li { border-bottom: 1px solid var(--line); }
+.cap-list a { display: flex; align-items: baseline; gap: 12px;
+  padding: 9px 2px; font-size: 14px; color: var(--fg); }
+.cap-list a:hover { background: var(--soft); text-decoration: none;
+  color: var(--accent); }
+.cap-num { min-width: 68px; color: var(--muted); font-size: 12.5px;
+  font-variant-numeric: tabular-nums; }
+.cap-title { flex: 1; }
+.cap-where { color: var(--muted); font-size: 11.5px; white-space: nowrap; }
+.cap-empty { color: var(--muted); font-size: 14px; }
+
+/* MathML 居中与缩放 */
+math[display="block"] { display: block; margin: 20px auto; font-size: 1.05em; }
+
+/* 页脚翻页 */
+.pager { display: flex; justify-content: space-between; gap: 16px;
+         margin-top: 56px; padding-top: 22px; border-top: 1px solid var(--line); }
+.pager a { flex: 1; padding: 12px 16px; border: 1px solid var(--line);
+           border-radius: 8px; font-size: 13px; }
+.pager a:hover { border-color: var(--accent); text-decoration: none;
+                 background: var(--soft); }
+.pager .dir { display: block; font-size: 11px; color: var(--muted);
+              margin-bottom: 3px; }
+.pager .next { text-align: right; }
+
+/* 首页 */
+.cover { padding: 56px 0 8px; }
+.cover h1 { font-size: 38px; margin-bottom: 8px; }
+.cover .sub { font-size: 15px; color: var(--muted); margin-bottom: 34px; }
+.toc-list { border-top: 1px solid var(--line); }
+.toc-list > li { list-style: none; margin: 0; border-bottom: 1px solid var(--line); }
+.toc-list { padding-left: 0; }
+.toc-row { display: flex; align-items: baseline; gap: 10px;
+           padding: 13px 2px; font-size: 15px; }
+.toc-row .no { color: var(--muted); font-size: 12px; min-width: 26px; }
+.toc-subs { padding: 0 0 12px 36px; margin: 0; }
+.toc-subs li { list-style: none; font-size: 13px; color: var(--muted);
+               padding: 3px 0; }
+
+/* 搜索结果 */
+#hits { display: none; position: absolute; left: 16px; right: 16px; top: 96px;
+        background: #fff; border: 1px solid var(--line); border-radius: 8px;
+        box-shadow: 0 8px 24px rgba(0,0,0,.12); max-height: 60vh;
+        overflow-y: auto; z-index: 50; }
+#hits.on { display: block; }
+#hits a { display: block; padding: 10px 14px; border-bottom: 1px solid var(--line); }
+#hits a:last-child { border-bottom: 0; }
+#hits a:hover { background: var(--soft); text-decoration: none; }
+#hits .h { font-size: 13px; font-weight: 600; color: var(--fg); }
+#hits .p { font-size: 11px; color: var(--accent); margin-bottom: 2px; }
+#hits .s { font-size: 12px; color: var(--muted); line-height: 1.5; }
+#hits .none { padding: 14px; font-size: 13px; color: var(--muted); }
+
+@media (max-width: 900px) {
+  .sidebar { display: none; }
+  .main { margin-left: 0; }
+  .wrap { padding: 24px 20px 72px; }
+  .cover h1 { font-size: 28px; }
+}
+@media print {
+  .sidebar, .pager, .search { display: none; }
+  .main { margin-left: 0; }
+  .wrap { max-width: none; padding: 0; }
+}
+</style>
+</head>
+<body>
+<aside class="sidebar">
+  <div class="brand">
+    <div class="t">量化金融与R语言</div>
+    <div class="s">Quantitative Trading with R 中文翻译稿</div>
+  </div>
+  <div class="search">
+    <input id="q" type="search" placeholder="搜索全书…" autocomplete="off" />
+  </div>
+  <nav class="nav"><div class="group">前言</div><a class="item" href="figures.html">插图目录</a><a class="item" href="tables.html">表格目录</a><a class="item" href="preface.html">译者序</a><a class="item" href="translators.html">译者简介</a><a class="item" href="acknowledgements.html">致谢</a><div class="group">正文</div><a class="item" href="ch01.html">第1章 总览</a><a class="item" href="ch02.html">第2章 交易工具</a><a class="item" href="ch03.html">第3章 与数据打交道</a><a class="item" href="ch04.html">第4章 统计和概率基础</a><a class="item" href="ch05.html">第5章 统计和概率中级</a><a class="item" href="ch06.html">第6章 价格差，贝塔系数和风险</a><a class="item" href="ch07.html">第7章 基于Quantstrat包的回溯测试</a><a class="item" href="ch08.html">第8章 高频数据分析</a><a class="item" href="ch09.html">第9章 期权</a><a class="item" href="ch10.html">第10章 最优化</a><a class="item" href="ch11.html">第11章 速度，测试与报告</a><div class="group">附录</div><a class="item active" href="appendix.html">补充</a><a class="item" href="references.html">参考文献</a><a class="item" href="terms.html">索引</a></nav>
+  <div id="hits"></div>
+</aside>
+<main class="main">
+  <div class="wrap">
+    <div class="crumb">附录</div>
+    <h1>补充</h1>
+<p>第1章</p>
+<ol type="1">
+<li>通过线上资源学习基础数学的最佳去处是可汗学院。相关资源推荐如下：</li>
+</ol>
+<ul>
+<li><p>线性代数 = <a href="https://www.khanacademy.org/math/linear-algebra" class="uri">https://www.khanacademy.org/math/linear-algebra</a>.</p></li>
+<li><p>微积分 = <a href="https://www.khanacademy.org/math/differentialcalculus" class="uri">https://www.khanacademy.org/math/differentialcalculus</a>.</p></li>
+<li><p>积分 = <a href="https://www.khanacademy.org/math/integral-calculus" class="uri">https://www.khanacademy.org/math/integral-calculus</a>.</p></li>
+<li><p>概率论与统计学 = <a href="https://www.khanacademy.org/math/probability" class="uri">https://www.khanacademy.org/math/probability</a>.</p></li>
+</ul>
+<ol start="2" type="1">
+<li>Python语言是当前非常流行的具有丰富数据处理功能和分析功能的脚本语言，它背后有众多来自学术界和工业界的支持。下面链接中的内容是非常优秀的入门级资源：</li>
+</ol>
+<ul>
+<li><p>https://wiki.python.org/moin/BeginnersGuide/NonProgrammers.</p></li>
+<li><p>http://www.youtube.com/show/python101.</p></li>
+</ul>
+<blockquote>
+<p>用户WiseOwlTutorials在YouTube上推出了一系列关于Excel/VBA 和 SQL的介绍性视频。这些技术在金融领域应用广泛，值得花时间去了解。YouTube上的链接如下：</p>
+</blockquote>
+<ul>
+<li>http://www.youtube.com/user/WiseOwlTutorials/playlists.</li>
+</ul>
+<ol start="3" type="1">
+<li><p>在古希腊，市场通常位于集市的中间位置，通常是城邦的中心。市民们会聚在这里聆听政客讲演、投票或者交易商品。现代希腊语中，“agorazo”可以表示“我购买”和“我公开表明”的意思，这些意思都衍生自“agora”[68,113]。</p></li>
+<li><p>金融监管格局是一个相当复杂的事务，至少在美国是如此。在股票和期权交易的监管方面，美国证券交易委员会（SEC）最具权威。SEC根据《证券交易法案》创立于1934年，在SEC创立之前，美国经历了金融史上最混乱的一个时期。据www.sec.gov披露，SEC的宗旨是保护投资者权益，维护公平、有序、高效的市场秩序，促进资本形成[139]。此外，还有一部分期货和期权市场归美国商品期货交易委员会（CFTC）监管。CETC根据《商品期货交易法案》成立于1974年[118]，组建CFTC是为了替代美国农业商品交易监管局。虽然SEC和CFTC是两个不同的政府机构，但他们在金融监管方面精诚合作。更多关于CFTC的信息可以查看CFTC的官网www.cftc.gov。</p></li>
+<li><p>通常来说，交易人员在使用电子交易所时可以执行三类交易操作。第一类是向交易所提交市价订单，市价订单说明，与成交价格相比较，交易人员更看重成交速度；第二类是向交易所提交限价订单。此时，交易人员更看重成交价格。第三类操作是修改或者撤销订单。限价订单组成整个市场的报价单，并最终向那些希望以市价成交的交易人员提供稳定的流动性。</p></li>
+<li><p>Trading Technologies, Inc.公司拥有竖排报价单的专利权，对应的专利号分别是6,766,304和6,772,132，都注册于2004年。</p></li>
+</ol>
+<p>第2章</p>
+<ol type="1">
+<li><p>编程范式是由数学衍生来的一系列概念，其目的是找出针对某一个问题的高效优雅的解决方案。例如，对于能够分解为层次交互对象的问题，适合用面向对象编程[85,137]来处理。而函数式编程则适合涉及数据处理、操作和转换的问题。函数式编程的产生基于由Alonzo Church于1936年提出的λ-积分概念。函数式编程是编程范式的基石。其核心观点是创造出某种函数，使得该函数的输出仅依赖于函数的输入，但这些函数不允许对外部数据进行操作。</p></li>
+<li><p>如果编程语言可以用以模拟任何单片图灵机，则其是图灵完备的。单片图灵机是一种可以模拟任何基于有限内存计算机的机械装置。下面的链接给出了一份关于图灵机的介绍：http://en.wikipedia.org/wiki/Turing machine。从实用角度而言，如果某种编程语言是图灵完备的，那么只要拥有足够多的资源，它就可以计算所有可计算的问题。</p></li>
+<li><p>编译是指将人类可读代码转换为机器代码的过程。编译过的代码运行速度快，但缺点是编译过程十分耗时。一种替代操作方案是让计算机把人类可读代码转换为更具操作性的对象。这种操作方式便于开发者与代码之间的高效交互，缺点是代码运行速度较慢。</p></li>
+<li><p>Julia是一门相对较新的编程语言，但它在科学编程领域已经显现出巨大的潜力。它的基于LLVM的即时编译机制使得它被应用于大多数数值计算应用时运算速度极快（可以跟C语言媲美）。更多关于该语言的细节可以点击如下链接：http://julialang.org/。</p></li>
+<li><p>参考语法意味着变量不再存储对象的数值，而是存储对象在内存中的物理位置。这种处理方式可以提升代码效率，因为庞大的对象在传递过程中无需被拷贝。</p></li>
+<li><p>在计算机科学中，大写的O用来表示当参数趋于无限大时函数的性能限制。下面的链接解释了O()的特性：http://en.wikipedia.org/wiki/Big O notation.</p></li>
+</ol>
+<blockquote>
+<p>从实用角度而言，O(1)表示无论输入参数多大，函数计算耗费的时间都一样。 O(n)表示函数计算时间会随着参数的变大而增加。</p>
+</blockquote>
+<ol start="7" type="1">
+<li><p>CRAN任务视图提供了一个按照主题分类的综合性软件包列表。下面的链接列出了与绘图相关的主要软件包：<a href="http://cran.r-project.org/web/views/Graphics.html" class="uri">http://cran.r-project.org/web/views/Graphics.html</a>.</p></li>
+<li><p>在R语言中，函数会首先按照输入的参数名字来匹配参数、其次按照前后缀、最后再匹配位置，具体说明可参见如下链接：<a href="http://adv-r.had.co.nz/Functions.html" class="uri">http://adv-r.had.co.nz/Functions.html</a>.</p></li>
+<li><p>在计算机科学中，抽象是指那些无法用数学清晰定义的概念。我们可以通过抽象掉具体的实施细节以及将通用方案封装为可被其他函数重复使用的模块来减少重复性代码的数量。</p></li>
+<li><p>下面列示了一些优秀的R语言资源：</p></li>
+</ol>
+<ul>
+<li><p>CRAN上志愿者贡献文档列表：http://cran.r-project.org/otherdocs.html</p></li>
+<li><p>R语言入门： http://cran.r-project.org/doc/manuals/R-intro.pdf</p></li>
+<li><p>R语言中的陷阱：http://www.burns-stat.com/pages/Tutor/R inferno.pdf</p></li>
+<li><p>R语言进阶：<a href="http://adv-r.had.co.nz/" class="uri">http://adv-r.had.co.nz/</a></p></li>
+</ul>
+<ol start="11" type="1">
+<li><p>下面的列表详细解释了正则表达式的概念：<a href="http://en.wikipedia.org/wiki/Regular" class="uri">http://en.wikipedia.org/wiki/Regular</a>expression。简而言之，正则表达式是通过字符串序列创建出一种针对文本信息的搜索模式。正则表达式程序可以将上述模式转化为非确定性有限自动机。</p></li>
+<li><p>三种最常见的相关性统计量分别是皮尔逊相关系数、斯皮尔曼秩相关系数和肯德尔tau相关系数[138]。</p></li>
+</ol>
+<p>第3章</p>
+<ol type="1">
+<li><p>雅虎金融：<a href="http://finance.yahoo.com/" class="uri">http://finance.yahoo.com/</a> 免费提供了很多股票和指数的日度数据。在R中可以通过<strong>quantmod</strong>包下载这些数据 [99]。</p></li>
+<li><p>关于创建R包，Hadley Wickham的书《Advanced R Programming》中一章节有很好的介绍：http://adv-r.had.co.nz/Philosophy.html.</p></li>
+<li><p>Jeffrey Rran是芝加哥的一位量化分析师和程序员。他创建或者与人合作创建了很多备受欢迎的与金融相关的R包，包括：quantmod, xts, mmao和greeks等[49,99]。</p></li>
+<li><p>library()和requires()两个命令的作用都是将相关R包加载到内存中。如果这个包没有实现安装，那么前一个命令将输出相关的出错信息，但后一个命令只会输出一个警告信息。如果这个包不存在，require()命令还会生成并输出一个FALSE的布尔值。</p></li>
+<li><p>CRAN上关于网页技术的任务概览（task view）中列举了关于从网页上爬取和解析数据的最受欢迎的R包，概览页面的地址为：<a href="http://cran.r-project.org/web/views/WebTechnologies.html" class="uri">http://cran.r-project.org/web/views/WebTechnologies.html</a></p></li>
+<li><p>NoSQL 是Not Only SQL的缩写。NoSQL数据库从类型上来说不属于关系型数据库，通常包括一个键值（key value）和一个图形化或者文档存储型的范例。一些流行的NoSQL数据库包括：</p></li>
+</ol>
+<ul>
+<li><p>MongoDB</p></li>
+<li><p>Redis</p></li>
+<li><p>Neo4j</p></li>
+<li><p>Cassandra</p></li>
+</ul>
+<ol start="7" type="1">
+<li><p>SQL的维基百科页面将其列为“为管理关系型数据库管理系统（RDBMS）数据所设计的专门的编程语言”。该语言兴起于20世纪70年代早期，当时是基于Edgar Codd所创建的关系型数据模型，在一篇论文中，他将其描述为“一个大型共享数据银行的关系型数据模型”。该语言本身是由IBM的Donald D. Chamberlin和Raymond F. Boyce所开发。他们刚开始称之为SEQUEL（结构性英语索引语言，Structured English Query Language）。</p></li>
+<li><p>该链接展示了如何安装MariaDB，创建一个数据目录并且初始化一个数据库：https://github.com/hadley/dplyr/blob/master/ vignettes/notes/mysql-setup.Rmd 。根据网站mariadb.org的官方描述：“MariaDB是MySQL的一个增强的理想替代产品。”</p></li>
+<li><p>这是另外一个提供了极高效查找和数据处理操作的优秀的表格型结构。Matt Dowle最近的演讲中对该包的工作机理进行了详细的解释，可参见：http://www.rinfinance.com/agenda/2014/workshop/MatthewDowle.pdf.</p></li>
+<li><p>POSIX代表“便携型操作系统界面”。他是IEEE在设计操作系统时所指定的一些列标准规范。POSIXct是一种时间“秒”的表示法，它表示自1970年开始所过去的“秒”的数量。</p></li>
+<li><p>多态（Polymorphism）是面向对象编程中的一个概念，指的是不同类别的对象在触发同一个函数时应该获得不同输出行为结果的能力。比如，一个类别为“猫”的对象，在触发说话函数speak()时，应该与一个类别为“狗”的对象在触发该函数时获得不一样的输出结果。</p></li>
+<li><p>一些流行的处理日期-时间数据的包有：</p></li>
+</ol>
+<ul>
+<li><p>Lubridate</p></li>
+<li><p>Chron</p></li>
+<li><p>timeData</p></li>
+</ul>
+<ol start="13" type="1">
+<li>关于这些概念的描述可参见：http://vita.had.co.nz/papers/layered-grammar.pdf.</li>
+</ol>
+<p>第4章</p>
+<ol type="1">
+<li><p>从有偏样本计算得到的统计量会导致对真实总体参数的一致性高估或者低估[30]。关于此方面的一些例子，可以参见：http://en.wikipedia.org/wiki/Sampling bias.</p></li>
+<li><p>在统计学中，自由度指的是在统计量的计算过程中可以自由改变的样本值的个数。一个经典的例子是样本方差估计量的自由度为N-1，因为在计算均值的时候一个样本值被占用而不能自由改变其取值。</p></li>
+<li><p>Jensen不等式是一个数学表示，指的是一个凸函数的正切线一定位于这个凸函数图像的上方[125]。它经常被用来证明一个凸函数的期望大于这个期望的函数：</p></li>
+</ol>
+<p><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>E</mi><mo stretchy="false" form="prefix">(</mo><mi>f</mi><mo stretchy="false" form="prefix">(</mo><mi>x</mi><mo stretchy="false" form="postfix">)</mo><mo stretchy="false" form="postfix">)</mo><mo>≥</mo><mi>f</mi><mo stretchy="false" form="prefix">(</mo><mi>E</mi><mo stretchy="false" form="prefix">(</mo><mi>x</mi><mo stretchy="false" form="postfix">)</mo><mo stretchy="false" form="postfix">)</mo></mrow><annotation encoding="application/x-tex">E(f(x)) \geq f(E(x))</annotation></semantics></math> (4.25)</p>
+<ol start="4" type="1">
+<li><p><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><msub><mrow><mi>d</mi><mi>W</mi></mrow><mi>t</mi></msub><annotation encoding="application/x-tex">{dW}_{t}</annotation></semantics></math>项是一个Wiener过程或布朗运动过程。它是许多随机型时间序列模型表示法的基石，可参加：http://en.wikipedia.org/wiki/Wiener process。</p></li>
+<li><p>一些流行的方差估计量有：</p></li>
+</ol>
+<ul>
+<li><p>Anderson 等提出的RV估计量</p></li>
+<li><p>Bardorff-Nielsen和Shephard提出的Cov估计量</p></li>
+<li><p>Zhang提出的非同步波动率度量</p></li>
+</ul>
+<p>第5章</p>
+<ol type="1">
+<li><p>统计推断指的是从样本统计量的行为中确定总体参数性质的理论、方法和实践。</p></li>
+<li><p>当谈论概率分布的时候，0阶矩指的是总概率（也就是1），一阶矩指的是均值，二阶矩指的是方差，三阶矩指的是偏度：http://en.wikipedia.org/wiki/Moment (mathematics)</p></li>
+<li><p>协整是时间序列数据的一个统计性质。当两个或者两个以上的非平稳时间序列的线性组合是一个平稳的时间序列时，我们称几个时间序列时协整的。这个概念本身是Robert Engle在其1987年的开创性论文中首次提出。检测协整效应的检验包括：Engle-Granger两步法，Johansen检验以及Phillips-Ouliaris协整检验等。</p></li>
+<li><p>P值指的是在假设原假设为真的情况下观测到某事件的概率值。如果我们的目标是拒绝原假设，那么越小的p值代表我们拒绝的信心越强大。</p></li>
+<li><p>一个关于稳健统计的教程可参见：http://www.rci.rutgers.edu/ dtyler/ShortCourse.pdf。</p></li>
+<li><p>秩相关系数是随机变量取值的顺序之间线性相关程度的度量。取值排序需要进行一定的数据预处理以对数据集中的每一个观测值赋予第一， 第二， 第三等正确的顺序值。</p></li>
+<li><p>关于Fisher渐进无偏估计量和Olkin-Pratt估计量的参考文献，可以访问：<a href="http://www.uv.es/revispsi/articulos1.03/9.ZUMBO.pdf" class="uri">http://www.uv.es/revispsi/articulos1.03/9.ZUMBO.pdf</a>。</p></li>
+</ol>
+<p>第6章</p>
+<ol type="1">
+<li><p>配对交易的概念据说由Gerry Bamberger首先提出，后来在20世纪80年代由摩根士丹利的Nunzio Tartaglia量化交易组主导。</p></li>
+<li><p>Fama-French三因子模型是一个因子模型的例子，试图将收益率分解为市值因子（small caps component）、账面市值比因子（price-to-bookratio component）和市盈率因子（value vs. growth stock component）。</p></li>
+<li><p>可以参考此处对协整的介绍：http://faculty.washington.edu/ezivot/econ584/notes/cointegration.pdf.</p></li>
+<li><p>总体最小二乘或正交回归是一种变量中含有误差（errors-in-variables）的回归，因变量和自变量的误差同时被考虑。更多细节可访问维基百科：http://en.wikipedia.org/wiki/Total least squares</p></li>
+<li><p>根据维基百科，“主成分分析是一种统计程序，它使用正交转换将一组可能相关的观察值变成一组线性不相关的变量，即所谓的主成分[133]。“在金融领域，这种技术经常被用来对收益曲线的行为或隐含波动率的动态表面构建模型。</p></li>
+<li><p>迄今已有三项“巴塞尔协议”。巴塞尔协议II于2004年6月颁布[114]。最近的巴塞尔协议III已经取代其前身。该协议针对银行资本充足率，压力测试和流动性风险，有效地建立了自发性监管结构。</p></li>
+</ol>
+<p>第7章</p>
+<ol type="1">
+<li><p>盈透证券（Interactive Brokers）对零售经济人（retail brokers）在某些收费上全行业最低，他们的主页在这里：https://www.interactivebrokers.com.</p></li>
+<li><p>Jan Humme和Brian Peterson对<strong>quantstrat</strong>有非常棒的介绍：http://www.rinfinance.com/agenda/2013/workshop/Humme+Peterson.pdf.</p></li>
+<li><p>Andreas Clenow是一位成功企业家，对冲基金交易员，量化分析师，以及<em>Following the Trend: Diversified Managed Futures Trading</em>（《跟随趋势：多元化期货交易管理》）一书的作者。本书中引用的趋势跟踪法详见此处：http://www.followingthetrend.com/2014/03/improving-the-free-trend-followingtrading-rules/.</p></li>
+<li><p>Laurence Connors撰写或合著的书有：<em>How Markets Really Work, Short Term Trading Strategies That Work，</em>以及 <em>the High Probability ETF Trading</em>（《市场如何运作》，《有效短期交易策略》，以及《大概率ETF交易》）。他的观点曾被华尔街日报，彭博社和道琼斯引用。</p></li>
+<li><p><strong>PerformanceAnalytics</strong>包是量化金融领域的中流砥柱。强烈建议读者将本包纳入工作流。介绍一个极好的资源：http://braverock.com/brian/R/PerformanceAnalytics/html/PerformanceAnalyticspackage.html.</p></li>
+</ol>
+<p>第8章</p>
+<ol type="1">
+<li><p>微观结构指的是股票、债券、期权、期货以及其他金融工具市场动态价格变化的粒状特性。通过学习和分析基础的市场微观结构，可以导出许多优于传统的相关性和波动率的测度。这些分析工作通常是通过分析整个交易委托账本（orderbook）的分笔交易数据获得的。</p></li>
+<li><p>该图是基于Tick Data 公司所提供的SPY 日内交易数据样本文件所绘制的。</p></li>
+<li><p>对高频交易的诸多批评中一个主要的观点是认为高频交易的算法会在最坏的时点，也就是大多数机构投资者最需要流动性的时候撤回订单。相比其他市场参与者，高频算法可以更快的探查市场变化因为也能够以更快的速度逃之夭夭。批评的观点认为这些高频交易公司所提供的市场流动性只不过是一个幻觉。</p></li>
+<li><p>一些第三方分笔交易数据库包括：</p></li>
+</ol>
+<ul>
+<li><p>OneMarketData的OneTick数据库：<a href="http://www.onetick.com" class="uri">http://www.onetick.com</a></p></li>
+<li><p>Kx Sysmtems的kdb数据库：<a href="http://kx.com" class="uri">http://kx.com</a></p></li>
+<li><p>SciDB数据库：http://www.scidb.org/</p></li>
+</ul>
+<ol start="5" type="1">
+<li><p>买卖弹跳（bid-ask bounce）描述的是发生在买家报价或者卖方报价一方的交易现象。对于一些流行性产品来说，即便价格根本没有变动，但内部市场已经发生了多次交易。该现象可以引起关于价格发生了变化的错觉，但其实价格并没有真正变化。基于日内交易数据价格的波动计算波动率时会因此而高估实际的波动率。</p></li>
+<li><p>自回归模型试图将时间序列输出变量表示为该变量过去值的函数。下面是该模型的一个一般表示方法：</p></li>
+</ol>
+<p><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>X</mi><mi>t</mi></msub><mo>=</mo><mi>α</mi><mo>+</mo><msubsup><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>1</mn></mrow><mi>p</mi></msubsup><mrow><msub><mi>β</mi><mi>i</mi></msub><msub><mi>X</mi><mrow><mi>t</mi><mo>−</mo><mi>i</mi></mrow></msub><mo>+</mo><msub><mi>ϵ</mi><mi>t</mi></msub></mrow></mrow><annotation encoding="application/x-tex">X_{t} = \alpha + \sum_{i = 1}^{p}{\beta_{i}X_{t - i} + \epsilon_{t}}</annotation></semantics></math> (8.2)</p>
+<ol start="7" type="1">
+<li>一个关于如何使用<strong>highfrequency</strong>包的教程参见：http://cran.r-project.org/web/packages/highfrequency/vignettes/ highfrequency.pdf</li>
+</ol>
+<p>第9章</p>
+<ol type="1">
+<li><p>这就是著名的布莱克-舒尔茨-莫顿模型。莫顿对期权定价的数学理论做出了卓越贡献，也是他提出了“布莱克-舒尔茨期权定价模型”的概http://en.wikipedia.org/wiki/Black-Scholes model.</p></li>
+<li><p>Dirk Eddelbuettel封装了一个关于Quantlib[2]的R包。与该软件包相关的示例、安装说明以及其他信息可以参见下面的链接：<a href="http://dirk.eddelbuettel.com/code/rquantlib.html" class="uri">http://dirk.eddelbuettel.com/code/rquantlib.html</a>.</p></li>
+<li><p>期权价格对标的资产、波动率、股息、利率以及行权价的敏感性公式可以在如下链接中找到：http://en.wikipedia.org/wiki/Black-Scholes model.</p></li>
+</ol>
+<p>第10章</p>
+<ol type="1">
+<li><p>最优化领域，有很多最新研究成果都在R语言中有相应的算法包。在CRAN上的下列任务视图中可以查看相关的软件包：<a href="http://cran.r-project.org/web/views/Optimization.html" class="uri">http://cran.r-project.org/web/views/Optimization.html</a>.</p></li>
+<li><p>梯度下降法会利用函数的梯度（导数）来求解最优值，核心做法是在初始点沿着负梯度方向按一定步长进行搜索。这类求解技术计算速度很快，但需要用到函数的梯度或者偏梯度。更多信息可以参见：http://en.wikipedia.org/wiki/Gradient descent.</p></li>
+<li><p>无风险套利定价意味着基于当前不同到期日（针对固定收益类）的金融工具或者行权价（针对期权），无法找到一个无风险的盈利机会。换而言之，我们无法创造出一个现金流出小于等于零但未来潜在收益为正的投资组合。</p></li>
+<li><p>过拟合是这样一种情况，拟合模型的输出结果是完全错误的或者完全不具备预测能力。通常很难发现模型拟是否过拟合，尤其在高维模型中更是如此。因此，在拟合数据模型过程中要特别小心。正则化方法以及收缩方法可以在一定程度上限制过拟合的发生。</p></li>
+</ol>
+<p>第11章</p>
+<ol type="1">
+<li><p>Luke Tierney有一个关于R引擎表现的演讲：<a href="http://www.rinfinance.com/agenda/2014/talk/LukeTierney.pdf" class="uri">http://www.rinfinance.com/agenda/2014/talk/LukeTierney.pdf</a>.</p></li>
+<li><p>R包<strong>Rtools由</strong>Brian Ripley首创，目前由Duncan Murdoch维护。相关安装文档和发行说明参见CRAN：<a href="http://cran.r-project.org/bin/windows/Rtools/" class="uri">http://cran.r-project.org/bin/windows/Rtools/</a>.</p></li>
+<li><p>TDD的一个解释概览详见此链接：<a href="http://www.agiledata.org/essays/tdd.html" class="uri">http://www.agiledata.org/essays/tdd.html</a>.</p></li>
+</ol>
+
+    <div class="pager"><a class="prev" href="ch11.html"><span class="dir">上一页</span>第11章 速度，测试与报告</a><a class="next" href="references.html"><span class="dir">下一页</span>参考文献</a></div>
+  </div>
+</main>
+<script>
+(function () {
+  var box = document.getElementById('q');
+  var panel = document.getElementById('hits');
+  if (!box) return;
+  var idx = [];
+  fetch('search-index.json')
+    .then(function (r) { return r.json(); })
+    .then(function (d) { idx = d; })
+    .catch(function () {});
+
+  function esc(s) {
+    return s.replace(/[&<>"]/g, function (c) {
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];
+    });
+  }
+  function run() {
+    var q = box.value.trim().toLowerCase();
+    if (!q) { panel.classList.remove('on'); panel.innerHTML = ''; return; }
+    var terms = q.split(/\s+/);
+    var out = [];
+    for (var i = 0; i < idx.length && out.length < 24; i++) {
+      var e = idx[i];
+      var hay = (e.h + ' ' + e.p + ' ' + e.t).toLowerCase();
+      var ok = true;
+      for (var k = 0; k < terms.length; k++) {
+        if (hay.indexOf(terms[k]) < 0) { ok = false; break; }
+      }
+      if (!ok) continue;
+      var pos = e.t.toLowerCase().indexOf(terms[0]);
+      var snip = pos > 40 ? e.t.slice(pos - 30, pos + 90)
+                          : e.t.slice(0, 110);
+      out.push('<a href="' + e.u + '"><div class="p">' + esc(e.p) +
+               '</div><div class="h">' + esc(e.h) +
+               '</div><div class="s">' + esc(snip) + '</div></a>');
+    }
+    panel.innerHTML = out.length
+      ? out.join('')
+      : '<div class="none">没有匹配的内容</div>';
+    panel.classList.add('on');
+  }
+  box.addEventListener('input', run);
+  box.addEventListener('focus', run);
+  document.addEventListener('click', function (e) {
+    if (!panel.contains(e.target) && e.target !== box) {
+      panel.classList.remove('on');
+    }
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') { panel.classList.remove('on'); box.blur(); }
+  });
+})();
+</script>
+</body>
+</html>

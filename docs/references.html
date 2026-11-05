@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>参考文献 · 量化金融与R语言</title>
+<meta name="description" content="Quantitative Trading with R 中文翻译稿" />
+<style>
+:root {
+  --bg: #ffffff;
+  --fg: #1f2328;
+  --muted: #6b7280;
+  --line: #e5e7eb;
+  --soft: #f7f8fa;
+  --accent: #0f5c8c;
+  --code-bg: #f6f8fa;
+  --sidebar-w: 288px;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  color: var(--fg);
+  background: var(--bg);
+  font-family: -apple-system, "PingFang SC", "Hiragino Sans GB",
+               "Microsoft YaHei", "Source Han Sans SC", sans-serif;
+  font-size: 16px;
+  line-height: 1.85;
+  -webkit-font-smoothing: antialiased;
+}
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* 侧边栏 */
+.sidebar {
+  position: fixed; inset: 0 auto 0 0; width: var(--sidebar-w);
+  border-right: 1px solid var(--line);
+  background: var(--soft);
+  display: flex; flex-direction: column;
+  overflow: hidden;
+}
+.brand {
+  padding: 22px 20px 14px;
+  border-bottom: 1px solid var(--line);
+}
+.brand .t { font-size: 17px; font-weight: 700; line-height: 1.4; }
+.brand .s { font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.5; }
+.search { padding: 12px 16px; border-bottom: 1px solid var(--line); }
+.search input {
+  width: 100%; padding: 8px 10px; font-size: 13px;
+  border: 1px solid var(--line); border-radius: 6px;
+  background: #fff; color: var(--fg); outline: none;
+}
+.search input:focus { border-color: var(--accent); }
+.nav { flex: 1; overflow-y: auto; padding: 10px 0 40px; }
+.nav .group { padding: 12px 20px 6px; font-size: 11px; font-weight: 700;
+  color: var(--muted); letter-spacing: .08em; }
+.nav a.item {
+  display: block; padding: 7px 20px 7px 20px;
+  font-size: 14px; color: var(--fg); border-left: 3px solid transparent;
+}
+.nav a.item:hover { background: #eef1f5; text-decoration: none; }
+.nav a.item.active {
+  border-left-color: var(--accent); background: #e8eff5;
+  font-weight: 600; color: var(--accent);
+}
+.nav details summary {
+  padding: 7px 20px; font-size: 14px; cursor: pointer; list-style: none;
+}
+.nav details summary::-webkit-details-marker { display: none; }
+.nav details summary:hover { background: #eef1f5; }
+.nav details a.sub {
+  display: block; padding: 4px 20px 4px 34px;
+  font-size: 12.5px; color: var(--muted); line-height: 1.5;
+}
+.nav details a.sub:hover { color: var(--accent); }
+
+/* 正文 */
+.main { margin-left: var(--sidebar-w); }
+.wrap { max-width: 860px; margin: 0 auto; padding: 40px 40px 96px; }
+.crumb { font-size: 12px; color: var(--muted); margin-bottom: 10px; }
+h1 { font-size: 30px; line-height: 1.35; margin: 0 0 26px;
+     font-weight: 700; letter-spacing: .01em; }
+h2 { font-size: 21px; margin: 40px 0 14px; padding-bottom: 8px;
+     border-bottom: 1px solid var(--line); font-weight: 700; }
+h3 { font-size: 17px; margin: 28px 0 10px; font-weight: 700; }
+h4 { font-size: 15px; margin: 22px 0 8px; font-weight: 700; }
+p { margin: 0 0 16px; text-align: justify; }
+p.signature { text-align: right; }
+ul, ol { margin: 0 0 16px; padding-left: 26px; }
+li { margin: 4px 0; }
+img { max-width: 100%; height: auto; display: block; margin: 22px auto;
+      border-radius: 4px; }
+figure { margin: 24px 0; text-align: center; }
+figcaption { font-size: 13px; color: var(--muted); margin-top: 8px; }
+
+code {
+  font-family: "SF Mono", Menlo, Consolas, "Courier New", monospace;
+  font-size: 0.88em; background: var(--code-bg);
+  padding: 2px 5px; border-radius: 4px;
+  border: 1px solid #eaecef;
+}
+pre {
+  background: var(--code-bg); border: 1px solid var(--line);
+  border-radius: 6px; padding: 14px 16px; overflow-x: auto;
+  line-height: 1.6; margin: 0 0 18px;
+}
+pre code { background: none; border: 0; padding: 0; font-size: 12.5px; }
+
+table { border-collapse: collapse; width: 100%; margin: 20px 0;
+        font-size: 14px; }
+th, td { border: 1px solid var(--line); padding: 7px 11px; }
+th { background: var(--soft); font-weight: 700; }
+tr:nth-child(even) td { background: #fcfcfd; }
+
+blockquote { margin: 0 0 18px; padding: 10px 18px;
+  border-left: 3px solid var(--line); color: var(--muted); background: var(--soft); }
+
+/* 插图目录 / 表格目录 */
+.cap-list { list-style: none; padding: 0; margin: 4px 0 0; }
+.cap-list li { border-bottom: 1px solid var(--line); }
+.cap-list a { display: flex; align-items: baseline; gap: 12px;
+  padding: 9px 2px; font-size: 14px; color: var(--fg); }
+.cap-list a:hover { background: var(--soft); text-decoration: none;
+  color: var(--accent); }
+.cap-num { min-width: 68px; color: var(--muted); font-size: 12.5px;
+  font-variant-numeric: tabular-nums; }
+.cap-title { flex: 1; }
+.cap-where { color: var(--muted); font-size: 11.5px; white-space: nowrap; }
+.cap-empty { color: var(--muted); font-size: 14px; }
+
+/* MathML 居中与缩放 */
+math[display="block"] { display: block; margin: 20px auto; font-size: 1.05em; }
+
+/* 页脚翻页 */
+.pager { display: flex; justify-content: space-between; gap: 16px;
+         margin-top: 56px; padding-top: 22px; border-top: 1px solid var(--line); }
+.pager a { flex: 1; padding: 12px 16px; border: 1px solid var(--line);
+           border-radius: 8px; font-size: 13px; }
+.pager a:hover { border-color: var(--accent); text-decoration: none;
+                 background: var(--soft); }
+.pager .dir { display: block; font-size: 11px; color: var(--muted);
+              margin-bottom: 3px; }
+.pager .next { text-align: right; }
+
+/* 首页 */
+.cover { padding: 56px 0 8px; }
+.cover h1 { font-size: 38px; margin-bottom: 8px; }
+.cover .sub { font-size: 15px; color: var(--muted); margin-bottom: 34px; }
+.toc-list { border-top: 1px solid var(--line); }
+.toc-list > li { list-style: none; margin: 0; border-bottom: 1px solid var(--line); }
+.toc-list { padding-left: 0; }
+.toc-row { display: flex; align-items: baseline; gap: 10px;
+           padding: 13px 2px; font-size: 15px; }
+.toc-row .no { color: var(--muted); font-size: 12px; min-width: 26px; }
+.toc-subs { padding: 0 0 12px 36px; margin: 0; }
+.toc-subs li { list-style: none; font-size: 13px; color: var(--muted);
+               padding: 3px 0; }
+
+/* 搜索结果 */
+#hits { display: none; position: absolute; left: 16px; right: 16px; top: 96px;
+        background: #fff; border: 1px solid var(--line); border-radius: 8px;
+        box-shadow: 0 8px 24px rgba(0,0,0,.12); max-height: 60vh;
+        overflow-y: auto; z-index: 50; }
+#hits.on { display: block; }
+#hits a { display: block; padding: 10px 14px; border-bottom: 1px solid var(--line); }
+#hits a:last-child { border-bottom: 0; }
+#hits a:hover { background: var(--soft); text-decoration: none; }
+#hits .h { font-size: 13px; font-weight: 600; color: var(--fg); }
+#hits .p { font-size: 11px; color: var(--accent); margin-bottom: 2px; }
+#hits .s { font-size: 12px; color: var(--muted); line-height: 1.5; }
+#hits .none { padding: 14px; font-size: 13px; color: var(--muted); }
+
+@media (max-width: 900px) {
+  .sidebar { display: none; }
+  .main { margin-left: 0; }
+  .wrap { padding: 24px 20px 72px; }
+  .cover h1 { font-size: 28px; }
+}
+@media print {
+  .sidebar, .pager, .search { display: none; }
+  .main { margin-left: 0; }
+  .wrap { max-width: none; padding: 0; }
+}
+</style>
+</head>
+<body>
+<aside class="sidebar">
+  <div class="brand">
+    <div class="t">量化金融与R语言</div>
+    <div class="s">Quantitative Trading with R 中文翻译稿</div>
+  </div>
+  <div class="search">
+    <input id="q" type="search" placeholder="搜索全书…" autocomplete="off" />
+  </div>
+  <nav class="nav"><div class="group">前言</div><a class="item" href="figures.html">插图目录</a><a class="item" href="tables.html">表格目录</a><a class="item" href="preface.html">译者序</a><a class="item" href="translators.html">译者简介</a><a class="item" href="acknowledgements.html">致谢</a><div class="group">正文</div><a class="item" href="ch01.html">第1章 总览</a><a class="item" href="ch02.html">第2章 交易工具</a><a class="item" href="ch03.html">第3章 与数据打交道</a><a class="item" href="ch04.html">第4章 统计和概率基础</a><a class="item" href="ch05.html">第5章 统计和概率中级</a><a class="item" href="ch06.html">第6章 价格差，贝塔系数和风险</a><a class="item" href="ch07.html">第7章 基于Quantstrat包的回溯测试</a><a class="item" href="ch08.html">第8章 高频数据分析</a><a class="item" href="ch09.html">第9章 期权</a><a class="item" href="ch10.html">第10章 最优化</a><a class="item" href="ch11.html">第11章 速度，测试与报告</a><div class="group">附录</div><a class="item" href="appendix.html">补充</a><a class="item active" href="references.html">参考文献</a><a class="item" href="terms.html">索引</a></nav>
+  <div id="hits"></div>
+</aside>
+<main class="main">
+  <div class="wrap">
+    <div class="crumb">附录</div>
+    <h1>参考文献</h1>
+<p>[1] Clenow A.F. Following the trend: diversified managed futures trading. Wiley Trading. Wiley, New York, 2012.</p>
+<p>[2] Ferdinando Ametrano and Luigi Ballabio. Quantlib - a free/open-source library for quantitative finance, 2003.</p>
+<p>[3] Clenow Andreas. Twelve months momentum trading rules - part 2. http://www.followingthetrend.com/2014/03/improving-the-free-trend-following-trading-rules/, March 2014.</p>
+<p>[4] Pfaff B. Analysis of Integrated and Cointegrated Time Series with R. Springer, New York, second edition, 2008. ISBN 0-387-27960-1.</p>
+<p>[5] Johnson Barry. Algorithmic Trading and DMA: An introduction to direct access trading strategies. 4Myeloma Press, February 2010.</p>
+<p>[6] Ripley Brian D. Spatial statistics. Wiley-Interscience, Hoboken, NJ, 2004.</p>
+<p>[7] Bacon Carl R. Practical portfolio performance: measurement and attribution. Wiley finance. Wiley, Chichester, England, 2nd edition, 2008.</p>
+<p>[8] Bartholomew Daniel. Getting started with MariaDB. Packt Publishing, Birmingham, UK, 2013.</p>
+<p>[9] Ardia David, Ospina Arango Juan, and Gomez Norman Giraldo. Jump-diffusion calibration using Differential Evolution. Wilmott Magazine, 55:76–79, 2011.</p>
+<p>[10] Ardia David, Mullen Katharine M., Peterson Brian G., and Joshua Ulrich. DEoptim: Differential Evolution in R, 2013. version 2.2-2.</p>
+<p>[11] Ardia David, Boudt Kris, Carl Peter, Mullen Katharine M., and Peterson Brian G. Differential Evolution with DEoptim: An application to non-convex portfolio optimization. The R Journal, 3(1):27–34, 2011.</p>
+<p>[12] Smith David. Fast and easy data munging, with dplyr. http://blog.revolutionanalytics.com/2014/01/fast-and-easy-data-munging-with-dplyr.html.</p>
+<p>[13] Belsley David A. and Kontoghiorghes Erricos John. Handbook of computational econometrics. Wiley, 2009.</p>
+<p>[14] James David A. and DebRoy Saikat. Package rmysql. http://cran.r-project.org/web/packages/RMySQL/RMySQL.pdf, July 2014.</p>
+<p>[15] Tyler David E. A short course on robust statistics. http://www.rci.rutgers.edu/~dtyler/ShortCourse.pdf, July 2014.</p>
+<p>[16] Kwiatkowski Denis and Philips Peter C. B. Testing the null hypothesis of stationarity against the alternative of a unit root. Journal of Econometrics, 54:159–178, 1991.</p>
+<p>[17] Derryberry DeWayne R. Basic data analysis for time series with R. Wiley, 2014.</p>
+<p>[18] Eddelbuettel Dirk. Seamless R and C++ integration with RCPP. Springer, New York, 2013.</p>
+<p>[19] Eddelbuettel Dirk. Rcpp overview. http://dirk.eddelbuettel.com/code/rcpp.html, July 2014.</p>
+<p>[20] Eddelbuettel Dirk and Francois Romain. Rcpp: Seamless R and C++ integration. Journal of Statistical Software, 40(8):1–18, 2011.</p>
+<p>[21] Eddelbuettel Dirk and Francois Romain. RInside: C++ classes to embed R in C++ applications, 2014. R package version 0.2.11.</p>
+<p>[22] Chance Don. A brief history of derivatives. http://husky1.stmarys.ca/~ gye/ derivativeshistory.pdf, July 2014.</p>
+<p>[23] Knuth Donald E. Structured programming with go to statements. ACM Comput. Surv., 6(4):261–301, December 1974.</p>
+<p>[24] Zimmerman Donald W., Zumbo Bruno D., and Williams Richard H. Bias in estimation and hypothesis testing of correlation. Psicologica, 24:133–158, 2003.</p>
+<p>[25] Zivot Eric and Wang Jiahui. Modeling financial time series with S-plus. Springer, New York, NY, 2nd edition, 2006.</p>
+<p>[26] Chan Ernie. How useful is order flow and vpin? http://epchan.blogspot.com/2013/10/how-useful-is-order-flow- and- vpin.html, October 2013.</p>
+<p>[27] Black Fischer and Scholes Myron S. The Pricing of Options and Corporate Liabilities. Journal of Political Economy, University of Chicago Press, 81(3):637–54, May-June 1973.</p>
+<p>[28] James Gareth, Witten Daniela, Hastie Trevor, and Tibshirani Robert. An Introduction to Statistical Learning: with Applications in R. Springer Texts in Statistics. Springer New York, 2014.</p>
+<p>[29] A.K.I.I. Gary, J.U. Schluetter, and H. Brumfield. Click based trading with intuitive grid display of market depth, August 3, 2004. US Patent 6,772,132.</p>
+<p>[30] Henry Gary T. Practical Sampling. SAGE Publications, Inc., 1990.</p>
+<p>[31] Box George E. P. and Draper Norman Richard. Empirical model-building and response surfaces. Wiley, New York, 1987.</p>
+<p>[32] Mirai Solutions GmbH. Xlconnect 0.2-0. http://www.r-bloggers.com/xlconnect-0-2-0/, July 2012.</p>
+<p>[33] Mirai Solutions GmbH. Package xlconnect. http://cran.r-project.org/web/packages/XLConnect/XLConnect.pdf, July 2014.</p>
+<p>[34] CME Group. Leading products q1 2014. http://www.cmegroup.com/education/files/cme-group-leading-products-2014- q1.pdf.</p>
+<p>[35] CME Group. Growth of cme globex platform: A retrospective. CME Group, page 2, 2012.</p>
+<p>[36] CME Group. Daily exchange volume and open interest. CME Group, 2014.</p>
+<p>[37] Zaner Group. A study in platform volume. CME Group, page 2, 2010.</p>
+<p>[38] Lebanon Guy. Bias, variance, and mse of estimators. http://www.cc.gatech.edu/~lebanon/notes/estimators1.pdf.</p>
+<p>[39] Yollin Guy. R tools for portfolio optimization. http://www.rinfinance.com/RinFinance2009/presentations/yollin_slides.pdf, April 2009.</p>
+<p>[40] Wickham Hadley. ggplot2: elegant graphics for data analysis. Springer New York, 2009.</p>
+<p>[41] Wickham Hadley. testhat: Get started with testing. The R Journal, 3/1, June 2011.</p>
+<p>[42] Wickham Hadley. Advanced r. http://adv-r.had.co.nz/, July 2014.</p>
+<p>[43] Wickham Hadley. Tidy data. The Journal of Statistical Software, Submitted.</p>
+<p>[44] Wickham Hadley and Francois Romain. Introduction to dplyr. http://cran.rstudio.com/web/packages/dplyr/vignettes/introduction.html.</p>
+<p>[45] Wickham Hadley and Francois Romain. dplyr: dplyr: a grammar of data manipulation, 2014. R package version 0.2.</p>
+<p>[46] Allaire J. Rstudio and inc. (2014), rmarkdown: R markdown document conversion, r package. github.com/rstudio/rmarkdown, 2014.</p>
+<p>[47] Maindonald J. H. and Braun John. Data analysis and graphics using R: an examplebased approach, volume 10 of Cambridge series in statistical and probabilistic mathematics. Cambridge University Press, 3rd edition, 2010. References 263</p>
+<p>[48] Humme Jan and Peterson Brian G. Using quantstrat to evaluate intraday trading strategies. http://www.rinfinance.com/agenda/2013/workshop/Humme+Peterson.pdf, 2013.</p>
+<p>[49] Ryan Jeffrey A. and Ulrich Joshua M. xts: eXtensible Time Series, 2013. R package version 0.9-7.</p>
+<p>[50] Knight J.L. and Satchell S. Forecasting Volatility in the Financial Markets. ButterworthHeinemann Finance. Butterworth-Heinemann, 2002.</p>
+<p>[51] Weisenthal Joe. The story of the first-ever options trade in recorded history. http://www.businessinsider.com/the-story-of-the-first-ever-options-trade-in-recorded-history-2012-3, March 2012.</p>
+<p>[52] Fox John and Weisberg Sanford. An R companion to applied regression. SAGE Publications, Thousand Oaks, CA, 2nd edition, 2011.</p>
+<p>[53] Miyamoto John. Demo 02-1: Using r to think about bayesian inference. https://faculty.washington.edu/jmiyamot/p548/demo02-1.p548.w14.pdf, July 2014.</p>
+<p>[54] Mount John. Frequentist inference only seems easy. http://www.win-vector.com/blog/2014/07/frequenstist-inference- only-seems- easy/, July 2014.</p>
+<p>[55] O’Connor John J. and Robertson Edmund F. The mactutor history of mathematics archive. http://www-history.mcs.st-and.ac.uk/.</p>
+<p>[56] Kruschke John K. Doing bayesian data analysis: a tutorial with R and BUGS. Academic Press, Burlington, MA, 2011.</p>
+<p>[57] Cornelissen Jonathan, Boudt Kris, and Payseur Scott. highfrequency: highfrequency, 2013. R package version 0.2.</p>
+<p>[58] Ulrich Joshua. How can i view the source code for a function? http://stackoverflow.com/questions/19226816/how-can-i-view-the-source-code-for-a-function, October 2013.</p>
+<p>[59] Ulrich Joshua. TTR: Technical Trading Rules, 2013. R package version 0.22-0.</p>
+<p>[60] Mullen Katharine, Ardia David, Gil David, Windover Donald, and Cline James. DEoptim: An R package for global optimization by differential evolution. Journal of Statistical Software, 40(6):1–26, 2011.</p>
+<p>[61] Price Kenneth and Storn Rainer. Differential evolution (de) for continuous function optimization. http://www1.icsi.berkeley.edu/~ storn/code.html, July 2014.</p>
+<p>[62] Price Kenneth V., Storn Rainer M., and Lampinen Jouni A. Differential Evolution A Practical Approach to Global Optimization. Natural Computing. Springer-Verlag, January 2006. ISBN 540209506.</p>
+<p>[63] Andrey N. Kolmogorov. Foundations of the Theory of Probability. Chelsea Pub Co., 2 edition, June 1960.</p>
+<p>[64] Boudt Kris, Cornelissen Jonathan, and Payseur Scott. Highfrequency: Toolkit for the analysis of highfrequency financial data in r. http://cran.r-project.org/web/packages/highfrequency/vignettes/highfrequency.pdf, July 2014.</p>
+<p>[65] Connors L.A. and Alvarez C. Short Term Trading Strategies that Work: A Quantified Guide to Trading Stocks and ETFs. Tradingmarkets Publishing Group, 2009.</p>
+<p>[66] Torgo Luis. Data mining with R: learning with case studies. Chapman and Hall/CRC data mining and knowledge discovery series. Chapman and Hall/CRC, Boca Raton, FL, 2011.</p>
+<p>[67] Tierney Luke. A byte code compiler for r. http://homepage.stat.uiowa.edu/~luke/R/compiler/compiler.pdf, March 2012.</p>
+<p>[68] Lang Mabel L. Life, death, and litigation in the Athenian Agora, volume no. 23. American School of Classical Studies at Athens, Princeton, NJ, 1994.</p>
+<p>[69] Blais Marcel and Protter Philip. Signing trades and an evaluation of the leeready algorithm. Annals of Finance, 8(1):1–13, 2012.</p>
+<p>[70] Bogard Matt. Regression via gradient descent in r. http://econometricsense.blogspot.gr/2011/11/regression-via- gradient- descent- in- r.html, July 2014.</p>
+<p>[71] Golder Matt and Golder Sona. Lecture 8: Estimation. https://files.nyu.edu/mrg217/public/lecture8_handouts.pdf, July 2014.</p>
+<p>[72] Dowle Matthew. Introduction to the data.table package in r. http://cran.r-project.org/web/packages/data.table/vignettes/datatable- intro.pdf, February 2014.</p>
+<p>[73] Kuhn Max and Johnson Kjell. Applied predictive modeling. Springer, New York, 2013.</p>
+<p>[74] Way Michael J. Advances in machine learning and data mining for astronomy. Chapman and Hall/CRC data mining and knowledge discovery series. Chapman and Hall/CRC, 2012.</p>
+<p>[75] Naguez Naceur and Prigent Jean-Luc. Kappa performance measures with johnson distributions. International Journal of Business, 16(3):210, 2011.</p>
+<p>[76] Sommacal Nicola Sturaro. Read excel file from r. http://www.milanor.net/blog/?p=779, July 2013.</p>
+<p>[77] Ross Noam. Faster! higher! stronger! - a guide to speeding up r code for busy people. http://www.noamross.net/blog/2013/4/25/faster-talk.html, April 2013.</p>
+<p>[78] Matloff Norman S. The art of R programming: tour of statistical software design. No Starch Press, San Francisco, 2011.</p>
+<p>[79] Valavanes Panos and Delevorrias Angelos. Great moments in Greek archaeology. J. Paul Getty Museum, Los Angeles, CA, 2007.</p>
+<p>[80] Teetor Paul. 25 recipes for getting started with R. O’Reilly Media, Beijing, 1st ed edition, 2011.</p>
+<p>[81] Teetor Paul. R cookbook. O’Reilly, Beijing, 1st edition, 2011.</p>
+<p>[82] Cowpertwait Paul S. P. and Metcalfe Andrew V. Introductory time series with R. Use R! Springer, Dordrecht, 2009.</p>
+<p>[83] Carl Peter and Peterson Brian G. PerformanceAnalytics: Econometric tools for performance and risk analysis, 2013.</p>
+<p>[84] Diggle Peter and Chetwynd Amanda. Statistics and scientific method: an introduction for students and researchers. Oxford University Press, 2011.</p>
+<p>[85] Roy Peter V. Programming paradigms for dummies: What every programming paradigms for dummies: What every programmer should know. http://www.info.ucl.ac.be/~pvr/VanRoyChapter.pdf.</p>
+<p>[86] Spector Phil. Data manipulation with R. Springer, New York, 2008.</p>
+<p>[87] Qusma. Equity curve straightness measures. http://qusma.com/2013/09/23/equity-curve-straightness- measures/, September 2013.</p>
+<p>[88] R Core Team. R: A Language and Environment for Statistical Computing. R Foundation for Statistical Computing, Vienna, Austria, 2014.</p>
+<p>[89] Subba Rao, T., Subba Rao, S., and Radhakrishna Rao C. Time series analysis: methods and applications, volume v. 30 of Handbook of statistics. North Holland, Amsterdam, 1st edition, 2012.</p>
+<p>[90] Rebonato Riccardo. Volatility and correlation: the perfect hedger and the fox. J. Wiley, Chichester, West Sussex, England, 2nd edition, 2004.</p>
+<p>[91] Becker Richard A. and Chambers John M. S: An interactive environment for data analysis and graphics. Wadsworth Advanced Book Program, Belmont, CA, 1984.</p>
+<p>[92] Bookstaber Richard M. A demon of our own design: markets, hedge funds, and the perils of financial innovation. J. Wiley, Hoboken, NJ, 2007.</p>
+<p>[93] Becker Rick. A brief history of s. ATT Bell Laboratories, 11, 1994. References 265</p>
+<p>[94] Peng Roger D. Interacting with data using the filehash package. The Newsletter of the R Project, 6/4, 2006.</p>
+<p>[95] Winston Rory. Newton’s method in r. http://www.theresearchkitchen.com/archives/642, July 2014.</p>
+<p>[96] Ihaka Ross and Gentleman Robert. R: A language for data analysis and graphics. Journal of Computational and Graphical Statistics, 5(3):299–314, 1996.</p>
+<p>[97] Tsay Ruey S. Analysis of financial time series. Wiley series in probability and statistics. Wiley, Cambridge, MA, 3rd edition, 2010.</p>
+<p>[98] Higginbottom Ryan. Introduction to scientific typesetting. lesson 12: Verbatim text and drawing in latex. http://www2.washjeff.edu/users/rhigginbottom/latex/resources/lecture12.pdf, January 2012.</p>
+<p>[99] Jeffrey A. Ryan. quantmod: Quantitative Financial Modeling Framework, 2013. R package version 0.4-0.</p>
+<p>[100] Meyers Scott. Effective STL: 50 specific ways to improve your use of the standard template library. Addison-Wesley, Boston, 2001.</p>
+<p>[101] Meyers Scott. Effective C++: 55 specific ways to improve your programs and designs. Addison-Wesley, Upper Saddle River, NJ, 3rd edition, 2005.</p>
+<p>[102] Ao Sio-Iong, Rieger Burghard B., and Amouzegar Mahyar A. Advances in machine learning and data analysis, volume 48 of Lecture notes in electrical engineering. Springer Science+Business Media, Dordrecht, 2010.</p>
+<p>[103] Prata Stephen. C++ primer plus. Addison-Wesley, Upper Saddle River, NJ, 6th ed edition, 2012.</p>
+<p>[104] R Core Team. R language definition. http://cran.r-project.org/doc/manuals/r-devel/R-lang.pdf.</p>
+<p>[105] Stan Development Team. Rstan: the r interface to stan, version 2.3. http://mc-stan.org/rstan.html, 2014.</p>
+<p>[106] Stan Development Team. Stan; a c++ library for probability and sampling, version 2.3. http://mc-stan.org, 2014.</p>
+<p>[107] Andersen Torben G. Handbook of financial time series. Springer, Berlin, 2009.</p>
+<p>[108] Hastie Trevor, Tibshirani Robert, and Friedman Jerome. H. The elements of statistical learning: data mining, inference, and prediction. Springer series in statistics. Springer, New York, 2nd edition, 2009.</p>
+<p>[109] Durden Tyler. Here is how high frequency trading hurts everyone. http://www.zerohedge.com/news/2014-02-20/here-how-high-frequency-trading- hurts-everyone, February 2014.</p>
+<p>[110] Zoonekynd Vincent. Optimization. http://zoonek.free.fr/blosxom/R/2012-06-01Optimization.html, July 2014.</p>
+<p>[111] Venables W. N. and Ripley Brian D. Modern applied statistics with S. Springer, New York, 4th edition, 2002.</p>
+<p>[112] Brainerd Walter S. and Landweber Lawrence H. Theory of computation. Wiley, New York, 1974.</p>
+<p>[113] Wikipedia. Agora—Wikipedia, the free encyclopedia. http://en.wikipedia.org/wiki/Agora, July 2014.</p>
+<p>[114] Wikipedia. Basel committee on banking supervision—Wikipedia, the free encyclopedia. wikipedia.org/wiki/Basel_Committee_on_Banking_Supervision, July 2014.</p>
+<p>[115] Wikipedia. Bayes theorem—Wikipedia, the free encyclopedia. http://en.wikipedia.org/wiki/Bayes’_theorem, July 2014.</p>
+<p>[116] Wikipedia. Black scholes model—Wikipedia, the free encyclopedia. http://en.wikipedia.org/wiki/Black-Scholes_model, July 2014.</p>
+<p>[117] Wikipedia. Central limit theorem—Wikipedia, the free encyclopedia. http://en.wikipedia.org/wiki/Central_limit_theorem, July 2014.</p>
+<p>[118] Wikipedia. Cftc—Wikipedia, the free encyclopedia. http://en.wikipedia.org/wiki/Commodity_Futures_Trading_Commission, August 2014.</p>
+<p>[119] Wikipedia. Checking whether a coin is fair—Wikipedia, the free encyclopedia. http: //en.wikipedia.org/wiki/Checking_whether_a_coin_is_fair, July 2014.</p>
+<p>[120] Wikipedia. Chicago board of trade—Wikipedia, the free encyclopedia. http://en.wikipedia.org/wiki/Chicago_Board_of_Trade, July 2014.</p>
+<p>[121] Wikipedia. Fama-french three-factor model—Wikipedia, the free encyclopedia. http://en.wikipedia.org/wiki/Fama%E2%80%93French_three-factor_model, July 2014.</p>
+<p>[122] Wikipedia. Frequentist probability—Wikipedia, the free encyclopedia. http://en.wikipedia.org/wiki/Frequentist_probability, July 2014.</p>
+<p>[123] Wikipedia. Gaussmarkov theorem—wikipedia, the free encyclopedia, 2014. [Online; accessed 13-September-2014].</p>
+<p>[124] Wikipedia. Hello world programs—Wikipedia, the free encyclopedia. http://en.wikipedia.org/wiki/List_of_Hello_world_program_examples, July 2014.</p>
+<p>[125] Wikipedia. Jensen’s inequality—wikipedia, the free encyclopedia, 2014. [Online; accessed 13-September-2014].</p>
+<p>[126] Wikipedia. Law of large numbers—Wikipedia, the free encyclopedia. http://en.wikipedia.org/wiki/Law_of_large_numbers, July 2014.</p>
+<p>[127] Wikipedia. Markdown—Wikipedia, the free encyclopedia. http://en.wikipedia.org/wiki/Markdown, July 2014.</p>
+<p>[128] Wikipedia. Omega ratio—Wikipedia, the free encyclopedia. http://en.wikipedia.org/wiki/Omega_ratio, July 2014.</p>
+<p>[129] Wikipedia. Operational risk—Wikipedia, the free encyclopedia. wikipedia.org/wiki/Operational_risk, July 2014.</p>
+<p>[130] Wikipedia. Option (finance)—Wikipedia, the free encyclopedia. http://en.wikipedia.org/wiki/Option_(finance), July 2014.</p>
+<p>[131] Wikipedia. Pairs trade—Wikipedia, the free encyclopedia. http://en.wikipedia.org/wiki/Pairs_trade, July 2014.</p>
+<p>[132] Wikipedia. Posix—wikipedia, the free encyclopedia, 2014. [Online; accessed 13September-2014].</p>
+<p>[133] Wikipedia. Principal component analysis—wikipedia, the free encyclopedia, 2014. [Online; accessed 14-September-2014].</p>
+<p>[134] Wikipedia. Probability axioms—Wikipedia, the free encyclopedia. http://en.wikipedia.org/wiki/Probability_axioms, July 2014.</p>
+<p>[135] Wikipedia. Probability interpretations—wikipedia, the free encyclopedia, 2014. [Online; accessed 13-September-2014].</p>
+<p>[136] Wikipedia. Program / optimization—Wikipedia, the free encyclopedia. http://en.wikipedia.org/wiki/Program/optimization, July 2014.</p>
+<p>[137] Wikipedia. Programming paradigm—Wikipedia, the free encyclopedia. http://en.wikipedia.org/wiki/Programming_paradigm, July 2014.</p>
+<p>[138] Wikipedia. Rank correlation—Wikipedia, the free encyclopedia. en.m.wikipedia. org/wiki/Rank_correlation, July 2014.</p>
+<p>[139] Wikipedia. Sec—Wikipedia, the free encyclopedia. http://en.wikipedia.org/wiki/Securities_and_Exchange_Commission, August 2014.</p>
+<p>[140] Wikipedia. Sharpe ratio—Wikipedia, the free encyclopedia. wikipedia.org/wiki/Sharpe_ratio, July 2014. References 267</p>
+<p>[141] Wikipedia. Test driven development—Wikipedia, the free encyclopedia. http://en.wikipedia.org/wiki/Test-driven_development, July 2014.</p>
+<p>[142] Wikipedia. Ulcer index—Wikipedia, the free encyclopedia. wikipedia.org/wiki/Ulcer_index, July 2014.</p>
+<p>[143] Wikipedia. Unbiased estimation of standard deviation—Wikipedia, the free encyclopedia. http://en.wikipedia.org/wiki/Unbiased_estimation_of_standard_deviation, July 2014.</p>
+<p>[144] Wikipedia. Vpin—Wikipedia, the free encyclopedia. http://en.wikipedia.org/wiki/VPIN, July 2014.</p>
+<p>[145] Xie Yihui. Dynamic Documents with R and knitr. Chapman and Hall/CRC, Boca Raton, Florida, 2013. ISBN 978-1482203530.</p>
+<p>[146] Xie Yihui. knitr: A general-purpose package for dynamic report generation in R, 2014. R package version 1.6.</p>
+<p>[147] Xie Yihui. knitr reference card. http://cran.at.r-project.org/web/packages/knitr/vignettes/knitr-refcard.pdf, May 2014.</p>
+<p>[148] Ross Zev. Four reasons why you should check out the r package dplyr. http://zevross.com/blog/2014/03/26/four-reasons-why-you-should-check-out-the-r-package-dplyr-3/.</p>
+
+    <div class="pager"><a class="prev" href="appendix.html"><span class="dir">上一页</span>补充</a><a class="next" href="terms.html"><span class="dir">下一页</span>索引</a></div>
+  </div>
+</main>
+<script>
+(function () {
+  var box = document.getElementById('q');
+  var panel = document.getElementById('hits');
+  if (!box) return;
+  var idx = [];
+  fetch('search-index.json')
+    .then(function (r) { return r.json(); })
+    .then(function (d) { idx = d; })
+    .catch(function () {});
+
+  function esc(s) {
+    return s.replace(/[&<>"]/g, function (c) {
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];
+    });
+  }
+  function run() {
+    var q = box.value.trim().toLowerCase();
+    if (!q) { panel.classList.remove('on'); panel.innerHTML = ''; return; }
+    var terms = q.split(/\s+/);
+    var out = [];
+    for (var i = 0; i < idx.length && out.length < 24; i++) {
+      var e = idx[i];
+      var hay = (e.h + ' ' + e.p + ' ' + e.t).toLowerCase();
+      var ok = true;
+      for (var k = 0; k < terms.length; k++) {
+        if (hay.indexOf(terms[k]) < 0) { ok = false; break; }
+      }
+      if (!ok) continue;
+      var pos = e.t.toLowerCase().indexOf(terms[0]);
+      var snip = pos > 40 ? e.t.slice(pos - 30, pos + 90)
+                          : e.t.slice(0, 110);
+      out.push('<a href="' + e.u + '"><div class="p">' + esc(e.p) +
+               '</div><div class="h">' + esc(e.h) +
+               '</div><div class="s">' + esc(snip) + '</div></a>');
+    }
+    panel.innerHTML = out.length
+      ? out.join('')
+      : '<div class="none">没有匹配的内容</div>';
+    panel.classList.add('on');
+  }
+  box.addEventListener('input', run);
+  box.addEventListener('focus', run);
+  document.addEventListener('click', function (e) {
+    if (!panel.contains(e.target) && e.target !== box) {
+      panel.classList.remove('on');
+    }
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') { panel.classList.remove('on'); box.blur(); }
+  });
+})();
+</script>
+</body>
+</html>

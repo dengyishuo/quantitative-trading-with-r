@@ -1,0 +1,10 @@
+devtools
+dplyr
+ggplot2
+hflights
+quantmod
+RJSONIO
+RMySQL
+RODBC
+XLConnect
+xts

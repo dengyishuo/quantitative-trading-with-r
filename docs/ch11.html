@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>第11章 速度，测试与报告 · 量化金融与R语言</title>
+<meta name="description" content="Quantitative Trading with R 中文翻译稿" />
+<style>
+:root {
+  --bg: #ffffff;
+  --fg: #1f2328;
+  --muted: #6b7280;
+  --line: #e5e7eb;
+  --soft: #f7f8fa;
+  --accent: #0f5c8c;
+  --code-bg: #f6f8fa;
+  --sidebar-w: 288px;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  color: var(--fg);
+  background: var(--bg);
+  font-family: -apple-system, "PingFang SC", "Hiragino Sans GB",
+               "Microsoft YaHei", "Source Han Sans SC", sans-serif;
+  font-size: 16px;
+  line-height: 1.85;
+  -webkit-font-smoothing: antialiased;
+}
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* 侧边栏 */
+.sidebar {
+  position: fixed; inset: 0 auto 0 0; width: var(--sidebar-w);
+  border-right: 1px solid var(--line);
+  background: var(--soft);
+  display: flex; flex-direction: column;
+  overflow: hidden;
+}
+.brand {
+  padding: 22px 20px 14px;
+  border-bottom: 1px solid var(--line);
+}
+.brand .t { font-size: 17px; font-weight: 700; line-height: 1.4; }
+.brand .s { font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.5; }
+.search { padding: 12px 16px; border-bottom: 1px solid var(--line); }
+.search input {
+  width: 100%; padding: 8px 10px; font-size: 13px;
+  border: 1px solid var(--line); border-radius: 6px;
+  background: #fff; color: var(--fg); outline: none;
+}
+.search input:focus { border-color: var(--accent); }
+.nav { flex: 1; overflow-y: auto; padding: 10px 0 40px; }
+.nav .group { padding: 12px 20px 6px; font-size: 11px; font-weight: 700;
+  color: var(--muted); letter-spacing: .08em; }
+.nav a.item {
+  display: block; padding: 7px 20px 7px 20px;
+  font-size: 14px; color: var(--fg); border-left: 3px solid transparent;
+}
+.nav a.item:hover { background: #eef1f5; text-decoration: none; }
+.nav a.item.active {
+  border-left-color: var(--accent); background: #e8eff5;
+  font-weight: 600; color: var(--accent);
+}
+.nav details summary {
+  padding: 7px 20px; font-size: 14px; cursor: pointer; list-style: none;
+}
+.nav details summary::-webkit-details-marker { display: none; }
+.nav details summary:hover { background: #eef1f5; }
+.nav details a.sub {
+  display: block; padding: 4px 20px 4px 34px;
+  font-size: 12.5px; color: var(--muted); line-height: 1.5;
+}
+.nav details a.sub:hover { color: var(--accent); }
+
+/* 正文 */
+.main { margin-left: var(--sidebar-w); }
+.wrap { max-width: 860px; margin: 0 auto; padding: 40px 40px 96px; }
+.crumb { font-size: 12px; color: var(--muted); margin-bottom: 10px; }
+h1 { font-size: 30px; line-height: 1.35; margin: 0 0 26px;
+     font-weight: 700; letter-spacing: .01em; }
+h2 { font-size: 21px; margin: 40px 0 14px; padding-bottom: 8px;
+     border-bottom: 1px solid var(--line); font-weight: 700; }
+h3 { font-size: 17px; margin: 28px 0 10px; font-weight: 700; }
+h4 { font-size: 15px; margin: 22px 0 8px; font-weight: 700; }
+p { margin: 0 0 16px; text-align: justify; }
+p.signature { text-align: right; }
+ul, ol { margin: 0 0 16px; padding-left: 26px; }
+li { margin: 4px 0; }
+img { max-width: 100%; height: auto; display: block; margin: 22px auto;
+      border-radius: 4px; }
+figure { margin: 24px 0; text-align: center; }
+figcaption { font-size: 13px; color: var(--muted); margin-top: 8px; }
+
+code {
+  font-family: "SF Mono", Menlo, Consolas, "Courier New", monospace;
+  font-size: 0.88em; background: var(--code-bg);
+  padding: 2px 5px; border-radius: 4px;
+  border: 1px solid #eaecef;
+}
+pre {
+  background: var(--code-bg); border: 1px solid var(--line);
+  border-radius: 6px; padding: 14px 16px; overflow-x: auto;
+  line-height: 1.6; margin: 0 0 18px;
+}
+pre code { background: none; border: 0; padding: 0; font-size: 12.5px; }
+
+table { border-collapse: collapse; width: 100%; margin: 20px 0;
+        font-size: 14px; }
+th, td { border: 1px solid var(--line); padding: 7px 11px; }
+th { background: var(--soft); font-weight: 700; }
+tr:nth-child(even) td { background: #fcfcfd; }
+
+blockquote { margin: 0 0 18px; padding: 10px 18px;
+  border-left: 3px solid var(--line); color: var(--muted); background: var(--soft); }
+
+/* 插图目录 / 表格目录 */
+.cap-list { list-style: none; padding: 0; margin: 4px 0 0; }
+.cap-list li { border-bottom: 1px solid var(--line); }
+.cap-list a { display: flex; align-items: baseline; gap: 12px;
+  padding: 9px 2px; font-size: 14px; color: var(--fg); }
+.cap-list a:hover { background: var(--soft); text-decoration: none;
+  color: var(--accent); }
+.cap-num { min-width: 68px; color: var(--muted); font-size: 12.5px;
+  font-variant-numeric: tabular-nums; }
+.cap-title { flex: 1; }
+.cap-where { color: var(--muted); font-size: 11.5px; white-space: nowrap; }
+.cap-empty { color: var(--muted); font-size: 14px; }
+
+/* MathML 居中与缩放 */
+math[display="block"] { display: block; margin: 20px auto; font-size: 1.05em; }
+
+/* 页脚翻页 */
+.pager { display: flex; justify-content: space-between; gap: 16px;
+         margin-top: 56px; padding-top: 22px; border-top: 1px solid var(--line); }
+.pager a { flex: 1; padding: 12px 16px; border: 1px solid var(--line);
+           border-radius: 8px; font-size: 13px; }
+.pager a:hover { border-color: var(--accent); text-decoration: none;
+                 background: var(--soft); }
+.pager .dir { display: block; font-size: 11px; color: var(--muted);
+              margin-bottom: 3px; }
+.pager .next { text-align: right; }
+
+/* 首页 */
+.cover { padding: 56px 0 8px; }
+.cover h1 { font-size: 38px; margin-bottom: 8px; }
+.cover .sub { font-size: 15px; color: var(--muted); margin-bottom: 34px; }
+.toc-list { border-top: 1px solid var(--line); }
+.toc-list > li { list-style: none; margin: 0; border-bottom: 1px solid var(--line); }
+.toc-list { padding-left: 0; }
+.toc-row { display: flex; align-items: baseline; gap: 10px;
+           padding: 13px 2px; font-size: 15px; }
+.toc-row .no { color: var(--muted); font-size: 12px; min-width: 26px; }
+.toc-subs { padding: 0 0 12px 36px; margin: 0; }
+.toc-subs li { list-style: none; font-size: 13px; color: var(--muted);
+               padding: 3px 0; }
+
+/* 搜索结果 */
+#hits { display: none; position: absolute; left: 16px; right: 16px; top: 96px;
+        background: #fff; border: 1px solid var(--line); border-radius: 8px;
+        box-shadow: 0 8px 24px rgba(0,0,0,.12); max-height: 60vh;
+        overflow-y: auto; z-index: 50; }
+#hits.on { display: block; }
+#hits a { display: block; padding: 10px 14px; border-bottom: 1px solid var(--line); }
+#hits a:last-child { border-bottom: 0; }
+#hits a:hover { background: var(--soft); text-decoration: none; }
+#hits .h { font-size: 13px; font-weight: 600; color: var(--fg); }
+#hits .p { font-size: 11px; color: var(--accent); margin-bottom: 2px; }
+#hits .s { font-size: 12px; color: var(--muted); line-height: 1.5; }
+#hits .none { padding: 14px; font-size: 13px; color: var(--muted); }
+
+@media (max-width: 900px) {
+  .sidebar { display: none; }
+  .main { margin-left: 0; }
+  .wrap { padding: 24px 20px 72px; }
+  .cover h1 { font-size: 28px; }
+}
+@media print {
+  .sidebar, .pager, .search { display: none; }
+  .main { margin-left: 0; }
+  .wrap { max-width: none; padding: 0; }
+}
+</style>
+</head>
+<body>
+<aside class="sidebar">
+  <div class="brand">
+    <div class="t">量化金融与R语言</div>
+    <div class="s">Quantitative Trading with R 中文翻译稿</div>
+  </div>
+  <div class="search">
+    <input id="q" type="search" placeholder="搜索全书…" autocomplete="off" />
+  </div>
+  <nav class="nav"><div class="group">前言</div><a class="item" href="figures.html">插图目录</a><a class="item" href="tables.html">表格目录</a><a class="item" href="preface.html">译者序</a><a class="item" href="translators.html">译者简介</a><a class="item" href="acknowledgements.html">致谢</a><div class="group">正文</div><a class="item" href="ch01.html">第1章 总览</a><a class="item" href="ch02.html">第2章 交易工具</a><a class="item" href="ch03.html">第3章 与数据打交道</a><a class="item" href="ch04.html">第4章 统计和概率基础</a><a class="item" href="ch05.html">第5章 统计和概率中级</a><a class="item" href="ch06.html">第6章 价格差，贝塔系数和风险</a><a class="item" href="ch07.html">第7章 基于Quantstrat包的回溯测试</a><a class="item" href="ch08.html">第8章 高频数据分析</a><a class="item" href="ch09.html">第9章 期权</a><a class="item" href="ch10.html">第10章 最优化</a><details open><summary><a class="item active" style="display:inline;padding:0;border:0" href="ch11.html">第11章 速度，测试与报告</a></summary><a class="sub" href="ch11.html#运行时执行的改进">运行时执行的改进</a><a class="sub" href="ch11.html#r代码基准测试">R代码基准测试</a><a class="sub" href="ch11.html#rcpp的解决方案">Rcpp的解决方案</a><a class="sub" href="ch11.html#用rinside在c中调用r">用RInside在C++中调用R</a><a class="sub" href="ch11.html#用testthat编写单元测试">用testthat编写单元测试</a><a class="sub" href="ch11.html#使用knitr撰写文档">使用`knitr`撰写文档</a><a class="sub" href="ch11.html#总结">总结</a></details><div class="group">附录</div><a class="item" href="appendix.html">补充</a><a class="item" href="references.html">参考文献</a><a class="item" href="terms.html">索引</a></nav>
+  <div id="hits"></div>
+</aside>
+<main class="main">
+  <div class="wrap">
+    <div class="crumb">正文</div>
+    <h1>第11章 速度，测试与报告</h1>
+<p>最后一章其实可以更简单的命名为“大杂烩”（Miscellaneous），它包含了R程序员需要注意的三个重要主题。第一个主题讨论能够加速原生R代码的运行速度以及允许R与C++之间互通的一些方法。第二个主题讨论了测试驱动的程序开发以及R用户如何编写单元测试以提升代码的质量和可靠性。最后的主题是讨论有关研究的可重复性以及如何在R中撰写报告。过去的几年中，R在这三个主题方面都取得了显著的进展。R的核心团队一直在对R的核心源代码进行性能改进<sup>1</sup>，类似<code>Rcpp</code>, <code>Rcpp11</code>和<code>RInside</code>这些第三方包也为R的性能改进做出了巨大贡献[20, 21]。我们会以<code>testhat</code>包为例展示如何进行代码的单元测试[41]。RStudio团队的近期工作成果以及类似<code>sweave</code>和<code>knitr</code>包的出现使得在R中撰写精简优雅的报告成为可能[145,146]。在本章的最后，我们将展示一个由<code>knitr</code>所生成的.pdf格式的报告样板。</p>
+<h2 id="运行时执行的改进">运行时执行的改进</h2>
+<p>即便对于大多数流行的算法，R都提供了十分高效的实现函数，但是对于某些应用来说，这些实现还是不够快。总体说来，算法的效率以及代码执行的速度这两大问题是每一位编程人员在他们的编程生涯中最终都要面对和解决的。对于任何一个开发人员来说，将自己的代码转化为正确的功能，是首先要关心和解决的问题。在这个首要问题解决了之后，我们才应该考虑对代码进行优化。如果我们想要的答案只需要计算一次就可以得到，而且结果在本质上对运行的时间并不敏感，那么即便代码速度很慢也完全没有关系。Donald Knuth说过一句非常贴切的话：“我们应该忘记小幅度的效率提升，大概97%左右的时间都不要关心效率问题：提前优化是万恶之源[23]。”</p>
+<p>理想的情况是，我们编写的所有程序从现在开始都是准确的、可维护的并且有效的。这种神圣的状态代表着我们最终可以达成的目标，但并不是一开始就能够实现的。原则上，一个程序员应该首先确保能够得到正确的结果，然后才考虑将代码的运行优化的越快越好。有些时候，代码的可维护性与代码的效率是两个互相矛盾的目标。具体的商业要求会决定哪一个才是更加重要的目标。</p>
+<p>在R中，解决执行速度问题的方法有好几种。第一种就是写出更好的代码。更好是一个相对的概念，从另外一个编程语言来看是快速的代码，从R的角度来说可能并非如此。一个典型的例子就是<code>for</code>循环的使用。下面用R写的代码运行起来就会耗费很长的时间：</p>
+<pre><code>sum_with_loop_in_r &lt;- function(max_value) {
+  sum &lt;- 0
+  for(i in 1:max_value) {
+    sum &lt;- sum + i
+  }
+  return(sum)
+}</code></pre>
+<p>下面的版本使用了向量化操作，速度的提升是显著的：</p>
+<pre><code>sum_with_vectorization_in_r = function(max_value) {
+  numbers &lt;- as.double(1:max_value)
+  return(sum(numbers))
+}</code></pre>
+<h2 id="r代码基准测试">R代码基准测试</h2>
+<p>我们可以使用<code>microbenchmark</code>包测试上面两种实现方式在运行时间上的相对差距。</p>
+<pre><code>library(microbenchmark)
+microbenchmark(loop = sum_with_loop_in_r(1e5),
+  vectorized = sum_with_vectorization_in_r(1e5))
+
+## Unit: microseconds
+## expr        min       lq        median
+## loop        57615.323 59424.740 60992.7720
+## vectorized  260.602   273.673   286.5495
+
+## uq        max       neval
+## 89608.441 96694.469 100
+## 294.236   414.349   100</code></pre>
+<p>向量化版本的代码要快大约213倍！</p>
+<p>我们编写的大多数R代码都是解释性代码。<code>compiler</code>包允许我们在R中对某些函数进行编译，这样他们在运行的时候就具有更快的执行速度。关于这个包的更多信息可以参阅这个文档：<a href="http://homepage.stat.uiowa.edu/luke/R/compiler/compiler.pdf" class="uri">http://homepage.stat.uiowa.edu/luke/R/compiler/compiler.pdf</a>。 自从R版本2.13.0开始，便有了这个编译包。</p>
+<pre><code>compiled_sum_with_loop_in_r &lt;- cmpfun(sum_with_loop_in_r)
+  microbenchmark(loop = sum_with_loop_in_r(1e5),
+  compiled = compiled_sum_with_loop_in_r(1e5),
+  vectorized = sum_with_vectorization_in_r(1e5))
+
+## Unit: microseconds
+## expr        min       lq         median
+## loop        56746.652 58343.8945 60602.445
+## compiled    4688.146  4758.6770  4892.246
+## vectorized  249.457   273.8635   284.050
+
+##  uq         max        neval
+##  86599.9875 96736.750  100
+##  5498.9710  46484.009  100
+##  292.3135   473.927    100</code></pre>
+<p>编译版本要比普通的for循环更快，但是并没有向量化版本的快。<code>cmpfun()</code>函数也绝对不是一个神奇魔弹。如果把它应用到一个已经经过预编译的函数，或者是内部实现是经由编译语言编写的，那么很可能不会有有任何速度上的提升。</p>
+<h2 id="rcpp的解决方案">Rcpp的解决方案</h2>
+<p>作为比较，下面用C++编写的同样功能的函数速度就快多了：</p>
+<pre><code>long add_cpp(long max_value) {
+  long sum = 0;
+  for(long i = 1; i &lt;= max_value; ++i) {
+    sum = sum + i;
+  }
+  return sum;
+}</code></pre>
+<p>R框架允许你在Fortran，C，或者C++中实现更快的代码。这些实现随后可以在R中调用。“Writing R Extensions（编写R扩展）”文档就提供了这个方法的详细说明，文档可以访问这里得到：<a href="http://cran.r-project.org/doc/manuals/R-exts.html。但是这个方法并不直接。这里或多或少涉及到用Fortran和C编写R扩展的过程，本书不讨论此内容" class="uri">http://cran.r-project.org/doc/manuals/R-exts.html。但是这个方法并不直接。这里或多或少涉及到用Fortran和C编写R扩展的过程，本书不讨论此内容</a>。</p>
+<p>我们转而使用和讨论<code>Rcpp</code>包，此包由Dirk Eddelbuettel和Romain Francois编写和维护。关于<code>Rcpp</code>的相关信息可以访问此处：<a href="http://dirk.eddelbuettel.com/code/rcpp.html" class="uri">http://dirk.eddelbuettel.com/code/rcpp.html</a>。 Francois最近公布了这个包的<code>Rcpp11</code>版本。详情和有关的链接可以访问此处：<a href="http://blog.r-enthusiasts.com/。Hadley" class="uri">http://blog.r-enthusiasts.com/。Hadley</a> Wickham也提供了一个非常有用的教程：http//adv-r.had.co.nz/Rcpp.html。</p>
+<p>简单来说，<code>Rcpp</code>可以让人们在R中用非常简洁的方式编写C++代码。把这些代码跟R连接起来使用也非常容易。用户不需要关心关于C内部API的各种工作机制就可以使代码运行起来。</p>
+<p>很多R自带的函数已经是通过编译语言比如Fortran，C或者C++编写的。可以在R的控制台窗口中键入这些函数的名称。如果只是返回了R代码而没有其他的返回结果，那么这个函数就是用R本身编写的。如果返回结果中出现了类似：<code>.C</code>,<code>.Call</code>,<code>，</code> <code>Fortran</code>，<code>.External</code>,<code>.Internal</code>或者<code>.Primitive</code>，那么这些函数就是用编译语言编写的。</p>
+<p>下面就是一个调用<code>.Internal()</code>的函数：</p>
+<pre><code>lapply
+## function (X, FUN, ...)
+## {
+##   FUN &lt;- match.fun(FUN)
+##   if (!is.vector(X) || is.object(X))
+##     X &lt;- as.list(X)
+##     .Internal(lapply(X, FUN))
+## }</code></pre>
+<p><code>lapply()</code>函数的源代码展示了在调用使用其他语言编写的编译实现代码时混合R的语法是完全可能的。下面是更有趣的部分。这里我们展示如何创建一个C++编译的函数并在R中调用它。</p>
+<p>配置步骤：</p>
+<ol type="1">
+<li><p>确保你的计算机中安装了一个可以工作的C++编译器。关于配置此项的更多信息可以参考这里： <a href="http://dirk.eddelbuetterl.com/code/rcpp/Rcpp-FAQ.pdf，以及这里http://rstudio.com/ide/docs/packages/prerequisites" class="uri">http://dirk.eddelbuetterl.com/code/rcpp/Rcpp-FAQ.pdf，以及这里http://rstudio.com/ide/docs/packages/prerequisites</a>. Windows用户需要安装<code>Rtools</code><sup><code>2</code></sup>包以确保能够使用命令行工具以及MinGW编译器。</p></li>
+<li><p>安装并加载Rcpp包以及它的所有依赖包。</p></li>
+</ol>
+<p>现在我们已经做好了在R中编写并使用C++代码的准备了。我们将用到两个函数<code>cppFunction()</code>和<code>sourceCpp()</code>。 <code>cppFunction()</code>函数允许我们编写内联的C++代码（inline code），而<code>sourceCpp()</code>函数则可以关联一个外部.cpp文件。</p>
+<pre><code>library(Rcpp)
+
+# 创建一个C++函数
+cppFunction(&#39;
+  long add_cpp(long max_value) {
+    long sum = 0;
+    for(long i = 1; i &lt;= max_value; ++i) {
+     sum = sum + i;
+    }
+    return sum;
+   }&#39;
+)</code></pre>
+<p>这个函数的签名是这个样子：</p>
+<pre><code>add_cpp
+## function (max_value)
+## .Primitive(&quot;.Call&quot;)(&lt;pointer: 0x10f52fbb0&gt;, max_value)</code></pre>
+<p>现在这个函数已经编译完成了，我们可以像使用一般R函数那样使用该函数。</p>
+<pre><code>add_cpp(1e5)
+## [1] 5000050000</code></pre>
+<p><code>microbenchmark</code>的测试结果突显了C++实现方式在执行效率上的优势。</p>
+<pre><code>microbenchmark(loop = sum_with_loop_in_r(1e5),
+  compiled = compiled_sum_with_loop_in_r(1e5),
+  vectorized = sum_with_vectorization_in_r(1e5),
+  compiled_cpp = add_cpp(1e5))
+
+## Unit: microseconds
+## expr         min       lq         median
+## loop         73049.461 76640.5945 79635.8810
+## compiled     7359.040  7487.9655  7795.9125
+## vectorized   804.773   932.9285   1031.9695
+## compiled_cpp 79.573    88.2615    98.9385
+
+## uq         max        neval
+## 80676.6600 94618.174  100
+## 12101.8610 135353.743 100
+## 1373.8565  2148.409   100
+## 105.2440   135.781    100</code></pre>
+<p>C++实现方式比原生的R循环起码快了800倍。这对于那些想在R编程环境中融入编译语言速度优势的人们来说无疑是一个激动人心的消息。这样的速度表现暗示了普通的R用户不需要再纠结R的速度问题。因为对执行速度有要求的“关键任务”现在都可以用C++来编写了。</p>
+<p>在R代码中编写C++内联函数提供了一个完全切实可行并且有效的解决方案。然而，如果我们可以将C++的代码部分拆分成单独的文件则会显得整个解决方案更加干净。<code>sourceCpp()</code>就允许我们将这些代码抽出来放在一个外部.cpp文件中去。 下面是一个.cpp文件的例子：</p>
+<pre><code># include &lt;Rcpp.h&gt;
+using namespace Rcpp;
+
+// [[Rcpp::export]]
+long add_2_cpp(long max_value) {
+    long sum = 0;
+    for(long i = 1; i &lt;= max_value ; i++) {
+        sum = sum + i;
+    }
+    return sum;
+}</code></pre>
+<p><code>sourceCpp()</code>函数会首先编译这个函数并创建一个具有相同名称的R版本的函数，然后写入到当前活动的R环境中。（<a href="http://adv-r/had.co.nz/Rcpp.html" class="uri">http://adv-r/had.co.nz/Rcpp.html</a>）</p>
+<pre><code>sourceCpp(&#39;Chapter_11/add_2_file.cpp&#39;)
+
+add_2_cpp(100)
+## [1] 5050</code></pre>
+<h2 id="用rinside在c中调用r">用RInside在C++中调用R</h2>
+<p>有时候我们需要在C++程序中直接调用R的某些功能。<code>RInside</code>包“提供了一个环绕R内置API的抽象层，并且将在应用中获取R实例变得更加简单。而且，得益于<code>Rcpp</code>提供的类，在R和C++中交换数据变得非常直接[18]。”</p>
+<p>在他的Rcpp书中，Eddelbuettel提供了一些关于如何编译和运行R和C++糅合代码的有用示例。下面就是一则：</p>
+<pre><code>#include &lt;RInside.h&gt;
+int main(int argc, char *argv[]) {
+
+ // create an embedded R instance
+ RInside R(argc, argv);
+
+ // assign a char* (string) to &quot;txt&quot;
+ R[&quot;txt&quot;] = &quot;Hello, world!\n&quot;;
+
+ // eval the init string, ignoring any returns
+ R.parseEvalQ(&quot;cat(txt)&quot;);
+
+ exit(0);
+}</code></pre>
+<h2 id="用testthat编写单元测试">用testthat编写单元测试</h2>
+<p>代码测试是很多开发人员都想要回避的，因为这项工作总被认为是非常无聊和枯燥的，甚至是新奇的。但这样的认识与真相是背道而驰的。因为每当我在我的编程工作流程中采纳了测试驱动的方法，我都能看到编程生产率的提升以及代码中错误发生率的降低。测试驱动的开发更是一种心态，而不仅仅是一些形式上的要求。它的基本想法可以归纳为下面几点：</p>
+<p>1. 概念层面上来说，将待完成项目的功能分拆为许多小的模块化的成分。这样做是为了让每一个成分（函数）只做一件事情并且做好。</p>
+<p>2. 针对每一个函数编写一个测试。刚开始的时候，让测试返回错误的结果。</p>
+<p>3. 运行所有测试。你将看到测试返回错误的信息。</p>
+<p>4. 开始编写能够实现所需功能的代码。</p>
+<p>5. 再次运行测试。这一次，大多数代码都应该通过测试。</p>
+<p>6. 保持代码重构，并且保证所有的测试都能够通过。</p>
+<p>在R中最受欢迎的代码测试包是：<code>RUnit</code>和<code>testthat</code>包。后者是Hadley Wickham的另外一个精彩贡献，关于它的更多信息，包括开发动机以及使用方法可以访问：<a href="http://adv-r.had.co.nz/Testing.html" class="uri">http://adv-r.had.co.nz/Testing.html</a>。</p>
+<p>下面这个例子就将testthat加入到我们的工作流程中去。这个例子中我们的任务是在给定一个价格向量的基础上计算对数收益率。根据上面的归纳，我们首先写出函数的框架，然后编写一个返回错误的测试：</p>
+<pre><code># 定义函数
+convert_to_returns &lt;- function(prices) {
+  return(9)
+}</code></pre>
+<p>这里的初始测试会返回错误的结果。<code>context()</code>函数可以帮助将相关的功能聚合在一起。<code>test_that()</code>函数将所有预期的行为都捆绑在了一起。而测试本身以<code>expect_</code>关键词开头：</p>
+<pre><code>require(testthat)
+
+# 用context()将所需的功能聚合起来
+context(&quot;Price to log-return conversion&quot;)
+
+# 用expect_that()定义我们期待的结果
+test_that(&quot;convert_to_returns produces the correct values&quot;, {
+
+  # 对于这些输入
+  input_prices &lt;- c(100, 101, 102, 103, 99)
+
+  # 我们期待返回这些结果
+  expected_returns &lt;- c(0.009950331,
+    0.009852296, 0.009756175, -0.039609138)
+
+  # 验证实际返回值与期待值是否等同
+  expect_equal(expected_returns,
+    convert_to_returns(input_prices))
+})</code></pre>
+<p>当我们运行这个测试之后，会得到下面的输出结果：</p>
+<pre><code>## Error: Test failed: &#39;convert_to_returns produces
+## the correct values&#39;
+## Not expected: expected_returns not equal to
+## convert_to_returns(input_prices)
+## Numeric: lengths (1, 4) differ.</code></pre>
+<p>接下来是时候继续加入我们的执行代码了。我们将加入一小块功能然后确认它可以通过我们的测试：</p>
+<pre><code># 定义函数
+convert_to_returns &lt;- function(prices) {
+  return(diff(log(prices)))
+}</code></pre>
+<p>再运行测试之后，就没有错误产生了。此处，我们可以增强测试函数的功能来检查当价格向量长度小于2时触发一条合适的错误信息。在实施该测试之前，我们需要该测试先返回错误信息。</p>
+<pre><code># 验证错误信息
+input_prices &lt;- c(100)
+msg &lt;- &quot;Not enough price entries.&quot;
+
+expect_message(msg, convert_to_returns(input_prices))
+## Error: expected_message no messages shown</code></pre>
+<p>现在我们重写函数以考虑这个极端情况：</p>
+<pre><code># 检查极端情况的函数
+convert_to_returns &lt;- function(prices) {
+  if(length(prices) &lt; 2) {
+    message(&quot;Not enough price entries.&quot;)
+  }
+  return(diff(log(prices)))
+}</code></pre>
+<p>其实，我们可以就多个场景的多个期望情形进行测试。关于测试功能的完整列表可以访问这个网页：<a href="http://adv-r.had.co.nz/Testing.html。另外一种运行测试的方法是创建一个单独的测试源代码文件然后运行下面的命令" class="uri">http://adv-r.had.co.nz/Testing.html。另外一种运行测试的方法是创建一个单独的测试源代码文件然后运行下面的命令</a>：</p>
+<pre><code>test_file(&quot;example_test_file.r&quot;)</code></pre>
+<h2 id="使用knitr撰写文档">使用<code>knitr</code>撰写文档</h2>
+<p>到目前为止，我们对编写R代码的讨论集中于操作，分析和可视化数据。基于此，我其实已经隐含的提到了这本书所建议采纳的特定工作流程。工作流程是完成某项任务系统性的方法路线，允许量化分析师或者开发人员更好的管理他们的研究，更轻松的重现他们的分析结果，以及更稳健的将他们的研究发现传播给大众或者其他感兴趣的群体。一个典型的工作流程可能包含以下几个步骤：</p>
+<ol type="1">
+<li>就一个特定的交易策略或者市场微观结构事件构想一个假设。</li>
+<li>收集测试该假设所涉及到的必要数据。</li>
+<li>转换，处理和过滤该数据。</li>
+<li>对过滤后的数据集，编写代码进行相关计算。</li>
+<li>将计算结果可视化并生成一些汇总统计量。</li>
+</ol>
+<p>这些步骤中的最后一步就是对重要发现结果进行有效和准确的重现。因为外部的观察者需要能够及时和准确的重现别人研究后声称已经发现的结果。这也是科学得以前进和发展的动力。那我们怎么才能让这样的过程更加容易呢？</p>
+<p>就实际情况而言，外部观察者可能需要得到最原始的数据，以及生成图表和分析结果的源代码。在当前的学术界和业界，普遍的做法是将代码，数据和文档以最终出版物的形式松散的捆绑在一起。然而，从浩瀚的学术出版物中获得这些资料是一件非常困难的事情。</p>
+<p>我们来看一下，为什么说把数据，代码和文档松散捆绑的方式可能会带来麻烦。试想一下一个研究人员需要在一个研究建议书中展示几十份图表。正确的标识这些文件，并且跟踪它们的变化的可能性会随着问题本身复杂度的增加而降低。当研究人员需要在多个研究项目中跳转的时候，会发生什么呢？把这些所有的资源管理好会变得更加困难。另外一个问题是当原始数据发生变化，那么所有的分析都要重做，也就会生成一批不同的图表和分析结果。</p>
+<p>解决这些 问题的方案之就是实将代码和数据糅合在一起，然后将代码嵌入到文档中去，这个文档需要具备一种合适的格式。我们可以用<code>knitr</code>包来完成这个任务。Yihui Xie (<code>knitr</code>包的作者)提供了一种将R代码、LaTeX和Markdown语法编织在一起的简便途径。LaTeX和Markdown是创建美观的.pdf文件和.html文档的流行语法。<code>knitr</code>的美好之处就在于它可以将R代码糅合到LaTeX和Markdown代码中去。</p>
+<p>下面的两个步骤允许我们将所有需要的元素组合起来，形成一个切实可行的方案：</p>
+<ol type="1">
+<li>创建一个.rnw文件，里面包含R代码，以及LaTeX或Markdown语法编写的代码。</li>
+<li>用pdfLaTeX编译这个.rnw文件，生成.tex和.pdf文件。</li>
+</ol>
+<p>我们将使用RStudio(http://www.rstudio.org)来完成这两个步骤。当然，这两个步骤的任务也可以在R自带的控制台中通过命令行操作实现。RStudio只是将这个工作流程进行了简化。RStudio是R语言的一个完整功能的集成开发环境（IDE），可以从此处免费下载获得：http://rstudio.com/ide/download/。根据使用的操作系统的类型，合适版本的LaTeX编译器也需要事先安装好。Window系统下的LaTeX编译器（MikeTex）可以从此处下载获得：http://miketex.org/download。Mac用户可以从http://www.tug.org/mactex/获取MacTex。下面是需要用到的配置步骤：</p>
+<ol type="1">
+<li>打开RStudio，在控制台窗口内键入命令，用以安装并加载knitr包：install.packages("knitr"); require(knitr)。</li>
+<li>点击Tool -&gt; Options -&gt; Sweave，并确保选择knitr和pdfLaTeX选项。</li>
+<li>在RStudio中，点击File -&gt; New -&gt; R Sweave。</li>
+<li>当完成.rnw文档后，通过点击compile PDF按钮将其编译成.pdf文件。</li>
+</ol>
+<p><img src="media/fig-11-01.png" style="width:4.65345in;height:4.69024in" /></p>
+<p id="fig-11-1"><strong>图11.1</strong> 设置knitr和pdflatex</p>
+<p>下面的Github页面有关于如何使用<code>knitr</code>的实例：<a href="https://github.com/yihui/knitr-examples/。我们挑选其中一个实例，稍加修改以演示这个包的一些基本功能" class="uri">https://github.com/yihui/knitr-examples/。我们挑选其中一个实例，稍加修改以演示这个包的一些基本功能</a>。</p>
+<pre><code>\documentclass{article}
+\usepackage[T1]{fontenc}
+
+\begin{document}
+
+This is an example LaTeX document with some embedded R code woven in for convenience.
+
+&lt;&lt;foo, fig.height = 4&gt;&gt;=
+x = 1:10
+y = x ^ 2
+
+plot(x, y, main = &quot;This is a graph&quot;)
+@
+行内表达可以使用\verb|\Sexpr{}|，比如$\pi=\Sexpr{pi}$，\Sexpr{2.3492e7}和\Sexpr{x / 2.0}。
+\subsection*{A different subsection}
+我们可以插入绘图而隐藏代码。这个功能由代码块的参数列表完成。
+
+&lt;&lt;foo2, fig.height = 3, echo = FALSE&gt;&gt;=
+x = 1:10
+y = x ^ 3
+plot(x, y, main = &quot;This is a second graph&quot;)
+@
+
+任何R代码都可以在knitr提供的代码块中运行。下面一个例子加载\texttt{ggplot2},并创建一个漂亮的密度直方图。
+
+&lt;&lt;foo3, fig.height = 6, tidy = FALSE &gt;&gt;=
+require(ggplot2)
+my_data = data.frame(returns = c(0.03, 0.04, 0.05,
+0.032, 0.01, 0.23, 0.4, 0.05, 0.066, 0.5),
+stock = c(&quot;SPY&quot;, &quot;CVX&quot;, &quot;CVX&quot;, &quot;SPY&quot;,
+&quot;XOM&quot;, &quot;XOM&quot;, &quot;CVX&quot;, &quot;SPY&quot;, &quot;SPY&quot;, &quot;XOM&quot;))
+ggplot(my_data, aes(x = returns, fill = stock)) +
+geom_density(alpha = 0.2)
+@
+\end{document}</code></pre>
+<p>图11.2和11.3展示了.rnw文档通过pdfLaTeX编译之后的.pdf输出样式。</p>
+<p>这是一个LateX样例文档，已经包含R代码以方便编译。</p>
+<pre><code>x = 1:10
+y = x ^ 2
+
+plot(x, y, main = &quot;这是一幅图&quot;)</code></pre>
+<p><img src="media/fig-11-01b.png" style="width:4.55579in;height:3.63213in" /></p>
+<p>行内表达可以使用<code>\Sexpr{}</code> <code>，比如</code>π = 3.1415927，2.3492 × 10 7 和0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5。我们可以插入绘图而隐藏代码。这个功能由代码块的参数列表完成。</p>
+<pre><code>x = 1:10
+y = x ^ 3
+plot(x, y, main = &quot;这是第二幅图&quot;)</code></pre>
+<p><img src="media/fig-11-02.png" style="width:4.47245in;height:3.56268in" /></p>
+<p id="fig-11-2"><strong>图11.2</strong> pdf文件输出样式</p>
+<p>任何R代码都可以在knitr提供的代码块中运行。下面一个例子加载ggplot2，并创建一个漂亮的密度直方图。</p>
+<pre><code>require(ggplot2)
+## Loading required package: ggplot2
+my_data = data.frame(returns = c(0.03, 0.04, 0.05,
+0.032, 0.01, 0.23, 0.4, 0.05, 0.066, 0.5),
+stock = c(&quot;SPY&quot;, &quot;CVX&quot;, &quot;CVX&quot;, &quot;SPY&quot;,
+&quot;XOM&quot;, &quot;XOM&quot;, &quot;CVX&quot;, &quot;SPY&quot;, &quot;SPY&quot;, &quot;XOM&quot;))
+ggplot(my_data, aes(x = returns, fill = stock)) +
+geom_density(alpha = 0.2)</code></pre>
+<p><img src="media/fig-11-03.png" style="width:5.05208in;height:4.04375in" /></p>
+<p id="fig-11-3"><strong>图11.3</strong> 一个含ggplot2图的pdf文件</p>
+<h2 id="总结">总结</h2>
+<p>本章讨论了所有严肃的R程序员都需要熟悉和掌握的四个概念。它们分别是：执行速度，R和C++代码的互操作性，代码能够通过单元测试的可测试性，以及通过R代码和LaTeX或Markdown语法的可重复性研究。代码执行的效率是通过编写”更好的”R代码以及通过利用好类似<code>Rcpp</code>和<code>Rcpp11</code>这样的工具包来达到的。互操作性的概念在本章只是略有提及，我们推荐使用<code>RInside</code>包来实现。通过<code>RInside</code>包，R还能够直接调用C++代码。不同实现方法之间的耗时可以利用<code>microbenchmark</code>包进行比较。本章还演示了对于某些类型的问题，C++方法有显著的速度优势。通过<code>testthat</code>包的使用实例，本章演示了代码的可测试性。搭配RStudio框架和<code>knitr</code>包，可以生成一个既包含R代码也包含LaTeX语法的.pdf文档。</p>
+<p>翻译：冯凌秉 审校：杨环</p>
+
+    <div class="pager"><a class="prev" href="ch10.html"><span class="dir">上一页</span>第10章 最优化</a><a class="next" href="appendix.html"><span class="dir">下一页</span>补充</a></div>
+  </div>
+</main>
+<script>
+(function () {
+  var box = document.getElementById('q');
+  var panel = document.getElementById('hits');
+  if (!box) return;
+  var idx = [];
+  fetch('search-index.json')
+    .then(function (r) { return r.json(); })
+    .then(function (d) { idx = d; })
+    .catch(function () {});
+
+  function esc(s) {
+    return s.replace(/[&<>"]/g, function (c) {
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];
+    });
+  }
+  function run() {
+    var q = box.value.trim().toLowerCase();
+    if (!q) { panel.classList.remove('on'); panel.innerHTML = ''; return; }
+    var terms = q.split(/\s+/);
+    var out = [];
+    for (var i = 0; i < idx.length && out.length < 24; i++) {
+      var e = idx[i];
+      var hay = (e.h + ' ' + e.p + ' ' + e.t).toLowerCase();
+      var ok = true;
+      for (var k = 0; k < terms.length; k++) {
+        if (hay.indexOf(terms[k]) < 0) { ok = false; break; }
+      }
+      if (!ok) continue;
+      var pos = e.t.toLowerCase().indexOf(terms[0]);
+      var snip = pos > 40 ? e.t.slice(pos - 30, pos + 90)
+                          : e.t.slice(0, 110);
+      out.push('<a href="' + e.u + '"><div class="p">' + esc(e.p) +
+               '</div><div class="h">' + esc(e.h) +
+               '</div><div class="s">' + esc(snip) + '</div></a>');
+    }
+    panel.innerHTML = out.length
+      ? out.join('')
+      : '<div class="none">没有匹配的内容</div>';
+    panel.classList.add('on');
+  }
+  box.addEventListener('input', run);
+  box.addEventListener('focus', run);
+  document.addEventListener('click', function (e) {
+    if (!panel.contains(e.target) && e.target !== box) {
+      panel.classList.remove('on');
+    }
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') { panel.classList.remove('on'); box.blur(); }
+  });
+})();
+</script>
+</body>
+</html>

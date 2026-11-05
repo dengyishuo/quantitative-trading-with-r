@@ -1,0 +1,5 @@
+﻿chapter,file,source,bytes,sha256
+2,Chapter_02/prices.csv,Chapter_02/prices.csv,124583,79d032ed0e5a8c7b1631f451e50ec7dd15ab6708d21897653be5888aea9f43a8
+3,Chapter_03/aapl.csv,Chapter_03/aapl.csv,267108,a7690813b3a46ba8a411c60050caec96839b28d1742cebe271a89d65f26bb2ef
+3,Chapter_03/sample_json_file.json,Chapter_03/sample_json_file.json,241,a8dd10caec64b20c267073428c0d96569b4551687b1c20775feadefcf0c69c4b
+3,Chapter_03/strategy.xlsx,Chapter_03/strategy.xlsx,31400,936436ffcbaa27ef2c1c776cca416374d7b13a886c56a9ef805d926d606e12d8
